@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base target="_top" />
+    <?!= include('Styles'); ?>
+  </head>
+  <body>
+    <main class="qr-page">
+      <header class="qr-header">
+        <div>
+          <p class="eyebrow">운영자용 샘플</p>
+          <h1>현장별 QR 안내 카드</h1>
+        </div>
+        <a href="<?= appUrl ?>" class="text-link">제안서로 돌아가기</a>
+      </header>
+      <section class="qr-grid" id="qrGrid"></section>
+    </main>
+    <?!= include('Script'); ?>
+  </body>
+</html>
