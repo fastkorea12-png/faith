@@ -40,10 +40,10 @@ const stations = [
 const qrGrid = document.querySelector("#qrGrid");
 
 if (qrGrid) {
-  const origin = `${window.location.origin}${window.location.pathname.replace("qr.html", "index.html")}`;
+  const origin = `${window.location.origin}${window.location.pathname.replace("qr.html", "game.html")}`;
   qrGrid.innerHTML = stations
     .map((station) => {
-      const url = `${origin}#${station.id}`;
+      const url = `${origin}?stage=${station.id}`;
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}`;
       return `
         <article class="qr-card">

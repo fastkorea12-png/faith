@@ -1,5 +1,5 @@
 <script>
-  const APP_URL = '<?= appUrl ?>';
+  const APP_URL = window.APP_URL || '';
   const stations = [
     { id: 'case', step: '00 / 사건 접수', title: '찢어진 본향 지도', cue: '배낭과 사건파일을 수령하고, 사라진 말씀 빈칸을 확인합니다.' },
     { id: 'bag', step: '01 / 증거', title: '남겨진 배낭', cue: '짐 카드와 물건 메모를 대조해 순례자가 무엇을 내려놓았는지 기록합니다.' },
@@ -13,7 +13,7 @@
   if (qrGrid) {
     qrGrid.innerHTML = stations
       .map((station) => {
-        const url = `${APP_URL}#${station.id}`;
+        const url = `${APP_URL}?page=activity&stage=${station.id}`;
         const qr = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}`;
         return `
           <article class="qr-card">

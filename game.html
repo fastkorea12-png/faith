@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>본향 사건파일 | 현장 퍼즐</title>
+    <link rel="stylesheet" href="game.css" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <header class="game-header">
+        <div>
+          <p class="eyebrow" id="gameStep">CASE</p>
+          <h1 id="gameTitle">현장 퍼즐</h1>
+          <p id="gameIntro"></p>
+        </div>
+        <a id="guideLink" class="guide-link" href="activity.html">가이드 페이지</a>
+      </header>
+
+      <section class="game-board" id="gameBoard"></section>
+
+      <section class="code-panel" id="codePanel" hidden>
+        <p class="eyebrow">Unlocked Code</p>
+        <h2 id="codeValue"></h2>
+        <p id="codeMessage"></p>
+        <a id="completeLink" href="activity.html">활동 페이지에 코드 입력하기</a>
+      </section>
+    </main>
+
+    <script src="game.js"></script>
+  </body>
+</html>

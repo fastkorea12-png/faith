@@ -305,6 +305,53 @@ main {
   padding: 20px;
 }
 
+.venue-section .section-heading p:not(.eyebrow) {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1.68;
+}
+
+.venue-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.venue-grid article {
+  min-height: 285px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+  background: rgba(255, 250, 240, 0.88);
+  box-shadow: 0 18px 48px rgba(34, 31, 26, 0.11);
+}
+
+.venue-grid span {
+  color: var(--rust);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.venue-grid h3 {
+  margin: 14px 0 10px;
+  font-size: 22px;
+}
+
+.venue-grid p {
+  margin: 0 0 16px;
+  color: var(--muted);
+}
+
+.venue-grid strong {
+  color: var(--deep);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
 .principle-grid span {
   color: var(--gold);
   font-weight: 900;
@@ -525,6 +572,7 @@ footer {
 
   .principle-grid,
   .journey-grid,
+  .venue-grid,
   .kit-list,
   .check-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -553,6 +601,7 @@ footer {
 
   .principle-grid,
   .journey-grid,
+  .venue-grid,
   .kit-list,
   .check-grid {
     grid-template-columns: 1fr;
