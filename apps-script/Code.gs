@@ -1,5 +1,8 @@
 function doGet(e) {
   if (e && e.parameter && e.parameter.action === 'dashboard') {
+    if (e.parameter.callback) {
+      return jsonpResponse(e.parameter.callback, getDashboardData());
+    }
     return jsonResponse(getDashboardData());
   }
 
@@ -150,4 +153,13 @@ function jsonResponse(payload) {
   return ContentService
     .createTextOutput(JSON.stringify(payload))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function jsonpResponse(callback, payload) {
+  var safeCallback = String(callback || '').replace(/[^\w$.]/g, '');
+  if (!safeCallback) return jsonResponse({ ok: false, error: 'Invalid callback' });
+
+  return ContentService
+    .createTextOutput(safeCallback + '(' + JSON.stringify(payload) + ');')
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }

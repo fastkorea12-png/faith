@@ -3,385 +3,205 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>본향 사건파일 | 야외 방탈출 제안서</title>
+    <title>본향 사건파일 | 순례형 방탈출</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="site-header">
       <a href="#top" class="brand">본향 사건파일</a>
-      <nav aria-label="제안서 목차">
-        <a href="#concept">콘셉트</a>
-        <a href="#venue">장소</a>
-        <a href="#flow">진행</a>
-        <a href="#kit">키트</a>
-        <a href="#web">웹</a>
+      <nav aria-label="게임 안내">
+        <a href="#story">스토리</a>
+        <a href="#how">진행 방법</a>
+        <a href="#rules">규칙</a>
+        <a href="#start">입장</a>
+        <a href="dashboard.html" class="admin-nav">진행자</a>
       </nav>
     </header>
 
     <main id="top">
-      <section class="hero">
+      <section class="hero player-hero">
         <div class="hero-inner">
-          <p class="eyebrow">Minimal Life, Maximal Faith</p>
-          <h1>문제를 푸는 방탈출이 아니라, 사건을 추리하는 순례 여정</h1>
+          <p class="eyebrow">CASE 11-13</p>
+          <h1>사라진 본향 지도를 복원하라</h1>
           <p class="hero-lead">
-            참가자는 배낭과 사건파일을 들고 교회 곳곳을 조사합니다. QR은 설명을
-            보여주는 장치이고, 진짜 단서는 현장의 물건, 표지판, 이름표, 장부,
-            발자국 안에 있습니다.
+            당신의 팀은 로뎀 곳곳에 남겨진 배낭, 이름표, 장부, 발자국을 추적하는
+            조사팀입니다. 현장 QR을 찾아 퍼즐을 풀고, 완성 코드를 기록해 마지막
+            고백에 도달하십시오.
           </p>
           <div class="hero-actions">
-            <a href="#flow" class="primary-action">시나리오 보기</a>
-            <a href="activity.html" class="secondary-action">활동 페이지 열기</a>
-            <a href="dashboard.html" class="secondary-action">운영 대시보드</a>
+            <a href="activity.html" class="primary-action">조사팀 입장</a>
+            <a href="#how" class="secondary-action">진행 방법 보기</a>
           </div>
         </div>
-        <aside class="hero-story" aria-label="사건 카툰과 개요">
+        <aside class="hero-story" aria-label="사건 카툰과 사건 접수">
           <img src="assets/story-comic.png?v=2" alt="본향 사건파일의 시작을 보여주는 네 컷 카툰" />
           <div class="case-file">
-            <span>CASE 11-13</span>
-            <h2>사라진 본향 지도</h2>
+            <span>긴급 사건 접수</span>
+            <h2>지도는 찢어졌고, 순례자는 사라졌다</h2>
             <p>
-              오래된 본향 지도가 찢어진 채 발견되었다. 지도와 함께 있던 배낭은
-              비어 있었고, 히브리서 11장의 일부 단어가 사라졌다.
+              오래된 본향 지도 뒤에는 여섯 개의 흔적이 남아 있습니다. 모든 흔적을
+              찾으면 그가 왜 떠났는지, 그리고 우리가 어디를 향해 걷는지 알게 됩니다.
             </p>
           </div>
         </aside>
       </section>
 
-      <section class="section story-comic-section">
+      <section class="section story-comic-section" id="story">
         <div class="section-heading">
-          <p class="eyebrow">Story Opening</p>
+          <p class="eyebrow">Opening Story</p>
           <h2>사건은 한 장의 찢어진 지도에서 시작됩니다</h2>
         </div>
         <figure class="story-comic">
-          <img src="assets/story-comic.png?v=2" alt="본향 사건파일의 시작을 보여주는 네 컷 카툰: 사건파일 수령, 배낭 조사, 발자국 추적, 지도 복원" />
+          <img src="assets/story-comic.png?v=2" alt="사건파일 수령, 배낭 조사, 발자국 추적, 지도 복원을 보여주는 카툰" />
           <figcaption>
-            참가자는 본관에서 사건파일을 받고, 배낭의 증거를 조사하고, 비아 돌로로사의 발자국을 따라가며,
-            마지막에 예배당에서 본향 지도를 복원합니다.
+            본관에서 사건파일을 받고, 현장의 증거를 조사하고, 길 위의 발자국을 따라가십시오.
+            마지막 장소에서 모든 지도 조각과 말씀의 빈칸이 하나로 이어집니다.
           </figcaption>
         </figure>
       </section>
 
-      <section class="section quick-read">
+      <section class="section quick-read" id="how">
         <div class="section-heading">
-          <p class="eyebrow">3분 이해</p>
-          <h2>한 팀이 실제로 겪는 흐름</h2>
+          <p class="eyebrow">How To Play</p>
+          <h2>조사팀 진행 방법</h2>
         </div>
         <div class="journey-grid">
           <article>
             <span>1</span>
-            <h3>입구에서 사건을 받는다</h3>
+            <h3>팀을 등록한다</h3>
             <p>
-              팀은 무거운 배낭, 클립보드 사건파일, 찢어진 지도를 받습니다. 첫 QR을
-              찍으면 “순례자가 사라졌다”는 메시지가 뜹니다.
+              활동 페이지에서 팀 이름과 팀 비밀번호를 입력합니다. 같은 팀은 같은
+              이름과 비밀번호를 사용하십시오.
             </p>
           </article>
           <article>
             <span>2</span>
-            <h3>현장 증거를 조사한다</h3>
+            <h3>현장 QR을 찾는다</h3>
             <p>
-              배낭 속 물건, 게시판 문구, 계단 수, 십자가 주변 표식처럼 실제 장소에
-              있는 단서를 보고 사건파일에 기록합니다.
+              게임은 주소를 직접 입력해서 열리지 않습니다. 각 장소에 숨겨진 QR을
+              찾아 스캔해야 퍼즐이 열립니다.
             </p>
           </article>
           <article>
             <span>3</span>
-            <h3>추론을 웹에 기록한다</h3>
+            <h3>퍼즐 코드를 기록한다</h3>
             <p>
-              “정답 입력”이 아니라 “우리 추론은 이렇다”를 남깁니다. 기록자가 추론이
-              맞으면 다음 현장을 알려줍니다.
+              퍼즐을 풀면 완료 코드가 나타납니다. 활동 페이지에 코드를 입력하면
+              다음 현장으로 이동할 수 있습니다.
             </p>
           </article>
           <article>
             <span>4</span>
-            <h3>마지막에 의미가 열린다</h3>
+            <h3>마지막 고백을 완성한다</h3>
             <p>
-              순례자는 길을 잃은 게 아니라, 후대가 믿음의 방향을 찾도록 흔적을 남긴
-              사람이었음이 드러납니다.
+              여섯 현장의 키워드를 모아 찢어진 본향 지도를 복원하고, 최종 고백을
+              완성하면 사건이 종결됩니다.
             </p>
           </article>
         </div>
       </section>
 
-      <section class="section example-panel">
-        <div>
-          <p class="eyebrow">Example Scene</p>
-          <h2>예: 첫 번째 현장 “남겨진 배낭”</h2>
-        </div>
-        <div class="scene-card">
-          <ol>
-            <li>교회 마당 한쪽에 무거운 배낭이 놓여 있습니다.</li>
-            <li>배낭 안에는 돌, 돈 봉투, 트로피, 거울, 시계가 들어 있습니다.</li>
-            <li>각 물건에는 짧은 메모가 붙어 있습니다. “이것만 있으면 안전할 줄 알았다.”</li>
-            <li>팀은 물건을 사건파일 표와 대조해, 순례자가 내려놓은 짐을 추론합니다.</li>
-            <li>QR에 추론을 기록하면 기록자가 말합니다. “그는 도망친 것이 아니라, 가벼워지고 있었습니다.”</li>
-          </ol>
-        </div>
-      </section>
-
-      <section class="section split" id="concept">
-        <div>
-          <p class="eyebrow">기획 방향</p>
-          <h2>참가자는 학생이 아니라 조사팀입니다</h2>
-        </div>
-        <div class="copy-block">
-          <p>
-            기존 설교형 미션은 “말씀을 듣고 정답을 입력”하는 구조로 흐르기
-            쉽습니다. 이 제안은 참가자를 사건 조사팀으로 설정해, 현장에 남은
-            배낭, 이름표, 장부, 발자국, 지도 조각을 직접 관찰하고 기록하게
-            만듭니다.
-          </p>
-          <p>
-            메시지는 마지막에 설명되는 것이 아니라, 증거를 모으는 과정에서
-            발견됩니다. “순례자는 본향을 잃어버린 것인가, 일부러 지도를 찢은
-            것인가?”라는 질문이 전체 몰입을 끌고 갑니다.
-          </p>
-        </div>
-      </section>
-
-      <section class="section">
+      <section class="section dark-band" id="rules">
         <div class="section-heading">
-          <p class="eyebrow">Reference Translation</p>
-          <h2>야외 방탈출 레퍼런스에서 가져올 요소</h2>
+          <p class="eyebrow">Rules</p>
+          <h2>조사 규칙</h2>
         </div>
-        <div class="principle-grid">
-          <article>
-            <span>01</span>
-            <h3>클립보드 기록</h3>
-            <p>웹에서 본 내용을 끝내지 않고, 사건파일에 관찰/단서/추론을 직접 적게 합니다.</p>
-          </article>
-          <article>
-            <span>02</span>
-            <h3>현장 지형지물</h3>
-            <p>교회 표어, 십자가, 계단 수, 게시판 문구, 건물 번호가 단서가 됩니다.</p>
-          </article>
-          <article>
-            <span>03</span>
-            <h3>챗봇 화자</h3>
-            <p>“기록자”가 메시지를 보내 다음 현장과 조사 방식을 안내합니다.</p>
-          </article>
-          <article>
-            <span>04</span>
-            <h3>아날로그 조작</h3>
-            <p>지도 조각, 투명 필름, 자물쇠, 장부, 이름표를 겹치고 비교합니다.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section venue-section" id="venue">
-        <div class="section-heading">
-          <p class="eyebrow">Venue Mapping</p>
-          <h2>로뎀의그늘 공간을 사건 현장으로 바꾸는 방식</h2>
-          <p>
-            로뎀의그늘 공개 시설 카테고리인 본관, 예배당, 숙소, 주방 및 기타 시설,
-            야외 시설, 비아 돌로로사를 현재 시나리오의 여섯 장면에 맞춥니다.
-            정확한 위치는 답사 후 확정하되, 제안 단계에서는 아래 동선으로 설명합니다.
-          </p>
-        </div>
-        <div class="venue-grid">
-          <article>
-            <span>본관 / 접수 지점</span>
-            <h3>00. 찢어진 본향 지도</h3>
-            <p>
-              참가자가 처음 모이는 안내 데스크 역할입니다. 배낭, 사건파일, 지도 조각
-              1개를 지급하고 “로뎀에서 사라진 순례자의 흔적”을 접수합니다.
-            </p>
-            <strong>운영 포인트: 팀 분산 출발, 안전 안내, 첫 QR 부착</strong>
-          </article>
-          <article>
-            <span>야외 시설 / 마당</span>
-            <h3>01. 남겨진 배낭</h3>
-            <p>
-              넓고 눈에 잘 띄는 야외 공간에 무거운 배낭을 둡니다. 돌, 돈 봉투,
-              트로피, 거울, 시계를 꺼내며 “비움”의 단서를 찾게 합니다.
-            </p>
-            <strong>운영 포인트: 소품 분실 방지용 박스, 우천 시 본관 로비 대체</strong>
-          </article>
-          <article>
-            <span>숙소 / 방문 앞</span>
-            <h3>02. 찢어진 이름표</h3>
-            <p>
-              숙소의 문패, 방 번호, 이름표 이미지를 활용합니다. 세상이 붙인 이름과
-              믿음의 이름을 구분하게 하며 “나그네” 키워드를 획득합니다.
-            </p>
-            <strong>운영 포인트: 실제 숙박객 동선과 분리, 탈부착 이름표 사용</strong>
-          </article>
-          <article>
-            <span>주방 및 기타 시설</span>
-            <h3>03. 비어 있는 장부</h3>
-            <p>
-              식사와 섬김이 일어나는 공간의 성격을 살려 시간, 돈, 재능, 관계, 마음
-              장부를 배치합니다. “내 것”이 아니라 맡겨진 것이라는 추론으로 연결합니다.
-            </p>
-            <strong>운영 포인트: 위생 구역 침범 금지, 별도 테이블에 장부 설치</strong>
-          </article>
-          <article>
-            <span>비아 돌로로사 / 길</span>
-            <h3>04. 돌아갈 수 있었던 길</h3>
-            <p>
-              로뎀의그늘에서 가장 강한 장소성입니다. 순례의 길 자체를 단서로 삼아
-              익숙한 길과 더 나은 본향을 향한 길을 비교하게 합니다.
-            </p>
-            <strong>운영 포인트: 야간 조명, 미끄럼 구간 확인, 발자국 카드 회수</strong>
-          </article>
-          <article>
-            <span>예배당 / 마무리</span>
-            <h3>05. 예비된 성</h3>
-            <p>
-              마지막 고백과 말씀 완성은 예배당이 가장 자연스럽습니다. 지도 조각을
-              모아 히브리서 11:13-16 빈칸을 채우고 짧은 나눔으로 끝냅니다.
-            </p>
-            <strong>운영 포인트: 소음 낮추기, 팀별 시간차 입장, 진행자 해설</strong>
-          </article>
-        </div>
-      </section>
-
-      <section class="section dark-band" id="flow">
-        <div class="section-heading">
-          <p class="eyebrow">Scenario Flow</p>
-          <h2>사건의 흐름</h2>
-        </div>
-        <div class="timeline">
-          <article>
-            <span class="step">00</span>
-            <div>
-              <h3>사건 접수: 찢어진 본향 지도</h3>
-              <p>
-                팀은 무거운 배낭과 “순례자 사건파일”을 받습니다. 지도는 찢겨 있고,
-                말씀 빈칸은 비어 있습니다.
-              </p>
-              <strong>핵심 질문: 순례자는 길을 잃었는가, 무언가를 남긴 것인가?</strong>
-            </div>
-          </article>
+        <div class="timeline rule-list">
           <article>
             <span class="step">01</span>
             <div>
-              <h3>증거 1: 남겨진 배낭</h3>
-              <p>
-                돌, 돈 봉투, 트로피, 거울, 시계의 메모를 조사해 그가 무엇을 내려놓고
-                떠났는지 추론합니다.
-              </p>
-              <strong>획득 키워드: 비움</strong>
+              <h3>화면보다 현장을 먼저 본다</h3>
+              <p>QR은 문을 여는 장치입니다. 진짜 단서는 배낭, 표식, 이름표, 장부, 길 위에 있습니다.</p>
             </div>
           </article>
           <article>
             <span class="step">02</span>
             <div>
-              <h3>증거 2: 찢어진 이름표</h3>
-              <p>
-                세상이 붙인 이름과 믿음의 이름을 구분합니다. 투명 필름을 지도나
-                게시판 단서와 겹쳐 남겨진 이름을 찾습니다.
-              </p>
-              <strong>획득 키워드: 나그네</strong>
+              <h3>소품은 제자리에 둔다</h3>
+              <p>증거물은 다음 팀도 사용합니다. 조사한 뒤 원래 위치에 정리하십시오.</p>
             </div>
           </article>
           <article>
             <span class="step">03</span>
             <div>
-              <h3>증거 3: 비어 있는 장부</h3>
-              <p>
-                시간, 돈, 재능, 관계, 마음 장부를 보고 “내 것”이라고 적힌 항목들이
-                사실 무엇이었는지 추리합니다.
-              </p>
-              <strong>획득 키워드: 청지기</strong>
+              <h3>막히면 기록을 다시 본다</h3>
+              <p>힌트는 대부분 사건파일 안에 있습니다. 관찰 기록, 획득 코드, 키워드를 비교하십시오.</p>
             </div>
           </article>
           <article>
             <span class="step">04</span>
             <div>
-              <h3>증거 4: 돌아갈 수 있었던 길</h3>
-              <p>
-                두 갈래 길의 발자국을 따라가며, 순례자가 왜 익숙한 길로 돌아가지
-                않았는지 밝힙니다.
-              </p>
-              <strong>획득 키워드: 더 나은 본향</strong>
+              <h3>안전 구역 밖으로 나가지 않는다</h3>
+              <p>진행자가 안내한 동선 안에서만 움직이고, 뛰지 말고 함께 이동하십시오.</p>
             </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section venue-section">
+        <div class="section-heading">
+          <p class="eyebrow">Investigation Route</p>
+          <h2>여섯 개의 현장</h2>
+          <p>각 현장은 하나의 QR 게임과 하나의 완료 코드를 가지고 있습니다.</p>
+        </div>
+        <div class="venue-grid">
+          <article>
+            <span>00 / 본관</span>
+            <h3>찢어진 본향 지도</h3>
+            <p>사건파일을 받고 첫 지도 조각의 방향을 확인합니다.</p>
+            <strong>완료 코드: 현장 QR 퍼즐 완료 후 공개</strong>
           </article>
           <article>
-            <span class="step">05</span>
-            <div>
-              <h3>최종: 지도 복원과 사건의 진실</h3>
-              <p>
-                지도 조각과 말씀 빈칸을 완성하면 순례자는 실종된 것이 아니라, 후대
-                순례자들이 믿음의 방향을 찾도록 흔적을 남겼다는 사실이 드러납니다.
-              </p>
-              <strong>최종 고백: 우리는 더 나은 본향을 향해 걷는 순례자입니다.</strong>
-            </div>
+            <span>01 / 야외 시설</span>
+            <h3>남겨진 배낭</h3>
+            <p>배낭 속 물건이 순례자의 마음에 어떤 짐이었는지 조사합니다.</p>
+            <strong>키워드: 비움</strong>
+          </article>
+          <article>
+            <span>02 / 숙소</span>
+            <h3>찢어진 이름표</h3>
+            <p>세상이 붙인 이름과 믿음으로 고백하는 이름을 구분합니다.</p>
+            <strong>키워드: 나그네</strong>
+          </article>
+          <article>
+            <span>03 / 주방 및 기타 시설</span>
+            <h3>비어 있는 장부</h3>
+            <p>시간, 돈, 재능, 관계, 마음이 누구에게 맡겨졌는지 추적합니다.</p>
+            <strong>키워드: 청지기</strong>
+          </article>
+          <article>
+            <span>04 / 비아 돌로로사</span>
+            <h3>돌아갈 수 있었던 길</h3>
+            <p>발자국을 따라가며 순례자가 왜 돌아가지 않았는지 밝힙니다.</p>
+            <strong>키워드: 더 나은 본향</strong>
+          </article>
+          <article>
+            <span>05 / 예배당</span>
+            <h3>예비된 성</h3>
+            <p>지도 조각과 말씀 빈칸을 모아 최종 고백을 완성합니다.</p>
+            <strong>최종: 우리는 순례자입니다</strong>
           </article>
         </div>
       </section>
 
-      <section class="section" id="kit">
+      <section class="section start-panel" id="start">
         <div class="section-heading">
-          <p class="eyebrow">Physical Kit</p>
-          <h2>손에 들고 다니는 사건파일</h2>
-        </div>
-        <div class="kit-layout">
-          <div class="clipboard">
-            <div class="clip"></div>
-            <h3>순례자 사건파일</h3>
-            <ul>
-              <li>교회/수련회장 지도</li>
-              <li>히브리서 11:13-16 빈칸 기록지</li>
-              <li>관찰 / 단서 / 추론 기록표</li>
-              <li>투명 암호 해독 필름</li>
-              <li>찢어진 지도 조각 보관면</li>
-            </ul>
-          </div>
-          <div class="kit-list">
-            <article>
-              <h3>무거운 배낭</h3>
-              <p>모래주머니 또는 책을 넣어 실제 무게를 만들고, 짐 카드와 증거물을 숨깁니다.</p>
-            </article>
-            <article>
-              <h3>증거물 세트</h3>
-              <p>돈 봉투, 트로피, 거울, 시계, 돌, 이름표, 장부, 발자국 카드로 구성합니다.</p>
-            </article>
-            <article>
-              <h3>잠금 장치</h3>
-              <p>숫자 자물쇠 2-3개와 봉인 편지를 사용해 조사 단계의 성취감을 만듭니다.</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="section split" id="web">
-        <div>
-          <p class="eyebrow">Web System</p>
-          <h2>웹은 정답지가 아니라 사건 기록 시스템</h2>
-        </div>
-        <div class="copy-block">
+          <p class="eyebrow">Start</p>
+          <h2>조사팀 입장</h2>
           <p>
-            QR을 찍으면 문제지가 아니라 “기록자”의 대화창이 열립니다. 화면은 다음
-            장소, 조사 방식, 증거 입력, 추론 승인, 진행 저장을 담당합니다.
+            팀 이름과 비밀번호를 정한 뒤 활동 페이지로 들어가십시오. 이후에는
+            현장에 숨겨진 QR을 찾아야 게임을 열 수 있습니다.
           </p>
-          <div class="chat-demo">
-            <p><b>기록자</b> 사건파일 2쪽을 여십시오. 단서는 화면 안이 아니라, 당신이 서 있는 곳에 있습니다.</p>
-            <p><b>조사팀</b> 찢어진 이름표에서 “나그네”를 확인했습니다.</p>
-            <p><b>기록자</b> 추론이 사건기록과 일치합니다. 다음 현장으로 이동하십시오.</p>
-          </div>
         </div>
-      </section>
-
-      <section class="section">
-        <div class="section-heading">
-          <p class="eyebrow">Operation</p>
-          <h2>운영 체크리스트</h2>
-        </div>
-        <div class="check-grid">
-          <label><input type="checkbox" /> 야외 동선 안전 확인</label>
-          <label><input type="checkbox" /> 우천 시 실내 대체 동선</label>
-          <label><input type="checkbox" /> 팀당 배낭/클립보드 준비</label>
-          <label><input type="checkbox" /> 자물쇠 번호 예비표</label>
-          <label><input type="checkbox" /> QR 오류 시 종이 힌트</label>
-          <label><input type="checkbox" /> 진행자용 정답/힌트표</label>
+        <div class="hero-actions">
+          <a href="activity.html" class="primary-action">활동 페이지로 이동</a>
+          <a href="#rules" class="secondary-action">규칙 다시 보기</a>
         </div>
       </section>
     </main>
 
     <footer>
-      <p>Proposal for church outdoor escape learning · Hebrews 11:13-16</p>
+      <p>본향 사건파일 · Hebrews 11:13-16</p>
     </footer>
-
-    <script src="script.js"></script>
   </body>
 </html>

@@ -80,6 +80,15 @@ nav a,
   text-decoration: none;
 }
 
+.admin-nav {
+  border: 1px solid rgba(33, 53, 48, 0.18);
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: rgba(255, 250, 240, 0.72);
+  color: var(--deep);
+  font-weight: 800;
+}
+
 main {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
@@ -319,6 +328,14 @@ main {
   margin: 14px 0 0;
   color: var(--muted);
   line-height: 1.68;
+}
+
+.rule-list article {
+  align-items: start;
+}
+
+.start-panel {
+  border-top: 1px solid var(--line);
 }
 
 .scene-card {
