@@ -284,6 +284,29 @@ main {
   padding-top: 24px;
 }
 
+.story-comic-section {
+  padding-top: 18px;
+}
+
+.story-comic {
+  margin: 0;
+}
+
+.story-comic img {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 18px 48px rgba(34, 31, 26, 0.13);
+}
+
+.story-comic figcaption {
+  max-width: 860px;
+  margin: 14px 0 0;
+  color: var(--muted);
+  line-height: 1.68;
+}
+
 .scene-card {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -527,6 +550,13 @@ footer {
   margin-bottom: 24px;
 }
 
+.qr-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
 .qr-header h1 {
   margin: 0;
   font-size: clamp(32px, 5vw, 54px);
@@ -581,6 +611,12 @@ footer {
 
 @media (max-width: 620px) {
   .site-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .qr-header,
+  .qr-links {
     align-items: flex-start;
     flex-direction: column;
   }

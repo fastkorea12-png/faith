@@ -134,7 +134,8 @@ button {
   font-weight: 900;
 }
 
-.game-action {
+.game-action,
+.home-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -147,6 +148,22 @@ button {
   color: var(--forest);
   font-weight: 900;
   text-decoration: none;
+}
+
+.home-action {
+  margin-top: 18px;
+  background: var(--forest);
+  color: #fffdf6;
+}
+
+.qr-reminder {
+  margin: 0;
+  border: 1px dashed var(--gold);
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(185, 138, 53, 0.09);
+  color: var(--forest);
+  font-weight: 900;
 }
 
 .team-card p {
@@ -384,6 +401,7 @@ blockquote {
 
   .team-card button,
   .game-action,
+  .home-action,
   .answer-form button,
   .final-panel button {
     width: 100%;

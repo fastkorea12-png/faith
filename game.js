@@ -51,6 +51,8 @@ const puzzles = {
 
 const params = new URLSearchParams(window.location.search);
 const stageId = params.get("stage") || "case";
+const qrToken = params.get("qr");
+const expectedQrToken = window.HomewardSync?.config?.qrToken || window.HOMEWARD_CONFIG?.qrToken || "rodem-2026";
 const puzzle = puzzles[stageId] || puzzles.case;
 const gameBoard = document.querySelector("#gameBoard");
 const codePanel = document.querySelector("#codePanel");
@@ -59,12 +61,22 @@ const codeMessage = document.querySelector("#codeMessage");
 const guideLink = document.querySelector("#guideLink");
 const completeLink = document.querySelector("#completeLink");
 
-document.querySelector("#gameStep").textContent = puzzle.step;
-document.querySelector("#gameTitle").textContent = puzzle.title;
-document.querySelector("#gameIntro").textContent = puzzle.intro;
-guideLink.href = `activity.html?stage=${stageId}`;
-completeLink.href = `activity.html?stage=${stageId}`;
-puzzle.render();
+if (qrToken !== expectedQrToken) {
+  document.querySelector("#gameStep").textContent = "Locked";
+  document.querySelector("#gameTitle").textContent = "현장 QR이 필요합니다";
+  document.querySelector("#gameIntro").textContent = "이 퍼즐은 현장에 숨겨진 QR을 스캔해야 열립니다.";
+  guideLink.href = "activity.html";
+  gameBoard.innerHTML = `
+    <p class="instruction">활동 페이지로 돌아가 현재 현장의 QR을 찾으십시오. 운영자 QR 카드에서 생성된 링크로만 퍼즐이 열립니다.</p>
+  `;
+} else {
+  document.querySelector("#gameStep").textContent = puzzle.step;
+  document.querySelector("#gameTitle").textContent = puzzle.title;
+  document.querySelector("#gameIntro").textContent = puzzle.intro;
+  guideLink.href = `activity.html?stage=${stageId}`;
+  completeLink.href = `activity.html?stage=${stageId}`;
+  puzzle.render();
+}
 
 function unlock() {
   codeValue.textContent = puzzle.code;

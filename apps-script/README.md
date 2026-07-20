@@ -17,3 +17,13 @@
 
 활동 페이지는 배포 URL 뒤에 `?page=activity`를 붙이면 열립니다.
 QR 샘플 페이지는 배포 URL 뒤에 `?page=qr`을 붙이면 열립니다.
+
+## GitHub Pages와 진행 대시보드 연결
+
+1. Apps Script를 웹 앱으로 배포합니다.
+2. 첫 배포 URL을 복사합니다. 예: `https://script.google.com/macros/s/.../exec`
+3. 저장소 루트의 `config.js`에서 `apiUrl` 값을 배포 URL로 바꿉니다.
+4. `activity.html`에서 팀 이름과 비밀번호를 저장하거나 코드를 제출하면 Apps Script가 자동으로 `본향 사건파일 진행현황` Google Spreadsheet를 만들고 진행 내용을 저장합니다.
+5. `dashboard.html`은 5초마다 해당 데이터를 불러옵니다.
+
+대시보드 비밀번호 기본값은 `2010102017`입니다.

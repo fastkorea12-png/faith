@@ -100,6 +100,7 @@ const recorderMessage = document.querySelector("#recorderMessage");
 const teamNote = document.querySelector("#teamNote");
 const teamForm = document.querySelector("#teamForm");
 const teamName = document.querySelector("#teamName");
+const teamPassword = document.querySelector("#teamPassword");
 const saveStatus = document.querySelector("#saveStatus");
 const progressText = document.querySelector("#progressText");
 const progressBar = document.querySelector("#progressBar");
@@ -108,15 +109,20 @@ const finalPanel = document.querySelector("#finalPanel");
 const resetButton = document.querySelector("#resetButton");
 
 teamName.value = state.teamName;
+teamPassword.value = state.teamPassword;
 render();
 
 teamForm.addEventListener("submit", (event) => {
   event.preventDefault();
   state.teamName = teamName.value.trim();
+  state.teamPassword = teamPassword.value.trim();
   saveState();
-  saveStatus.textContent = state.teamName
-    ? `${state.teamName}의 사건파일을 저장했습니다.`
-    : "팀 이름 없이 진행합니다.";
+  if (!state.teamName || !state.teamPassword) {
+    saveStatus.textContent = "팀 이름과 팀 비밀번호를 모두 입력하십시오.";
+    return;
+  }
+  syncProgress("team_saved");
+  saveStatus.textContent = `${state.teamName}의 사건파일을 저장했습니다.`;
 });
 
 answerForm.addEventListener("submit", (event) => {
@@ -136,12 +142,15 @@ answerForm.addEventListener("submit", (event) => {
   recorderMessage.dataset.status = "success";
   moveToNextStage(stage.id);
   saveState();
+  syncProgress("stage_completed");
   render();
 });
 
 teamNote.addEventListener("input", () => {
   state.notes[activeStageId] = teamNote.value;
   saveState();
+  window.clearTimeout(teamNote.syncTimer);
+  teamNote.syncTimer = window.setTimeout(() => syncProgress("note_updated"), 500);
 });
 
 resetButton.addEventListener("click", () => {
@@ -158,7 +167,7 @@ function render() {
   stageStory.textContent = stage.story;
   stageMission.textContent = stage.mission;
   stageHint.textContent = stage.hint;
-  gameLink.href = `game.html?stage=${stage.id}`;
+  gameLink.textContent = `${stage.place}에 숨겨진 QR을 찾아 스캔하십시오. 직접 주소 입력으로는 게임이 열리지 않습니다.`;
   currentPlace.textContent = stage.place;
   teamNote.value = state.notes[stage.id] || "";
   answerInput.value = "";
@@ -206,7 +215,7 @@ function moveToNextStage(stageId) {
 }
 
 function loadState() {
-  const fallback = { teamName: "", activeStageId: "case", completed: {}, notes: {} };
+  const fallback = { teamName: "", teamPassword: "", activeStageId: "case", completed: {}, notes: {} };
   try {
     return { ...fallback, ...JSON.parse(localStorage.getItem(storageKey)) };
   } catch {
@@ -225,4 +234,28 @@ function normalize(value) {
 function updateUrl(stageId) {
   const next = `${window.location.pathname}?stage=${stageId}`;
   window.history.replaceState(null, "", next);
+}
+
+async function syncProgress(eventType) {
+  if (!window.HomewardSync || !state.teamName || !state.teamPassword) return;
+  const completedStages = stages.filter((stage) => state.completed[stage.id]).map((stage) => stage.id);
+  const current = getActiveStage();
+  try {
+    const result = await window.HomewardSync.send("saveProgress", {
+      eventType,
+      teamName: state.teamName,
+      teamPassword: state.teamPassword,
+      activeStageId: state.activeStageId,
+      activeStageTitle: current.title,
+      completedStages,
+      completedCount: completedStages.length,
+      totalStages: stages.length,
+      notes: state.notes,
+      updatedAt: new Date().toISOString(),
+    });
+    if (result.ok) saveStatus.textContent = "대시보드에 진행 상황을 반영했습니다.";
+    if (result.offline) saveStatus.textContent = "로컬 저장 중입니다. config.js에 Apps Script URL을 넣으면 대시보드와 동기화됩니다.";
+  } catch {
+    saveStatus.textContent = "로컬 저장 중입니다. 네트워크 연결 후 다시 저장하면 동기화됩니다.";
+  }
 }

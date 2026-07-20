@@ -40,10 +40,11 @@ const stations = [
 const qrGrid = document.querySelector("#qrGrid");
 
 if (qrGrid) {
+  const qrToken = window.HOMEWARD_CONFIG?.qrToken || "rodem-2026";
   const origin = `${window.location.origin}${window.location.pathname.replace("qr.html", "game.html")}`;
   qrGrid.innerHTML = stations
     .map((station) => {
-      const url = `${origin}?stage=${station.id}`;
+      const url = `${origin}?stage=${station.id}&qr=${encodeURIComponent(qrToken)}`;
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}`;
       return `
         <article class="qr-card">
