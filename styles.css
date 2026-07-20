@@ -160,7 +160,21 @@ main {
 
 .case-file {
   padding: 24px;
-  transform: rotate(1deg);
+}
+
+.hero-story {
+  display: grid;
+  gap: 14px;
+}
+
+.hero-story img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 18px 48px rgba(34, 31, 26, 0.13);
 }
 
 .case-file span {
