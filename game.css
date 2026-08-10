@@ -92,10 +92,60 @@ p {
   padding: clamp(18px, 4vw, 30px);
 }
 
+.case-brief {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.45fr);
+  gap: 18px;
+  align-items: end;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 18px;
+  margin-bottom: 20px;
+}
+
+.case-brief h2 {
+  margin: 0;
+  color: var(--forest);
+  font-size: clamp(24px, 4vw, 36px);
+  line-height: 1.18;
+}
+
+.evidence-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.evidence-strip span {
+  border: 1px solid rgba(36, 58, 49, 0.16);
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: rgba(111, 138, 93, 0.12);
+  color: var(--forest);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.puzzle-surface {
+  display: grid;
+  gap: 16px;
+}
+
 .instruction {
   margin-bottom: 18px;
   color: var(--forest);
   font-weight: 900;
+}
+
+.locked-panel {
+  display: grid;
+  gap: 12px;
+  place-items: start;
+}
+
+.locked-panel strong {
+  color: var(--forest);
+  font-size: 28px;
 }
 
 .tile-grid {
@@ -128,6 +178,55 @@ p {
   color: #fffdf6;
 }
 
+.map-workbench {
+  display: grid;
+  grid-template-columns: 1fr minmax(180px, 0.45fr);
+  gap: 14px;
+}
+
+.map-slots,
+.map-pool {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.map-slots {
+  border: 1px solid rgba(36, 58, 49, 0.16);
+  border-radius: 8px;
+  padding: 12px;
+  background:
+    linear-gradient(rgba(255, 253, 246, 0.82), rgba(255, 253, 246, 0.9)),
+    repeating-linear-gradient(135deg, #efe5cf, #efe5cf 10px, #f8f0de 10px, #f8f0de 20px);
+}
+
+.map-slots button,
+.map-pool button {
+  min-height: 64px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--forest);
+  font-size: clamp(22px, 5vw, 38px);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.map-slots button {
+  background: rgba(255, 253, 246, 0.72);
+  color: rgba(36, 58, 49, 0.42);
+}
+
+.map-slots button.filled {
+  background: var(--paper);
+  color: var(--forest);
+}
+
+.map-pool button:disabled {
+  cursor: default;
+  opacity: 0.22;
+}
+
 .match-list {
   display: grid;
   gap: 12px;
@@ -142,6 +241,40 @@ p {
 
 .match-row strong {
   color: var(--forest);
+}
+
+.evidence-match {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.evidence-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: #fff;
+}
+
+.evidence-card strong {
+  color: var(--forest);
+  font-size: 20px;
+}
+
+.evidence-card p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.evidence-card[data-status="correct"] {
+  border-color: var(--leaf);
+  background: rgba(111, 138, 93, 0.12);
+}
+
+.evidence-card[data-status="miss"] {
+  border-color: var(--clay);
 }
 
 select,
@@ -167,6 +300,94 @@ input {
   padding: 12px;
 }
 
+.name-output {
+  border: 1px solid rgba(36, 58, 49, 0.18);
+  border-radius: 8px;
+  padding: 18px;
+  background: #182820;
+  color: #fffdf6;
+  font-size: clamp(34px, 8vw, 62px);
+  font-weight: 900;
+  text-align: center;
+}
+
+.name-grid button {
+  display: grid;
+  gap: 6px;
+}
+
+.name-grid strong {
+  font-size: 26px;
+}
+
+.name-grid small {
+  color: var(--muted);
+}
+
+.name-grid button.selected small {
+  color: rgba(255, 253, 246, 0.72);
+}
+
+.ledger-board {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ledger-board section {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: rgba(255, 253, 246, 0.72);
+}
+
+.ledger-board h3 {
+  margin: 0 0 12px;
+  color: var(--forest);
+}
+
+.ledger-list {
+  display: grid;
+  gap: 8px;
+  min-height: 260px;
+}
+
+.ledger-chip,
+.received-chip {
+  display: grid;
+  gap: 4px;
+  min-height: 54px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff;
+  color: var(--ink);
+  text-align: left;
+}
+
+.ledger-chip {
+  cursor: pointer;
+}
+
+.received-chip {
+  background: rgba(111, 138, 93, 0.16);
+  color: var(--forest);
+}
+
+.ledger-chip small,
+.received-chip small {
+  color: var(--muted);
+}
+
+.path-progress {
+  border: 1px solid rgba(36, 58, 49, 0.16);
+  border-radius: 8px;
+  padding: 14px;
+  background: rgba(111, 138, 93, 0.1);
+  color: var(--forest);
+  font-weight: 900;
+}
+
 .path-grid button {
   min-height: 72px;
   border: 1px solid var(--line);
@@ -176,8 +397,21 @@ input {
   cursor: pointer;
 }
 
+.path-grid button span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.path-grid button strong {
+  display: block;
+  margin-top: 4px;
+}
+
 .path-grid button.done {
-  background: rgba(111, 138, 93, 0.2);
+  border-color: var(--leaf);
+  background: rgba(111, 138, 93, 0.22);
 }
 
 .blank-grid {
@@ -185,8 +419,54 @@ input {
   gap: 12px;
 }
 
+.confession-card {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background:
+    linear-gradient(rgba(255, 253, 246, 0.88), rgba(255, 253, 246, 0.92)),
+    repeating-linear-gradient(#fffdf6, #fffdf6 30px, #efe6d5 31px);
+}
+
+.confession-card label {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.45fr) 1fr;
+  gap: 10px;
+  align-items: center;
+  color: var(--forest);
+  font-weight: 900;
+}
+
+.confession-card input[data-status="correct"] {
+  border-color: var(--leaf);
+  background: rgba(111, 138, 93, 0.12);
+}
+
+.confession-card input[data-status="miss"] {
+  border-color: var(--clay);
+}
+
 .check-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 18px;
+}
+
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 11px 16px;
+  background: #fff;
+  color: var(--forest);
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .feedback {
@@ -201,6 +481,13 @@ input {
   padding: clamp(20px, 4vw, 30px);
 }
 
+.code-panel.revealed {
+  border-color: rgba(111, 138, 93, 0.5);
+  background:
+    linear-gradient(rgba(255, 253, 246, 0.96), rgba(255, 253, 246, 0.96)),
+    radial-gradient(circle at top right, rgba(185, 138, 53, 0.34), transparent 36%);
+}
+
 .code-panel h2 {
   margin: 0 0 8px;
   color: var(--forest);
@@ -210,7 +497,11 @@ input {
 
 @media (max-width: 620px) {
   .game-header,
-  .match-row {
+  .case-brief,
+  .map-workbench,
+  .match-row,
+  .ledger-board,
+  .confession-card label {
     grid-template-columns: 1fr;
   }
 
@@ -220,7 +511,12 @@ input {
 
   .guide-link,
   .code-panel a,
-  .primary-button {
+  .primary-button,
+  .secondary-button {
     width: 100%;
+  }
+
+  .evidence-strip {
+    justify-content: flex-start;
   }
 }
