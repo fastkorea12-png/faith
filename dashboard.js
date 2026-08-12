@@ -197,21 +197,61 @@ function renderTimer() {
   timerStatus.textContent = state.timer.running ? "진행 중" : remaining === totalSeconds ? "대기 중" : "일시정지";
 }
 
+const STUCK_WARNING_MINUTES = 15;
+const STUCK_CRITICAL_MINUTES = 25;
+
+function isTeamFinished(team) {
+  return stages.every((stage) => team.completed[stage.id]);
+}
+
+function stagnantMinutes(team) {
+  const ts = team.lastProgressAt || team.updatedAt;
+  if (!ts) return 0;
+  const elapsed = Date.now() - new Date(ts).getTime();
+  if (!Number.isFinite(elapsed) || elapsed < 0) return 0;
+  return Math.floor(elapsed / 60000);
+}
+
+function stuckLevel(team) {
+  if (isTeamFinished(team)) return "none";
+  const minutes = stagnantMinutes(team);
+  if (minutes >= STUCK_CRITICAL_MINUTES) return "critical";
+  if (minutes >= STUCK_WARNING_MINUTES) return "warning";
+  return "none";
+}
+
 function renderTeams() {
   if (state.teams.length === 0) {
     teamBoard.innerHTML = `<article class="team-card"><p>아직 등록된 팀이 없습니다. 위에서 팀을 추가하십시오.</p></article>`;
     return;
   }
 
-  teamBoard.innerHTML = state.teams
+  // 순회하며 관리하는 진행자가 한눈에 우선순위를 파악할 수 있도록,
+  // 가장 오래 정체된 팀이 맨 위로 오게 정렬한다(원본 state.teams 순서는 안 바꿈).
+  const levelWeight = { critical: 2, warning: 1, none: 0 };
+  const teamsForDisplay = [...state.teams].sort((a, b) => {
+    const weightDiff = levelWeight[stuckLevel(b)] - levelWeight[stuckLevel(a)];
+    if (weightDiff !== 0) return weightDiff;
+    return stagnantMinutes(b) - stagnantMinutes(a);
+  });
+
+  teamBoard.innerHTML = teamsForDisplay
     .map((team) => {
       const completedCount = stages.filter((stage) => team.completed[stage.id]).length;
       const percent = Math.round((completedCount / stages.length) * 100);
+      const level = stuckLevel(team);
+      const minutes = stagnantMinutes(team);
+      const stuckBadge =
+        level === "critical"
+          ? `<span class="stuck-badge critical">🚨 ${minutes}분째 정체</span>`
+          : level === "warning"
+          ? `<span class="stuck-badge warning">⚠ ${minutes}분째 정체</span>`
+          : "";
       return `
-        <article class="team-card" data-team="${team.id}">
+        <article class="team-card" data-team="${team.id}" data-stuck="${level}">
           <div class="team-head">
             <div>
-              <h3>${escapeHtml(team.name)}</h3>
+              <h3>${escapeHtml(team.name)} ${stuckBadge}</h3>
               <small>${completedCount} / ${stages.length} 완료 · 힌트 ${team.hints}회</small>
             </div>
             <button type="button" data-action="remove">삭제</button>
@@ -249,6 +289,7 @@ function renderTeams() {
       input.addEventListener("change", () => {
         team.completed[input.dataset.stage] = input.checked;
         team.current = nextCurrentStage(team);
+        if (input.checked) team.lastProgressAt = new Date().toISOString();
         touch(team);
       });
     });
@@ -299,6 +340,7 @@ async function loadRemoteDashboard() {
       current: team.activeStageId || nextRemoteStage(team.completedStages || []),
       note: team.note || "",
       updatedAt: team.updatedAt || "",
+      lastProgressAt: team.lastProgressAt || team.updatedAt || "",
       password: team.teamPassword || "",
     }));
     saveState();
@@ -336,6 +378,9 @@ function renderSummary() {
   document.querySelector("#avgProgress").textContent = `${avg}%`;
   document.querySelector("#hintCount").textContent = teams.reduce((sum, team) => sum + team.hints, 0);
   document.querySelector("#finishedCount").textContent = teams.filter((team) => stages.every((stage) => team.completed[stage.id])).length;
+  const stuckCount = teams.filter((team) => stuckLevel(team) !== "none").length;
+  document.querySelector("#stuckCount").textContent = stuckCount;
+  document.querySelector("#stuckStat")?.classList.toggle("has-stuck", stuckCount > 0);
 }
 
 function tickTimer() {

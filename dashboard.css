@@ -240,9 +240,22 @@ textarea {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
   margin-top: 14px;
+}
+
+.stuck-stat {
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.stuck-stat.has-stuck {
+  background: rgba(138, 61, 49, 0.12);
+  border: 2px solid var(--danger);
+}
+
+.stuck-stat.has-stuck span {
+  color: var(--danger);
 }
 
 .summary-grid article {
@@ -282,6 +295,24 @@ textarea {
 
 .team-card {
   padding: 16px;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.team-card[data-stuck="warning"] {
+  border-color: var(--gold);
+  background: rgba(185, 138, 53, 0.08);
+}
+
+.team-card[data-stuck="critical"] {
+  border-color: var(--danger);
+  background: rgba(138, 61, 49, 0.1);
+  animation: stuck-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes stuck-pulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(138, 61, 49, 0); }
+  50% { box-shadow: 0 0 0 6px rgba(138, 61, 49, 0.12); }
 }
 
 .team-head {
@@ -294,6 +325,28 @@ textarea {
 .team-head h3 {
   margin: 0;
   font-size: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.stuck-badge {
+  font-size: 13px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.stuck-badge.warning {
+  background: var(--gold);
+  color: #fffdf6;
+}
+
+.stuck-badge.critical {
+  background: var(--danger);
+  color: #fffdf6;
 }
 
 .team-head button {
