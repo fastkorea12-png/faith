@@ -134,6 +134,17 @@ const finalQuote = document.querySelector("#finalQuote");
 teamName.value = state.teamName;
 teamPassword.value = state.teamPassword;
 render();
+if (state.teamName && state.teamPassword) {
+  pullTeamProgress();
+}
+
+// 진행자 없이 운영될 때, 팀원이 서로 다른 폰을 들고 흩어져 있어도
+// 한 명이 스테이지를 완료하면 나머지 폰도 60초 안에 자동으로 따라잡는다.
+window.setInterval(() => {
+  if (document.visibilityState === "visible" && state.teamName && state.teamPassword) {
+    pullTeamProgress();
+  }
+}, 60000);
 
 teamForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -146,6 +157,7 @@ teamForm.addEventListener("submit", (event) => {
     return;
   }
   syncProgress("team_saved");
+  pullTeamProgress();
   saveStatus.textContent = `${state.teamName}의 사건파일을 저장했습니다.`;
   renderKeywordBoard();
 });
@@ -390,6 +402,56 @@ async function syncProgress(eventType) {
     if (result.offline) saveStatus.textContent = "로컬 저장 중입니다. config.js에 Apps Script URL을 넣으면 대시보드와 동기화됩니다.";
   } catch {
     saveStatus.textContent = "로컬 저장 중입니다. 네트워크 연결 후 다시 저장하면 동기화됩니다.";
+  }
+}
+
+// 같은 팀이 여러 폰으로 흩어져 서로 다른 스테이지를 진행할 때, 이 기기가
+// 놓친 완료 기록을 서버(Apps Script 시트)에서 끌어와 병합한다. 로컬 상태는
+// 절대 지우지 않고 "완료"만 합집합으로 더한다 — 네트워크가 없거나 서버가
+// 아직 아무것도 모르는 새 팀이어도 로컬 진행은 그대로 유지된다.
+async function pullTeamProgress() {
+  if (!window.HomewardSync || !state.teamName || !state.teamPassword) return;
+  saveStatus.textContent = "다른 기기의 진행 상황을 확인하는 중입니다...";
+  try {
+    const result = await window.HomewardSync.getTeamProgress(state.teamName, state.teamPassword);
+    if (!result || !result.ok) {
+      saveStatus.textContent = "다른 기기 진행 상황을 불러오지 못했습니다. 네트워크를 확인하십시오.";
+      return;
+    }
+    if (result.offline) {
+      saveStatus.textContent = "오프라인 상태입니다. 이 기기에 기록된 진행 상황만 표시됩니다.";
+      return;
+    }
+    if (!result.found) return;
+
+    let addedAny = false;
+    (result.completedStages || []).forEach((stageId) => {
+      if (!state.completed[stageId]) {
+        state.completed[stageId] = true;
+        localStorage.setItem(`homeward-solved-${stageId}`, "true");
+        const cardMeta = keywordCards.find((k) => k.id === stageId);
+        if (cardMeta && !localStorage.getItem(`homeward-keyword-${stageId}`)) {
+          localStorage.setItem(`homeward-keyword-${stageId}`, cardMeta.name);
+        }
+        addedAny = true;
+      }
+    });
+    Object.entries(result.notes || {}).forEach(([stageId, note]) => {
+      if (note && !state.notes[stageId]) {
+        state.notes[stageId] = note;
+        addedAny = true;
+      }
+    });
+
+    if (addedAny) {
+      saveState();
+      saveStatus.textContent = "다른 기기에서 완료한 진행 상황을 불러왔습니다.";
+      render();
+    } else {
+      saveStatus.textContent = "이 기기가 이미 최신 진행 상황입니다.";
+    }
+  } catch {
+    saveStatus.textContent = "다른 기기 진행 상황을 불러오지 못했습니다. 네트워크를 확인하십시오.";
   }
 }
 

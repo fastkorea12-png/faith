@@ -6,6 +6,14 @@ function doGet(e) {
     return jsonResponse(getDashboardData());
   }
 
+  if (e && e.parameter && e.parameter.action === 'teamProgress') {
+    var progress = getTeamProgressData(e.parameter.teamName, e.parameter.teamPassword);
+    if (e.parameter.callback) {
+      return jsonpResponse(e.parameter.callback, progress);
+    }
+    return jsonResponse(progress);
+  }
+
   var page = 'Index';
   if (e && e.parameter && e.parameter.page === 'qr') page = 'Qr';
   if (e && e.parameter && e.parameter.page === 'activity') page = 'Activity';
@@ -68,6 +76,40 @@ function saveProgress(payload) {
   }
 
   return { ok: true };
+}
+
+function getTeamProgressData(teamName, teamPassword) {
+  var sheet = getProgressSheet();
+  var rows = sheet.getDataRange().getValues();
+  var key = String(teamName || '') + '::' + String(teamPassword || '');
+
+  for (var i = 1; i < rows.length; i += 1) {
+    if (String(rows[i][1]) + '::' + String(rows[i][2]) === key) {
+      var completedStages = [];
+      var notes = {};
+      try {
+        completedStages = JSON.parse(rows[i][7] || '[]');
+      } catch (error) {
+        completedStages = [];
+      }
+      try {
+        notes = JSON.parse(rows[i][8] || '{}');
+      } catch (error) {
+        notes = {};
+      }
+
+      return {
+        ok: true,
+        found: true,
+        updatedAt: rows[i][0],
+        activeStageId: rows[i][3],
+        completedStages: completedStages,
+        notes: notes,
+      };
+    }
+  }
+
+  return { ok: true, found: false, completedStages: [], notes: {} };
 }
 
 function getDashboardData() {

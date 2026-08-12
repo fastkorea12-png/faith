@@ -17,6 +17,16 @@
     return jsonp(`${config.apiUrl}?action=dashboard`);
   }
 
+  async function getTeamProgress(teamName, teamPassword) {
+    if (!config.apiUrl || !teamName || !teamPassword) return { ok: false, offline: true };
+    const query = new URLSearchParams({
+      action: "teamProgress",
+      teamName,
+      teamPassword,
+    });
+    return jsonp(`${config.apiUrl}?${query.toString()}`);
+  }
+
   function jsonp(url) {
     return new Promise((resolve, reject) => {
       const callbackName = `homewardDashboard_${Date.now()}_${Math.random().toString(16).slice(2)}`;
@@ -47,5 +57,6 @@
     config,
     send,
     getDashboard,
+    getTeamProgress,
   };
 })();
