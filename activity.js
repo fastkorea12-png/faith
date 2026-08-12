@@ -109,6 +109,10 @@ const stageHint = document.querySelector("#stageHint");
 const answerForm = document.querySelector("#answerForm");
 const answerInput = document.querySelector("#answerInput");
 const gameLink = document.querySelector("#gameLink");
+const isLocalPreviewEnv =
+  window.location.protocol === "file:" ||
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
 const recorderMessage = document.querySelector("#recorderMessage");
 const teamNote = document.querySelector("#teamNote");
 const teamForm = document.querySelector("#teamForm");
@@ -203,7 +207,9 @@ function render() {
   stageStory.textContent = stage.story;
   stageMission.textContent = stage.mission;
   stageHint.textContent = stage.hint;
-  gameLink.innerHTML = `📱 현장 QR 스캔 또는 직접 접속: <a href="game.html?stage=${stage.id}&qr=rodem-2026" class="text-link" style="color:var(--gold-light); font-weight:bold; text-decoration:underline;" target="_blank">🔍 [${stage.title}] 현장 퍼즐 실행하기 (클릭)</a>`;
+  gameLink.innerHTML = isLocalPreviewEnv
+    ? `🛠 로컬/관리자 미리보기 전용 링크: <a href="game.html?stage=${stage.id}&qr=rodem-2026" class="text-link" style="color:var(--gold-light); font-weight:bold; text-decoration:underline;" target="_blank">🔍 [${stage.title}] 퍼즐 바로 열기 (테스트용)</a>`
+    : `📱 ${stage.place}에 숨겨진 QR을 찾아 스캔하십시오. 직접 주소 입력으로는 게임이 열리지 않습니다.`;
   currentPlace.textContent = stage.place;
   teamNote.value = state.notes[stage.id] || "";
   answerInput.value = "";

@@ -2,16 +2,16 @@ const puzzles = {
   case: {
     step: "00 / 본관",
     title: "조작된 사건파일",
-    intro: "본관 접수 기록의 이상한 문장을 해석해 첫 정체성을 찾으십시오.",
+    intro: "본관 로비에 숨겨진 알파벳 카드를 찾아 기록을 복원하고, 이상한 문장을 해석해 첫 정체성을 찾으십시오.",
     code: "PILGRIM-00",
     keyword: "나그네",
     message: "첫 키워드 '나그네'를 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
-    evidence: ["사건 메모", "접수 기록 5건", "거짓 기록 3건", "정체성 입력"],
-    objective: "접수 기록 5건을 사건 메모와 대조해 거짓 기록 3건을 가려낸 뒤, 아직 목적지에 이르지 않은 조사팀의 정체성을 추리합니다.",
+    evidence: ["알파벳 카드 A~E", "사건 메모", "접수 기록 5건", "거짓 기록 3건", "정체성 입력"],
+    objective: "본관 로비에서 알파벳 카드 5장을 찾아 암호로 기록을 복원하고, 사건 메모와 대조해 거짓 기록 3건을 가려낸 뒤, 아직 목적지에 이르지 않은 조사팀의 정체성을 추리합니다.",
     hints: {
-      focus: "현장 사건 메모(CASE H-11-13)의 지침에 시선을 집중하십시오. '미도착', '본관 접수대는 출발 지점일 뿐', 'H를 절대로 지우지 말 것' 세 항목이 핵심 단서입니다.",
-      contrast: "접수 기록 5건 중 메모의 지침과 정면으로 모순되는 거짓 기록 3건(stampA, deskC, numberD)을 가려내십시오.",
-      action: "거짓 기록 3건을 모두 지목하면 열리는 정체성 입력창에 사건번호 H-11-13(히브리서 11:13 '나그네와 외국인임을 증언하였으니')이 가리키는 성경적 정체성인 '나그네'를 입력하십시오.",
+      focus: "본관 로비 곳곳에 숨겨진 알파벳 카드 A~E를 먼저 모두 찾으십시오. 카드에 적힌 4자리 숫자가 같은 알파벳의 기록을 여는 암호입니다.",
+      contrast: "다섯 기록을 모두 복원했다면, 현장 사건 메모의 '미도착', '본관 접수대는 출발 지점일 뿐', 'H를 절대로 지우지 말 것' 세 항목과 정면으로 모순되는 거짓 기록 3건을 가려내십시오.",
+      action: "거짓 기록 3건을 모두 지목하면 열리는 정체성 입력창에 사건번호 H-11-13(히브리서 11:13 '나그네와 외국인임을 증언하였으니')이 가리키는 성경적 정체성을 입력하십시오.",
     },
     render: renderCasePuzzle,
   },
@@ -356,20 +356,30 @@ function unlock() {
 
 function renderCasePuzzle() {
   const surface = getSurface();
-  const state = loadPuzzleState("case", { selected: [], contradictionsConfirmed: false, solved: false });
+  const state = loadPuzzleState("case", { selected: [], revealed: [], contradictionsConfirmed: false, solved: false });
   const records = [
-    { id: "stampA", source: "도장 기록", text: "조사팀은 11:13에 목적지 본향 도착 확인 도장을 받았다.", false: true },
-    { id: "listB", source: "명단 기록", text: "미도착 명단에는 아직 길 위에 있는 조사팀의 이름만 남는다.", false: false },
-    { id: "deskC", source: "접수대 기록", text: "본관 접수대는 조사팀의 최종 목적지로 등록되었다.", false: true },
-    { id: "numberD", source: "사건 번호 기록", text: "사건 번호 H-11-13의 H는 오기이므로 지워도 된다.", false: true },
-    { id: "timeE", source: "시각 기록", text: "11:13은 조사팀이 도착한 시각이 아니라, 기록을 여는 위치다.", false: false },
+    { id: "stampA", label: "기록 A", source: "도장 기록", text: "조사팀은 11:13에 목적지 본향 도착 확인 도장을 받았다.", false: true },
+    { id: "listB", label: "기록 B", source: "명단 기록", text: "미도착 명단에는 아직 길 위에 있는 조사팀의 이름만 남는다.", false: false },
+    { id: "deskC", label: "기록 C", source: "접수대 기록", text: "본관 접수대는 조사팀의 최종 목적지로 등록되었다.", false: true },
+    { id: "numberD", label: "기록 D", source: "사건 번호 기록", text: "사건 번호 H-11-13의 H는 오기이므로 지워도 된다.", false: true },
+    { id: "timeE", label: "기록 E", source: "시각 기록", text: "11:13은 조사팀이 도착한 시각이 아니라, 기록을 여는 위치다.", false: false },
   ];
+  // 5개 팀 각각 서로 다른 4자리 암호를 쓰지만, 웹은 어느 팀 카드든 인정한다(팀 식별 없이도 동작).
+  // 값은 print-materials.html "00 본관 5개 팀별 독자 보물찾기 암호 카드 마스터"의 A1~E5 매트릭스와 동일하다.
+  const passcodes = {
+    stampA: ["1113", "1114", "1115", "1116", "1117"],
+    listB: ["2026", "2027", "2028", "2029", "2030"],
+    deskC: ["3154", "3155", "3156", "3157", "3158"],
+    numberD: ["4891", "4892", "4893", "4894", "4895"],
+    timeE: ["5207", "5208", "5209", "5210", "5211"],
+  };
   const falseIds = records.filter((r) => r.false).map((r) => r.id).sort().join(",");
+  const allRevealed = () => records.every((r) => state.revealed.includes(r.id));
   const persist = () => savePuzzleState("case", state);
 
   function draw() {
     surface.innerHTML = `
-      <p class="instruction">본관 접수대의 사건 메모와 접수 기록 5건을 대조하십시오. 서로 맞지 않는 거짓 기록 3건을 먼저 지목해야 정체성 입력창이 열립니다.</p>
+      <p class="instruction">본관 로비에 숨겨진 알파벳 카드 A~E를 찾아, 카드에 적힌 4자리 암호로 각 기록을 복원하십시오. 다섯 기록을 모두 복원해야 사건 메모와의 대조를 시작할 수 있습니다.</p>
       <div class="reception-puzzle">
         <section class="reception-record">
           <span>현장 사건 메모</span>
@@ -390,24 +400,39 @@ function renderCasePuzzle() {
         </section>
         <section class="unlock-terminal">
           <div class="deduction-brief">
-            <p class="eyebrow">Cross-check</p>
-            <h3>접수 기록 5건</h3>
-            <p>사건 메모와 어긋나는 거짓 기록을 정확히 3건 고르십시오.</p>
+            <p class="eyebrow">${allRevealed() ? "Cross-check" : "Field Recovery"}</p>
+            <h3>접수 기록 5건 (${state.revealed.length}/5 복원)</h3>
+            <p>${allRevealed() ? "사건 메모와 어긋나는 거짓 기록을 정확히 3건 고르십시오." : "현장 카드의 4자리 암호를 입력해 기록을 복원하십시오."}</p>
           </div>
           <div class="record-grid" id="recordGrid">
             ${records
-              .map(
-                (r) => `
+              .map((r) => {
+                const revealed = state.revealed.includes(r.id);
+                if (!revealed) {
+                  return `
+                    <form class="record-locked" data-passcode-form="${r.id}">
+                      <b>🔒 ${r.label} · ${r.source}</b>
+                      <span class="locked-caption">현장 카드의 4자리 암호를 입력하십시오.</span>
+                      <div class="passcode-row">
+                        <input data-passcode-input="${r.id}" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="0000" />
+                        <button type="submit" class="secondary-button">복원</button>
+                      </div>
+                    </form>
+                  `;
+                }
+                return `
                   <button type="button" data-record="${r.id}" class="${state.selected.includes(r.id) ? "selected" : ""}" ${state.contradictionsConfirmed ? "disabled" : ""}>
-                    <b>${r.source}</b>
+                    <b>${r.label} · ${r.source}</b>
                     <span>${r.text}</span>
                   </button>
-                `,
-              )
+                `;
+              })
               .join("")}
           </div>
           ${
-            state.contradictionsConfirmed
+            !allRevealed()
+              ? `<p class="locked-hint">아직 복원하지 못한 기록이 ${5 - state.revealed.length}건 남았습니다. 로비를 더 수색하십시오.</p>`
+              : state.contradictionsConfirmed
               ? ""
               : `<button class="primary-button" id="confirmRecords" type="button">거짓 기록 3건 확정 (${state.selected.length}/3)</button>`
           }
@@ -420,7 +445,7 @@ function renderCasePuzzle() {
                   <button class="primary-button" type="submit">정체성 확인</button>
                 </form>
               `
-              : `<p class="locked-hint">거짓 기록 3건을 확정하면 정체성 입력창이 열립니다.</p>`
+              : ""
           }
           <div class="verse-panel" id="versePanel" ${state.solved ? "" : "hidden"}>
             <p class="eyebrow">Hebrews 11:13</p>
@@ -434,6 +459,8 @@ function renderCasePuzzle() {
           ? "본관은 접수 지점이었습니다. 아직 길 위에 있는 첫 정체성 기록이 복원되었습니다."
           : state.contradictionsConfirmed
           ? "거짓 기록 3건이 확정되었습니다. 이제 정체성을 입력하십시오."
+          : !allRevealed()
+          ? "본관 로비에서 알파벳 카드를 찾아 암호로 기록을 복원하십시오."
           : "다섯 기록 중 사건 메모와 어긋나는 거짓 기록 3건을 고르십시오."
       }</p>
     `;
@@ -442,6 +469,23 @@ function renderCasePuzzle() {
 
   function bind() {
     const feedback = document.querySelector("#feedback");
+
+    document.querySelectorAll("[data-passcode-form]").forEach((form) => {
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const id = form.dataset.passcodeForm;
+        const input = form.querySelector(`[data-passcode-input="${id}"]`);
+        const value = input.value.trim();
+        if (passcodes[id].includes(value)) {
+          state.revealed = [...state.revealed, id];
+          persist();
+          draw();
+          return;
+        }
+        triggerFeedbackShake(feedback, "그 암호로는 이 기록이 열리지 않습니다. 카드의 알파벳과 기록 이름이 맞는지 다시 확인하십시오.");
+        input.value = "";
+      });
+    });
 
     document.querySelectorAll("[data-record]").forEach((button) => {
       button.addEventListener("click", () => {
