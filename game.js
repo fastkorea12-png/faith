@@ -43,7 +43,7 @@ const puzzles = {
     hints: {
       focus: "휴대폰 잠금화면의 상단 알림 2개와 숙소 문 앞 안내문에 적힌 날짜 표시를 주시하십시오.",
       contrast: "알림 속 약속된 날짜와 문 앞 안내문의 월/일(MMDD) 형식을 대조하고, 잠금 해제 후 다섯 장의 사진을 모두 확대해 도장 종류를 확인하십시오.",
-      action: "휴대폰 잠금 비밀번호 '0316'을 입력하여 연 뒤, '원본 · 수정 없음' 도장이 찍힌 사진을 원본으로 지목하십시오.",
+      action: "휴대폰 잠금 비밀번호 '0316'을 입력해 연 뒤, 도장 문구 '수정 없음'을 그대로 입력해 원본을 확정하고, 검색 기록 마지막 줄의 문구 '약속을 지키는 사람'을 입력해 메모를 복원하십시오.",
     },
     render: renderPhonePuzzleV2,
   },
@@ -651,7 +651,11 @@ function renderPhonePuzzleV2() {
     photos: [],
     zoomedPhoto: null,
     original: "",
+    originalWrongStreak: 0,
+    originalLockedUntil: 0,
     memo: false,
+    memoWrongStreak: 0,
+    memoLockedUntil: 0,
     solved: false,
     attempts: 0,
   });
@@ -705,7 +709,9 @@ function renderPhonePuzzleV2() {
     if (activeApp === "memo" && !memoReady) activeApp = "photo";
     screen.innerHTML = `<div class="phone-apps phone-apps-four"><button type="button" data-app="notices" class="${activeApp === "notices" ? "selected" : ""}"><span>✉</span>알림</button><button type="button" data-app="photo" class="${activeApp === "photo" ? "selected" : ""}"><span>□</span>사진</button><button type="button" data-app="search" class="${activeApp === "search" ? "selected" : ""}"><span>⌕</span>검색</button><button type="button" data-app="memo" class="${activeApp === "memo" ? "selected" : ""} ${memoReady ? "" : "app-locked"}" ${memoReady ? "" : 'aria-disabled="true"'}><span>${memoReady ? "M" : "🔒"}</span>메모${memoReady ? "" : `<small>사진 기록을 먼저 검증하세요</small>`}</button></div><div class="phone-screen evidence-screen">${renderAppBody(memoReady)}</div>`;
     bindUnlocked(memoReady);
-    feedback.textContent = activeApp === "notices" ? "이미 확인한 알림입니다. 사진 감식으로 돌아가 상태 도장을 비교하십시오." : activeApp === "search" ? "검색 기록은 정답을 알려주지 않습니다. 무엇을 좇다가 무엇으로 옮겨갔는지만 살펴보십시오." : activeApp === "memo" ? "삭제된 두 이름과 마지막 줄을 대조해 복원하십시오." : state.photos.length < 5 ? "사진 다섯 장의 상태 도장을 모두 확대하십시오." : "반복 노출보다 ‘임시/반납’과 ‘원본/수정 없음’을 비교하십시오.";
+    feedback.textContent = activeApp === "notices" ? "이미 확인한 알림입니다. 사진 감식으로 돌아가 상태 도장을 비교하십시오." : activeApp === "search" ? "검색 기록은 정답을 알려주지 않습니다. 무엇을 좇다가 무엇으로 옮겨갔는지만 살펴보십시오." : activeApp === "memo" ? "삭제된 두 이름 대신 들어갈 표현을 검색 기록에서 찾아 그대로 입력하십시오." : state.photos.length < 5 ? "사진 다섯 장의 상태 도장을 모두 확대하십시오." : state.original === "promise" ? "원본이 확정되었습니다. 메모 탭으로 이동하십시오." : "다섯 장의 도장 문구를 직접 옮겨 적어 보십시오. 반복해서 등장하는 문구는 정답이 아닙니다.";
+    const subLockRemaining = activeApp === "photo" ? state.originalLockedUntil - Date.now() : activeApp === "memo" ? state.memoLockedUntil - Date.now() : 0;
+    if (subLockRemaining > 0) lockTimer = setTimeout(draw, 1000);
   }
   function renderAppBody(memoReady) {
     if (activeApp === "notices") {
@@ -715,13 +721,32 @@ function renderPhonePuzzleV2() {
       return `<div class="phone-app-title"><span>검색 기록</span><strong>최근 순</strong></div><div class="search-history-list">${searchHistory.map((s) => `<article><p>${s.query}</p><small>${s.time}</small></article>`).join("")}</div>`;
     }
     if (activeApp === "memo" && memoReady) {
-      return `<div class="memo-note"><p><s>성공한 사람</s> — 삭제됨</p><p><s>인정받는 사람</s> — 삭제됨</p><button id="restoreMemo" class="memo-final" type="button">${state.solved ? "빌린 이름은 바뀌지만, 바뀌지 않은 것은 약속이다." : "마지막 줄 복원"}</button></div>`;
+      const deleted = `<p><s>성공한 사람</s> — 삭제됨</p><p><s>인정받는 사람</s> — 삭제됨</p>`;
+      if (state.solved) {
+        return `<div class="memo-note">${deleted}<p class="memo-final">빌린 이름은 바뀌지만, 그가 끝까지 찾던 말은 ‘약속을 지키는 사람’이었다.</p></div>`;
+      }
+      const remaining = Math.max(0, Math.ceil((state.memoLockedUntil - Date.now()) / 1000));
+      if (remaining > 0) {
+        return `<div class="memo-note">${deleted}<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div></div>`;
+      }
+      return `<div class="memo-note">${deleted}<form id="memoForm" class="phone-answer-form"><label>지워진 두 이름 대신 마지막 줄에 들어갈 표현을, 검색 기록에서 찾아 그대로 입력하십시오.</label><input id="memoAnswer" autocomplete="off" placeholder="검색 기록의 마지막 문구" /><button type="submit" class="primary-button">복원</button></form></div>`;
     }
     const zoomed = photos.find((p) => p.id === state.zoomedPhoto);
     if (zoomed) {
-      return `<div class="photo-lightbox"><button type="button" class="lightbox-close" id="closeLightbox">✕ 닫기</button><div class="polaroid-large"><div class="polaroid-image-wrap"><img src="${zoomed.img}" alt="${zoomed.title}" onerror="this.style.display='none'" /><span class="photo-stamp ${zoomed.real ? "stamp-real" : "stamp-fake"}">${zoomed.stamp}</span></div><p class="polaroid-caption">${zoomed.title}</p></div>${state.photos.length === 5 ? `<button type="button" class="primary-button" data-original="${zoomed.id}">이 기록을 원본으로 지목</button>` : ""}</div>`;
+      return `<div class="photo-lightbox"><button type="button" class="lightbox-close" id="closeLightbox">✕ 닫기</button><div class="polaroid-large"><div class="polaroid-image-wrap"><img src="${zoomed.img}" alt="${zoomed.title}" onerror="this.style.display='none'" /><span class="photo-stamp ${zoomed.real ? "stamp-real" : "stamp-fake"}">${zoomed.stamp}</span></div><p class="polaroid-caption">${zoomed.title}</p></div></div>`;
     }
-    return `<div class="phone-app-title"><span>사진 감식</span><strong>${state.photos.length}/5 확대</strong></div><div class="photo-evidence-grid photo-evidence-grid-5">${photos.map(p => `<button type="button" data-photo="${p.id}" class="polaroid-thumb ${state.photos.includes(p.id) ? "viewed" : ""} ${state.original === p.id ? "chosen" : ""}"><div class="polaroid-image-wrap"><img src="${p.img}" alt="" onerror="this.style.display='none'" /></div><small>${p.title}</small></button>`).join("")}</div>${state.photos.length === 5 ? `<p class="phone-caption">다섯 기록 중 원본으로 남은 기록을 선택하십시오.</p><div class="original-choice">${photos.map(p => `<button type="button" data-original="${p.id}" class="${state.original === p.id ? "selected" : ""}">${p.title}</button>`).join("")}</div>` : ""}`;
+    let originalPanel = "";
+    if (state.photos.length === 5) {
+      if (state.original === "promise") {
+        originalPanel = `<p class="phone-caption">원본이 확정되었습니다. 메모 탭에서 마지막 줄을 복원하십시오.</p>`;
+      } else {
+        const remaining = Math.max(0, Math.ceil((state.originalLockedUntil - Date.now()) / 1000));
+        originalPanel = remaining > 0
+          ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
+          : `<form id="originalForm" class="phone-answer-form"><label>다섯 기록 중 원본에만 있는 도장 문구를 그대로 입력하십시오.</label><input id="originalAnswer" autocomplete="off" placeholder="도장 문구" /><button type="submit" class="primary-button">제출</button></form>`;
+      }
+    }
+    return `<div class="phone-app-title"><span>사진 감식</span><strong>${state.photos.length}/5 확대</strong></div><div class="photo-evidence-grid photo-evidence-grid-5">${photos.map(p => `<button type="button" data-photo="${p.id}" class="polaroid-thumb ${state.photos.includes(p.id) ? "viewed" : ""}"><div class="polaroid-image-wrap"><img src="${p.img}" alt="" onerror="this.style.display='none'" /></div><small>${p.title}</small></button>`).join("")}</div>${originalPanel}`;
   }
   function bindLocked() {
     screen.querySelectorAll("[data-notice]").forEach(b => b.addEventListener("click", () => { if (!state.notices.includes(b.dataset.notice)) state.notices.push(b.dataset.notice); persist(); draw(); }));
@@ -769,14 +794,50 @@ function renderPhonePuzzleV2() {
       draw();
     }));
     document.querySelector("#closeLightbox")?.addEventListener("click", () => { state.zoomedPhoto = null; persist(); draw(); });
-    screen.querySelectorAll("[data-original]").forEach(b => b.addEventListener("click", () => {
-      state.original = b.dataset.original;
-      state.zoomedPhoto = null;
+    document.querySelector("#originalForm")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = document.querySelector("#originalAnswer");
+      if (normalize(input.value) === normalize("수정 없음")) {
+        state.original = "promise";
+        state.originalWrongStreak = 0;
+        persist();
+        draw();
+        return;
+      }
+      state.originalWrongStreak = (state.originalWrongStreak || 0) + 1;
+      if (state.originalWrongStreak >= 3) {
+        state.originalLockedUntil = Date.now() + 10000;
+        state.originalWrongStreak = 0;
+        persist();
+        draw();
+        return;
+      }
+      triggerFeedbackShake(document.querySelector("#feedback"), "많이 찍힌 기록이 원본이라는 뜻은 아닙니다. 다섯 장의 도장 문구를 다시 대조하십시오.");
+      input.value = "";
       persist();
-      draw();
-      if (state.original !== "promise") triggerFeedbackShake(document.querySelector("#feedback"), "많이 찍힌 기록이 원본이라는 뜻은 아닙니다. 사진의 상태 도장을 확대하세요.");
-    }));
-    document.querySelector("#restoreMemo")?.addEventListener("click", () => { state.solved = true; persist(); draw(); unlock(); });
+    });
+    document.querySelector("#memoForm")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = document.querySelector("#memoAnswer");
+      if (normalize(input.value) === normalize("약속을 지키는 사람")) {
+        state.solved = true;
+        persist();
+        draw();
+        unlock();
+        return;
+      }
+      state.memoWrongStreak = (state.memoWrongStreak || 0) + 1;
+      if (state.memoWrongStreak >= 3) {
+        state.memoLockedUntil = Date.now() + 10000;
+        state.memoWrongStreak = 0;
+        persist();
+        draw();
+        return;
+      }
+      triggerFeedbackShake(document.querySelector("#feedback"), "이 이름들이 아닙니다. 검색 기록의 가장 최근 문구를 그대로 옮겨 적으십시오.");
+      input.value = "";
+      persist();
+    });
   }
   document.querySelector("#resetStage")?.addEventListener("click", () => resetStageProgress("name"));
   draw();
