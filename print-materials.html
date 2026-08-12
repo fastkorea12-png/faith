@@ -287,7 +287,8 @@
       </div>
       <div style="display:flex; gap:12px; align-items:center;">
         <div class="stage-filter" id="filterGroup">
-          <button class="active" onclick="filterStage('all', this)">전체 보기</button>
+          <button class="active" onclick="filterStage('all', this)">전체 풀 패키지</button>
+          <button onclick="filterStage('essential', this)" style="background:#16a34a; color:white; font-weight:bold;">📱 모바일 퍼스트 필수 인쇄 (추천! 3종만 출력)</button>
           <button onclick="filterStage('st00', this)">00 본관</button>
           <button onclick="filterStage('st01', this)">01 야외</button>
           <button onclick="filterStage('st02', this)">02 숙소</button>
@@ -400,7 +401,7 @@
       </section>
 
       <!-- 01 야외 현장 표식 카드 (팀별 패턴 20장 중 예시) -->
-      <section class="page-sheet st01">
+      <section class="page-sheet st01 essential-sheet">
         <div class="sheet-header">
           <h2>01 야외 — 현장 표식 카드 A~D (재단 및 코팅용)</h2>
           <span>규격: A4 코팅지 (나무, 벤치, 바위, 이정표 부착)</span>
@@ -487,7 +488,7 @@
       </section>
 
       <!-- 05 예배당 실물 귀향 선언문 서식 (5부) -->
-      <section class="page-sheet st05">
+      <section class="page-sheet st05 essential-sheet">
         <div class="sheet-header">
           <h2>05 예배당 — 실물 귀향 선언문 서식 (5부)</h2>
           <span>수량: 5부 (A4 220g 고급 켄트지 / 최종 상자 내부 봉입)</span>
@@ -510,7 +511,7 @@
       </section>
 
       <!-- 키워드 카드 30장 마스터 재단 Sheet (6종 x 5팀) -->
-      <section class="page-sheet keywords">
+      <section class="page-sheet keywords essential-sheet">
         <div class="sheet-header">
           <h2>실물 키워드 카드 30장 (00~05 메타 퍼즐 교구)</h2>
           <span>규격: A4 220g 고급 켄트지 (점선 재단 후 해당 자물쇠 상자/봉투 삽입)</span>
@@ -569,6 +570,8 @@
         sheets.forEach(sheet => {
           if (stageId === 'all') {
             sheet.style.display = 'block';
+          } else if (stageId === 'essential') {
+            sheet.style.display = sheet.classList.contains('essential-sheet') ? 'block' : 'none';
           } else {
             sheet.style.display = sheet.classList.contains(stageId) ? 'block' : 'none';
           }
