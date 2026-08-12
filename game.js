@@ -28,31 +28,31 @@ const puzzles = {
     code: "PROMISE-02",
     keyword: "약속",
     message: "세 번째 키워드 '약속'을 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
-    evidence: ["잠금화면 알림", "문 앞 안내문", "MMDD", "메모 앱"],
-    objective: "잠금화면 알림이 가리키는 약속한 날짜를 문 앞 안내문에서 찾아 휴대폰 암호를 해제합니다.",
-    render: renderPhonePuzzle,
+    evidence: ["알림 2개", "0316", "사진 3장", "원본 약속 카드", "메모"],
+    objective: "알림과 현장 기록으로 휴대폰을 열고, 사진의 상태와 메모 수정 이력으로 원본을 판별합니다.",
+    render: renderPhonePuzzleV2,
   },
   ledger: {
     step: "03 / 주방 및 기타 시설",
-    title: "사라진 식량 장부",
-    intro: "장부의 기록과 실제 재고를 대조해 맡겨진 양식의 누락을 복원하십시오.",
+    title: "맡겨진 것을 바꾼 사람",
+    intro: "원래 선반과 변경 기록, 담당 권한을 대조해 조작한 사람을 찾으십시오.",
     code: "STEWARD-03",
     keyword: "청지기",
     message: "네 번째 키워드 '청지기'를 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
-    evidence: ["식량 장부", "현장 재고 카드", "누락 기록", "3자리 자물쇠"],
-    objective: "주방 곳곳의 재고 카드를 확인하고, 기록과 실제가 어긋난 품목을 찾아 장부를 복원합니다.",
-    render: renderInventoryPuzzle,
+    evidence: ["역할 분담", "재고 카드 6장", "변경 기록", "권한표", "3자리 자물쇠"],
+    objective: "카드의 원래 위치를 복원하고 기록과 권한을 감식해 물리 자물쇠의 순서를 찾습니다.",
+    render: renderInventoryPuzzleV2,
   },
   road: {
     step: "04 / 비아 돌로로사",
-    title: "되돌아가는 길",
-    intro: "편한 선택은 계속 같은 곳으로 돌아옵니다. 반복 속에서 다른 길의 단서를 찾으십시오.",
+    title: "돌아갈 수 있었던 길",
+    intro: "네 사람의 기억으로 루프를 통과하고, 길처럼 보인 방향을 기록으로 다시 읽으십시오.",
     code: "BETTER-04",
     keyword: "더 나은 본향",
     message: "다섯 번째 키워드 '더 나은 본향'을 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
-    evidence: ["갈림길", "반복 기록", "길목 문구", "히브리서 11:16"],
-    objective: "루프의 기록을 기억하며 네 번의 선택을 올바른 순서로 통과합니다.",
-    render: renderLoopPuzzle,
+    evidence: ["기억 담당 A~D", "4개 루프", "문장 조각", "방향 홈", "실제 자물쇠"],
+    objective: "분담한 현장 기억으로 네 갈림길을 통과하고 문장과 방향 기록의 의미를 복원합니다.",
+    render: renderLoopPuzzleV2,
   },
   home: {
     step: "05 / 예배당",
@@ -82,6 +82,18 @@ const codeMessage = document.querySelector("#codeMessage");
 const guideLink = document.querySelector("#guideLink");
 const completeLink = document.querySelector("#completeLink");
 let solved = false;
+
+function loadPuzzleState(id, fallback) {
+  try {
+    return { ...fallback, ...JSON.parse(localStorage.getItem(`homeward-game-${id}`)) };
+  } catch {
+    return { ...fallback };
+  }
+}
+
+function savePuzzleState(id, state) {
+  localStorage.setItem(`homeward-game-${id}`, JSON.stringify(state));
+}
 
 if (qrToken !== expectedQrToken && !adminPreview) {
   document.querySelector("#gameStep").textContent = "Locked";
@@ -222,517 +234,125 @@ function renderFieldPuzzle() {
   `;
 }
 
-function renderPhonePuzzle() {
+function renderPhonePuzzleV2() {
   const surface = getSurface();
-  const apps = {
-    notice: {
-      label: "알림",
-      icon: "!",
-      html: `
-        <div class="phone-app-title"><span>알림 센터</span><strong>오늘</strong></div>
-        <article class="notification-card"><b>엄마</b><p>네 이름이 뭐가 되든, 약속한 날은 잊지 마. 숙소 문 앞 안내문에 남겨뒀어.</p></article>
-        <article class="notification-card"><b>룸메이트</b><p>비밀번호 형식은 MMDD래. 이름 말고 날짜를 보래.</p></article>
-        <article class="notification-card muted"><b>홍보팀</b><p>새 별명 추천: 성공한 사람, 인정받는 사람, 비교에서 이긴 사람</p></article>
-      `,
-    },
-    photo: {
-      label: "사진",
-      icon: "□",
-      html: `
-        <div class="phone-app-title"><span>사진</span><strong>문 앞 안내문 백업</strong></div>
-        <div class="photo-grid name-fragment-preview">
-          <span data-color="blue">03/16</span><span data-color="green">약속</span><span data-color="red">성공</span><span data-color="gray">인정</span>
-        </div>
-        <p class="phone-caption">백업 사진: 문 앞 안내문에는 여러 이름이 있었지만, 약속 카드 수령일만 날짜로 남아 있었다.</p>
-      `,
-    },
-    memo: {
-      label: "메모",
-      icon: "M",
-      html: `
-        <div class="phone-app-title"><span>메모</span><strong>잠긴 메모 일부</strong></div>
-        <div class="memo-note">
-          <p>빌린 이름은 자주 바뀐다.</p>
-          <p>성공, 인정, 비교는 문 앞에 오래 붙어 있지 못했다.</p>
-          <p>하지만 약속한 날은 바뀌지 않는다.</p>
-          <p class="scribble">남겨야 할 이름은 약속 안에서 발견된다.</p>
-        </div>
-      `,
-    },
-    search: {
-      label: "검색",
-      icon: "?",
-      html: `
-        <div class="phone-app-title"><span>검색 기록</span><strong>삭제되지 않음</strong></div>
-        <ul class="search-list">
-          <li>좋아 보이는 이름</li>
-          <li>인정받는 법</li>
-          <li>약속을 잊지 않는 법</li>
-          <li>비밀번호 MMDD 뜻</li>
-        </ul>
-      `,
-    },
-  };
-  const doorNotices = [
-    { id: "promise", label: "약속 카드 수령일", value: "03/16", code: "0316", type: "real" },
-    { id: "success", label: "임시 이름표", value: "성공한 사람", code: "", type: "decoy" },
-    { id: "approval", label: "임시 이름표", value: "인정받는 사람", code: "", type: "decoy" },
-    { id: "checkout", label: "퇴실 안내", value: "11:13", code: "", type: "decoy" },
+  const state = loadPuzzleState("name", { notices: [], unlocked: false, photos: [], original: "", memo: false, solved: false, attempts: 0 });
+  const photos = [
+    { id: "success", title: "성공한 사람", stamp: "임시 발급 · 반납 대상" },
+    { id: "approval", title: "인정받는 사람", stamp: "임시 발급 · 반납 대상" },
+    { id: "promise", title: "약속 카드 03/16", stamp: "원본 · 수정 없음" },
   ];
-  let phoneUnlocked = false;
-  let foundPromiseDate = "";
-
-  surface.innerHTML = `
-    <p class="instruction">목표: 잠긴 휴대폰을 열고 메모 앱에서 방 주인이 끝까지 붙든 단어를 확인하십시오.</p>
-    <div class="phone-board">
-      <section class="phone-device">
-        <div class="phone-island"></div>
-        <div class="phone-topbar"><span>11:13</span><span>숙소 Wi-Fi</span></div>
-        <div class="phone-lockscreen">
-          <p>잠긴 휴대폰</p>
-          <strong>11:13</strong>
-          <span>이름은 바뀌어도 약속은 남는다</span>
-        </div>
-        <div class="lock-notifications" id="lockNotifications">
-          <article><b>엄마</b><p>약속한 날은 숙소 문 앞 안내문에 있어.</p></article>
-          <article><b>룸메이트</b><p>비밀번호 형식은 MMDD. 이름 말고 날짜.</p></article>
-        </div>
-        <button class="phone-unlock-button" type="button" id="showPasscode">잠금 해제</button>
-        <div class="phone-home-screen" id="phoneHomeScreen" hidden>
-          <div class="phone-apps">
-            ${Object.entries(apps).map(([id, app]) => `<button type="button" data-tab="${id}"><span>${app.icon}</span>${app.label}</button>`).join("")}
-          </div>
-          <div class="phone-screen" id="phoneScreen">
-            <div class="empty-phone-app">
-              <strong>앱을 선택하세요</strong>
-              <p>사진, 메모, 검색 기록을 열어 문 앞 안내문을 확인하십시오.</p>
-            </div>
-          </div>
-        </div>
-        <form class="phone-passcode" id="phoneForm" hidden>
-          <label for="phoneCode">암호</label>
-          <input id="phoneCode" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="----" />
-          <div class="passcode-dots" aria-hidden="true">
-            <span></span><span></span><span></span><span></span>
-          </div>
-          <div class="phone-keypad" aria-label="숫자 키패드">
-            ${["1", "2", "3", "4", "5", "6", "7", "8", "9", "지움", "0", "확인"]
-              .map((key) => `<button type="${key === "확인" ? "submit" : "button"}" data-key="${key}">${key}</button>`)
-              .join("")}
-          </div>
-        </form>
-        <div class="phone-homebar"></div>
-      </section>
-      <section class="phone-investigation">
-        <div class="deduction-steps">
-          <strong>풀어야 할 문제</strong>
-          <ol>
-            <li>잠금화면 알림 2개를 읽는다.</li>
-            <li>숙소 문 앞 안내문에서 약속한 날짜를 찾는다.</li>
-            <li>잠금 해제를 눌러 암호를 입력한다.</li>
-            <li>휴대폰이 열리면 메모 앱을 열어 완료 단어를 확인한다.</li>
-          </ol>
-        </div>
-        <div class="fragment-board">
-          <p class="eyebrow">현장 안내문</p>
-          <h3>숙소 문 앞 기록</h3>
-          <p class="fragment-copy">알림은 “약속한 날”과 “MMDD”를 말합니다. 이름처럼 보이는 기록을 버리고 날짜 기록을 고르십시오.</p>
-          <div class="fragment-grid">
-            ${doorNotices.map((notice) => `<button type="button" data-notice="${notice.id}" data-code="${notice.code}" data-type="${notice.type}"><span>${notice.label}</span><strong>${notice.value}</strong></button>`).join("")}
-          </div>
-          <div class="fragment-result" id="fragmentResult">찾은 날짜: ----</div>
-        </div>
-        <div class="field-note">
-          <strong>현장 행동</strong>
-          <p>실제 운영에서는 이 안내문을 숙소 문 앞에 붙입니다. 화면의 기록 후보는 진행자 리허설용이며, 참가자는 현장 안내문을 보고 암호를 직접 눌러야 합니다.</p>
-        </div>
-      </section>
-    </div>
-    <p class="feedback" id="feedback">먼저 숙소 문 앞 안내문에서 약속한 날짜를 찾으십시오.</p>
-  `;
-
-  document.querySelector("#showPasscode").addEventListener("click", () => {
-    document.querySelector("#phoneForm").hidden = false;
-    document.querySelector("#showPasscode").hidden = true;
-    document.querySelector("#feedback").textContent = foundPromiseDate
-      ? `${foundPromiseDate}를 MMDD 형식으로 바꾸어 휴대폰 키패드에 직접 입력하십시오.`
-      : "먼저 숙소 문 앞 안내문에서 약속한 날짜를 찾은 뒤 MMDD 형식으로 입력하십시오.";
-  });
-
-  surface.querySelectorAll("[data-tab]").forEach((button) => {
-    button.addEventListener("click", () => {
-      surface.querySelectorAll("[data-tab]").forEach((item) => item.classList.remove("selected"));
-      button.classList.add("selected");
-      document.querySelector("#phoneScreen").innerHTML = apps[button.dataset.tab].html;
-      if (phoneUnlocked && button.dataset.tab === "memo") {
-        document.querySelector("#feedback").textContent = "잠긴 메모가 열렸습니다. 방 주인이 붙든 단어는 약속이었습니다.";
-        unlock();
-      }
-    });
-  });
-
-  function updateDoorNoticeResult(value) {
-    foundPromiseDate = value;
-    document.querySelector("#fragmentResult").textContent = `찾은 날짜: ${value} → MMDD`;
-  }
-
+  surface.innerHTML = `<p class="instruction">알림 → 현장 암호 → 사진 3장 대조 → 원본 선택 → 메모 복원 순서로 확인하십시오.</p><div class="phone-board"><section class="phone-device"><div class="phone-island"></div><div class="phone-topbar"><span>11:13</span><span>숙소 Wi-Fi</span></div><div id="phoneFlow"></div><div class="phone-homebar"></div></section><section class="phone-investigation"><div class="deduction-steps"><strong>포렌식 진행</strong><ol><li>엄마와 룸메이트 알림을 각각 펼친다.</li><li>문 앞의 약속한 날을 MMDD로 입력한다.</li><li>사진 세 장의 상태 도장을 모두 확대한다.</li><li>원본 기록을 골라 메모 마지막 줄을 복원한다.</li></ol></div>${adminPreview ? `<div class="fragment-board admin-preview-only"><p class="eyebrow">관리자 미리보기</p><h3>현장 기록 후보</h3><p>약속 카드 수령일 03/16 · 임시 이름표 2장 · 퇴실 안내 11:13</p><button class="secondary-button" id="resetStage" type="button">이 스테이지 초기화</button></div>` : ""}</section></div><p class="feedback" id="feedback" aria-live="polite"></p>`;
+  const screen = document.querySelector("#phoneFlow");
+  const feedback = document.querySelector("#feedback");
+  const persist = () => savePuzzleState("name", state);
   function updatePasscodeDots() {
-    const length = document.querySelector("#phoneCode").value.length;
-    surface.querySelectorAll(".passcode-dots span").forEach((dot, index) => {
-      dot.classList.toggle("filled", index < length);
-    });
+    const length = document.querySelector("#phoneCode")?.value.length || 0;
+    screen.querySelectorAll(".passcode-dots span").forEach((dot, index) => dot.classList.toggle("filled", index < length));
   }
-
-  surface.querySelectorAll("[data-notice]").forEach((button) => {
-    button.addEventListener("click", () => {
-      if (button.dataset.type !== "real") {
-        button.dataset.status = "miss";
-        document.querySelector("#feedback").textContent = "그 기록은 빌린 이름이거나 시간 표시입니다. 알림이 말한 '약속한 날'을 찾으십시오.";
-        return;
-      }
-      surface.querySelectorAll("[data-notice]").forEach((item) => item.removeAttribute("data-status"));
-      button.dataset.status = "correct";
-      updateDoorNoticeResult(button.querySelector("strong").textContent);
-      document.querySelector("#feedback").textContent = "약속한 날을 찾았습니다. 날짜를 MMDD 형식으로 바꾸어 휴대폰 키패드에 직접 입력하십시오.";
-    });
-  });
-
-  surface.querySelectorAll("[data-key]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const input = document.querySelector("#phoneCode");
-      const key = button.dataset.key;
-      if (key === "확인") return;
-      if (key === "지움") {
-        input.value = input.value.slice(0, -1);
-        updatePasscodeDots();
-        return;
-      }
-      if (input.value.length < 4) input.value += key;
-      updatePasscodeDots();
-    });
-  });
-
-  document.querySelector("#phoneForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-    if (document.querySelector("#phoneCode").value.trim() === "0316") {
-      phoneUnlocked = true;
-      document.querySelector("#phoneForm").hidden = true;
-      document.querySelector("#lockNotifications").hidden = true;
-      document.querySelector(".phone-lockscreen").hidden = true;
-      document.querySelector("#phoneHomeScreen").hidden = false;
-      document.querySelector("#feedback").textContent = "휴대폰이 열렸습니다. 메모 앱을 열어 마지막 기록을 확인하십시오.";
+  function draw() {
+    if (!state.unlocked) {
+      const notices = [["mom", "엄마", "약속한 날은 숙소 문 앞 기록에 남겨뒀어."], ["roommate", "룸메이트", "비밀번호 형식은 MMDD야."]];
+      screen.innerHTML = `<div class="phone-lockscreen"><p>잠긴 휴대폰</p><strong>11:13</strong><span>${state.notices.length}/2 알림 확인</span></div><div class="lock-notifications">${notices.map(([id, from, text]) => `<button type="button" data-notice="${id}" class="notification-button ${state.notices.includes(id) ? "read" : ""}"><b>${from}</b><p>${state.notices.includes(id) ? text : "탭해서 알림 펼치기"}</p></button>`).join("")}</div>${state.notices.length === 2 ? `<form class="phone-passcode" id="phoneForm"><label>문 앞 기록을 MMDD로 입력</label><input id="phoneCode" inputmode="numeric" maxlength="4" autocomplete="off"><div class="passcode-dots"><span></span><span></span><span></span><span></span></div><div class="phone-keypad">${["1","2","3","4","5","6","7","8","9","지움","0","확인"].map(k => `<button type="${k === "확인" ? "submit" : "button"}" data-key="${k}">${k}</button>`).join("")}</div></form>` : ""}`;
+      bindLocked();
+      feedback.textContent = state.notices.length < 2 ? "두 알림을 모두 펼쳐 자료와 형식을 확인하십시오." : "숙소 문 앞에서 ‘약속한 날’을 찾아 MMDD로 입력하십시오.";
       return;
     }
-    document.querySelector("#feedback").textContent = "잠금이 풀리지 않습니다. 이름보다 날짜, 날짜보다 약속을 다시 보십시오.";
-  });
+    screen.innerHTML = `<div class="phone-apps phone-apps-two"><button class="selected" type="button"><span>□</span>사진</button><button type="button" id="memoApp" ${state.original === "promise" ? "" : "disabled"}><span>${state.original === "promise" ? "M" : "🔒"}</span>메모</button></div><div class="phone-screen evidence-screen">${state.memo ? `<div class="memo-note"><p><s>성공한 사람</s> — 삭제됨</p><p><s>인정받는 사람</s> — 삭제됨</p><button id="restoreMemo" class="memo-final" type="button">${state.solved ? "빌린 이름은 바뀌지만, 바뀌지 않은 것은 약속이다." : "마지막 줄 복원"}</button></div>` : `<div class="phone-app-title"><span>사진 감식</span><strong>${state.photos.length}/3 확대</strong></div><div class="photo-evidence-grid">${photos.map(p => `<button type="button" data-photo="${p.id}" class="${state.photos.includes(p.id) ? "viewed" : ""}"><strong>${p.title}</strong><small>${state.photos.includes(p.id) ? p.stamp : "탭해 상태 도장 확대"}</small></button>`).join("")}</div>${state.photos.length === 3 ? `<p class="phone-caption">세 기록 중 원본으로 남은 기록을 선택하십시오.</p><div class="original-choice">${photos.map(p => `<button type="button" data-original="${p.id}">${p.title}</button>`).join("")}</div>` : ""}`}</div>`;
+    bindUnlocked();
+    feedback.textContent = state.memo ? "삭제된 두 이름과 마지막 줄을 대조해 복원하십시오." : state.photos.length < 3 ? "사진 세 장의 상태 도장을 모두 확대하십시오." : "반복 노출보다 ‘임시/반납’과 ‘원본/수정 없음’을 비교하십시오.";
+  }
+  function bindLocked() {
+    screen.querySelectorAll("[data-notice]").forEach(b => b.addEventListener("click", () => { if (!state.notices.includes(b.dataset.notice)) state.notices.push(b.dataset.notice); persist(); draw(); }));
+    const form = document.querySelector("#phoneForm");
+    if (!form) return;
+    form.querySelectorAll("[data-key]").forEach(b => b.addEventListener("click", () => { const input = document.querySelector("#phoneCode"); if (b.dataset.key === "확인") return; input.value = b.dataset.key === "지움" ? input.value.slice(0, -1) : (input.value + b.dataset.key).slice(0, 4); updatePasscodeDots(); }));
+    form.addEventListener("submit", e => { e.preventDefault(); const value = document.querySelector("#phoneCode").value; state.attempts += 1; if (value === "0316") { state.unlocked = true; persist(); draw(); return; } feedback.textContent = value === "1113" ? "그 숫자는 날짜가 아니라 퇴실 시각입니다." : value.length !== 4 ? "잠금 기록은 네 자리 MMDD 형식입니다." : "숫자의 모양보다 출처가 중요합니다. ‘약속한 날’의 수령 기록을 찾으십시오."; document.querySelector("#phoneCode").value = ""; updatePasscodeDots(); persist(); });
+  }
+  function bindUnlocked() {
+    screen.querySelectorAll("[data-photo]").forEach(b => b.addEventListener("click", () => { if (!state.photos.includes(b.dataset.photo)) state.photos.push(b.dataset.photo); persist(); draw(); }));
+    screen.querySelectorAll("[data-original]").forEach(b => b.addEventListener("click", () => { state.original = b.dataset.original; if (state.original !== "promise") { feedback.textContent = "많이 찍힌 기록이 원본이라는 뜻은 아닙니다. 상태 도장을 다시 보십시오."; persist(); return; } persist(); draw(); }));
+    document.querySelector("#memoApp")?.addEventListener("click", () => { state.memo = true; persist(); draw(); });
+    document.querySelector("#restoreMemo")?.addEventListener("click", () => { state.solved = true; persist(); draw(); unlock(); });
+  }
+  document.querySelector("#resetStage")?.addEventListener("click", () => { localStorage.removeItem("homeward-game-name"); window.location.reload(); });
+  draw();
+  if (state.solved) unlock();
 }
 
-function renderInventoryPuzzle() {
-  const records = [
-    { id: "rice", item: "쌀", ledger: 14, actual: 10, clue: "가장 먼저 기록된 주식" },
-    { id: "water", item: "물", ledger: 8, actual: 8, clue: "공동 사용 기록과 일치" },
-    { id: "bread", item: "빵", ledger: 10, actual: 7, clue: "나눔표에 표시된 양식" },
-    { id: "oil", item: "기름", ledger: 5, actual: 5, clue: "봉인된 채 남아 있음" },
-    { id: "salt", item: "소금", ledger: 6, actual: 4, clue: "마지막으로 기록된 양념" },
-  ];
+function renderInventoryPuzzleV2() {
   const surface = getSurface();
-
-  surface.innerHTML = `
-    <p class="instruction">주방의 장부와 현장 재고 카드를 대조하십시오. 기록보다 실제가 부족한 품목만 찾아, 부족한 수량을 장부 순서대로 읽으십시오.</p>
-    <section class="inventory-ledger" aria-label="식량 장부 복원">
-      <div class="inventory-intro">
-        <p class="eyebrow">맡겨진 양식 / 복원 중</p>
-        <h3>사라진 식량 장부</h3>
-        <p>장부는 누군가의 소유 목록이 아니라, 함께 맡겨진 것을 돌보는 기록입니다. 실제 재고 카드는 주방 곳곳에 놓여 있습니다.</p>
-      </div>
-      <div class="ledger-table" role="table" aria-label="장부 기록과 현장 재고">
-        <div class="ledger-row ledger-head" role="row"><span>품목</span><span>장부 기록</span><span>현장 재고</span><span>부족분</span></div>
-        ${records.map((record) => `
-          <label class="ledger-row" data-record="${record.id}" role="row">
-            <span><strong>${record.item}</strong><small>${record.clue}</small></span>
-            <span>${record.ledger}</span>
-            <span><input type="number" min="0" max="20" inputmode="numeric" data-stock="${record.id}" placeholder="?" aria-label="${record.item} 현장 재고" /></span>
-            <span class="shortage" data-shortage="${record.id}">-</span>
-          </label>
-        `).join("")}
-      </div>
-      <div class="inventory-rule"><strong>복원 규칙</strong><span>장부보다 실제가 적은 품목만 숫자로 남긴다.</span></div>
-    </section>
-    <div class="check-line"><button class="primary-button" type="button" id="restoreLedger">장부 복원</button></div>
-    <form class="code-entry pantry-lock" id="pantryLock" hidden>
-      <label for="pantryCode">주방 보관함 자물쇠</label>
-      <p id="sealResult">부족분을 장부 순서대로 읽으십시오.</p>
-      <input id="pantryCode" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="3자리 번호" />
-      <button class="primary-button" type="submit">보관함 열기</button>
-    </form>
-    <p class="feedback" id="feedback">현장 재고 카드의 숫자를 먼저 기록하십시오. 장부에 없는 숫자를 추측하지 마십시오.</p>
-  `;
-
-  document.querySelector("#restoreLedger").addEventListener("click", () => {
-    const values = Object.fromEntries(
-      records.map((record) => [record.id, document.querySelector(`[data-stock="${record.id}"]`).value.trim()]),
-    );
-    const complete = records.every((record) => values[record.id] !== "");
-    if (!complete) {
-      document.querySelector("#feedback").textContent = "아직 확인하지 않은 현장 재고가 있습니다. 다섯 장의 재고 카드를 모두 찾아 입력하십시오.";
-      return;
-    }
-
-    const shortages = records.map((record) => Math.max(0, record.ledger - Number(values[record.id])));
-    records.forEach((record, index) => {
-      const row = document.querySelector(`[data-record="${record.id}"]`);
-      const shortage = document.querySelector(`[data-shortage="${record.id}"]`);
-      const correct = Number(values[record.id]) === record.actual;
-      row.dataset.status = correct ? "correct" : "miss";
-      shortage.textContent = shortages[index] || "-";
-    });
-
-    const actualsCorrect = records.every((record) => Number(values[record.id]) === record.actual);
-    if (!actualsCorrect) {
-      document.querySelector("#feedback").textContent = "기록과 실제가 아직 맞지 않습니다. 카드의 품목과 수량을 다시 대조하십시오.";
-      return;
-    }
-
-    const lockCode = shortages.filter((value) => value > 0).join("");
-    document.querySelector("#pantryLock").hidden = false;
-    document.querySelector("#sealResult").textContent = `부족분 확인: ${shortages.filter((value) => value > 0).join(" · ")} → 장부 순서대로 읽기`;
-    document.querySelector("#feedback").textContent = "누락된 기록이 복원되었습니다. 부족분을 장부 순서대로 자물쇠에 입력하십시오.";
-    document.querySelector("#pantryLock").dataset.code = lockCode;
-  });
-
-  document.querySelector("#pantryLock").addEventListener("submit", (event) => {
-    event.preventDefault();
-    if (document.querySelector("#pantryCode").value.trim() === document.querySelector("#pantryLock").dataset.code) {
-      document.querySelector("#feedback").textContent = "보관함이 열렸습니다. 맡겨진 것을 돌보는 사람의 이름이 드러납니다.";
-      unlock();
-      return;
-    }
-    document.querySelector("#feedback").textContent = "자물쇠가 열리지 않습니다. 부족분만, 장부에 적힌 순서대로 읽으십시오.";
-  });
+  const state = loadPuzzleState("ledger", { step: "briefing", found: [], suspects: [], culprit: "", checks: [], solved: false });
+  const items = [
+    { id: "wheat", mark: "○", item: "밀", found: "조리대", shelf: 2, text: "먼저 처리 — 조리대로 이동", author: "배급 담당", altered: true },
+    { id: "oil", mark: "△", item: "기름", found: "출입구", shelf: 3, text: "먼저 처리 — 출입구로 이동", author: "배급 담당", altered: true },
+    { id: "salt", mark: "□", item: "소금", found: "조리대", shelf: 4, text: "먼저 처리 — 조리대로 이동", author: "배급 담당", altered: true },
+    { id: "bean", mark: "◇", item: "콩", found: "선반 5", shelf: 5, text: "확인 뒤 인계 — 원래 자리 유지", author: "장부 담당" },
+    { id: "fruit", mark: "☆", item: "건과일", found: "선반 1", shelf: 1, text: "확인 뒤 인계 — 원래 자리 유지", author: "보관 담당" },
+    { id: "water", mark: "+", item: "물", found: "선반 6", shelf: 6, text: "확인 뒤 인계 — 원래 자리 유지", author: "열쇠 담당" },
+  ];
+  surface.innerHTML = `<p class="instruction">역할을 나누고 원본 위치·변경 문장·권한을 대조해 실제 상자의 번호를 복원하십시오.</p>${adminPreview ? `<button class="secondary-button admin-reset" id="resetLedger" type="button">관리자: 이 스테이지 초기화</button>` : ""}<section class="case-flow" id="ledgerFlow"></section><p class="feedback" id="feedback" aria-live="polite"></p>`;
+  const flow = document.querySelector("#ledgerFlow");
+  const feedback = document.querySelector("#feedback");
+  const persist = () => savePuzzleState("ledger", state);
+  const advance = step => { state.step = step; persist(); draw(); };
+  function draw() {
+    const progress = `<div class="flow-progress">브리핑 · 수색 · 복원 · 기록 감식 · 용의자 · 실제 자물쇠</div>`;
+    if (state.step === "briefing") flow.innerHTML = `${progress}<h3>식량 장부 사건 브리핑</h3><p>수색 A/B, 보관 복원, 기록 감식, 권한 확인, 반증·발표 역할을 나누십시오. 최소 세 역할이 결론 전에 근거를 확인해야 합니다.</p><div class="role-grid">${["수색 A", "수색 B", "보관 복원", "기록 감식", "권한 확인", "반증·발표"].map(x => `<span>${x}</span>`).join("")}</div><button class="primary-button" id="next" type="button">역할 배정 완료</button>`;
+    if (state.step === "search") flow.innerHTML = `${progress}<h3>재고 카드 6장 회수</h3><p>발견 위치는 원래 위치가 아닐 수 있습니다. 찾은 카드만 체크하십시오.</p><div class="check-grid">${items.map(x => `<button data-found="${x.id}" class="${state.found.includes(x.id) ? "selected" : ""}">${x.mark} ${x.item}<small>${x.found}</small></button>`).join("")}</div><button class="primary-button" id="next" ${state.found.length === 6 ? "" : "disabled"}>6장 인계</button>`;
+    if (state.step === "restore") flow.innerHTML = `${progress}<h3>봉인 전 원본 선반 안내도</h3><ol class="shelf-clues"><li>물은 가장 아래 선반</li><li>콩은 물 바로 위</li><li>소금은 콩 바로 위</li><li>기름은 소금 바로 위</li><li>밀은 기름 바로 위</li><li>건과일은 가장 위</li></ol><div class="shelf-stack">${[1,2,3,4,5,6].map(n => `<div><b>선반 ${n}</b><span>${items.find(x => x.shelf === n).mark} ${items.find(x => x.shelf === n).item}</span></div>`).join("")}</div><button class="primary-button" id="next">현장 매트 복원 완료</button>`;
+    if (state.step === "audit") flow.innerHTML = `${progress}<h3>변경 기록 6건 감식</h3><p>원래 선반, 원본 문장 ‘확인 뒤 인계’, 담당 권한이 모두 어긋난 세 건을 선택하십시오.</p><div class="record-grid">${items.map(x => `<button data-suspect="${x.id}" class="${state.suspects.includes(x.id) ? "selected" : ""}"><b>${x.mark} ${x.item}</b><span>발견: ${x.found}</span><span>${x.text}</span><small>${x.author}</small></button>`).join("")}</div><button class="primary-button" id="audit">의심 기록 3건 확정</button>`;
+    if (state.step === "accuse") flow.innerHTML = `${progress}<h3>사건 결론</h3><p>세 기록을 바꾼 사람을 고르기 전에 세 역할의 근거를 확인하십시오.</p><div class="check-grid">${["복원 위치 확인", "기록 문장 확인", "권한표 확인"].map(x => `<button data-check="${x}" class="${state.checks.includes(x) ? "selected" : ""}">${x}</button>`).join("")}</div><div class="choice-grid">${["보관 담당", "장부 담당", "열쇠 담당", "배급 담당"].map(x => `<button data-culprit="${x}">${x}</button>`).join("")}</div>`;
+    if (state.step === "unlock") flow.innerHTML = `${progress}<h3>인계 표식 순서: □ → △ → ○</h3><p>해당 품목 카드를 복원 매트에서 찾아 <strong>원래 선반 번호</strong>를 순서대로 읽고 실제 3자리 자물쇠를 여십시오.</p><div class="physical-lock-note">웹에는 번호를 입력하지 않습니다. 상자를 열었으면 안의 결과 카드를 꺼내십시오.</div><button class="primary-button" id="opened">실제 상자를 열었다</button>`;
+    if (state.step === "complete") flow.innerHTML = `${progress}<h3>결과 카드 확인</h3><p>상자 안 카드의 키워드와 완료 코드를 확인해 활동 페이지에 기록하십시오.</p><a class="primary-button" href="activity.html?stage=ledger">활동 페이지로 이동</a>`;
+    bind();
+  }
+  function bind() {
+    document.querySelector("#next")?.addEventListener("click", () => advance({ briefing: "search", search: "restore", restore: "audit" }[state.step]));
+    flow.querySelectorAll("[data-found]").forEach(b => b.addEventListener("click", () => { state.found = state.found.includes(b.dataset.found) ? state.found.filter(x => x !== b.dataset.found) : [...state.found, b.dataset.found]; persist(); draw(); }));
+    flow.querySelectorAll("[data-suspect]").forEach(b => b.addEventListener("click", () => { state.suspects = state.suspects.includes(b.dataset.suspect) ? state.suspects.filter(x => x !== b.dataset.suspect) : state.suspects.length < 3 ? [...state.suspects, b.dataset.suspect] : state.suspects; persist(); draw(); }));
+    document.querySelector("#audit")?.addEventListener("click", () => { const correct = items.filter(x => x.altered).every(x => state.suspects.includes(x.id)) && state.suspects.length === 3; if (!correct) { feedback.textContent = state.suspects.length !== 3 ? "사라진 것은 세 건입니다. 같은 표현이 반복된 기록부터 찾으십시오." : "발견 장소만으로 판단하지 마십시오. 원래 선반, 문장, 권한을 모두 대조하십시오."; return; } advance("accuse"); });
+    flow.querySelectorAll("[data-check]").forEach(b => b.addEventListener("click", () => { if (!state.checks.includes(b.dataset.check)) state.checks.push(b.dataset.check); persist(); draw(); }));
+    flow.querySelectorAll("[data-culprit]").forEach(b => b.addEventListener("click", () => { if (state.checks.length < 3) { feedback.textContent = "최소 세 역할이 위치·문장·권한 근거를 모두 확인해야 합니다."; return; } if (b.dataset.culprit !== "배급 담당") { feedback.textContent = "그 담당자에게 위치와 인계 문장을 함께 바꿀 기회가 있었습니까?"; return; } state.culprit = b.dataset.culprit; advance("unlock"); }));
+    document.querySelector("#opened")?.addEventListener("click", () => { state.step = "complete"; state.solved = true; persist(); draw(); unlock(); });
+  }
+  document.querySelector("#resetLedger")?.addEventListener("click", () => { localStorage.removeItem("homeward-game-ledger"); window.location.reload(); });
+  draw();
+  if (state.solved) unlock();
 }
 
-function renderLoopPuzzle() {
-  const sequence = ["문을떠난다", "기억한다", "좁은길", "더나은본향"];
-  const directionSequence = ["right", "up", "left", "up"];
-  const directionLabels = { up: "위", right: "오른쪽", down: "아래", left: "왼쪽" };
-  const fragments = [
-    { id: "return", text: "돌아갈 수 있었지만", dir: "right" },
-    { id: "leave", text: "그 길을 떠나", dir: "up" },
-    { id: "seek", text: "더 나은 본향을", dir: "left" },
-    { id: "long", text: "사모하였다", dir: "up" },
-  ];
+function renderLoopPuzzleV2() {
+  const surface = getSurface();
+  const state = loadPuzzleState("road", { phase: "briefing", index: 0, loops: 0, history: [], fragments: [], slots: [], interpretation: "", solved: false });
+  const fragments = [{ id: "return", text: "돌아갈 수 있었지만" }, { id: "leave", text: "그 길을 떠나" }, { id: "seek", text: "더 나은 본향을" }, { id: "long", text: "사모하였다" }];
   const scenes = [
-    {
-      title: "첫 번째 갈림길",
-      text: "익숙한 문은 밝고 넓습니다. 이름을 불러 주는 길처럼 보입니다.",
-      fragmentId: "return",
-      choices: [
-        { label: "익숙한 문으로 돌아간다", value: "return" },
-        { label: "문을 떠난다", value: "문을떠난다" },
-      ],
-    },
-    {
-      title: "두 번째 갈림길",
-      text: "길목 표지판에는 '본 것은 아직 답이 아니다. 기억한 것이 길이 된다'고 적혀 있습니다.",
-      fragmentId: "leave",
-      choices: [
-        { label: "방금 본 문장을 기억한다", value: "기억한다" },
-        { label: "가장 빠른 길을 고른다", value: "fast" },
-      ],
-    },
-    {
-      title: "세 번째 갈림길",
-      text: "사람들이 많은 길에는 설명이 많고, 좁은 길에는 표식 하나만 남아 있습니다.",
-      fragmentId: "seek",
-      choices: [
-        { label: "사람들이 많은 길", value: "crowd" },
-        { label: "좁은 길", value: "좁은길" },
-      ],
-    },
-    {
-      title: "마지막 갈림길",
-      text: "돌아갈 기회는 아직 있습니다. 하지만 표식은 보이지 않는 곳을 향합니다.",
-      fragmentId: "long",
-      choices: [
-        { label: "돌아갈 수 있었던 고향", value: "old" },
-        { label: "더 나은 본향", value: "더나은본향" },
-      ],
-    },
+    { mark: "A 문", memory: "열려 있다는 것과 들어가야 한다는 것은 다르다.", answer: "leave", choices: [["return", "익숙한 문으로 돌아간다"], ["leave", "문을 떠난다"]], fragment: "return", fail: "문은 열렸지만 길은 제자리입니다. A 담당자의 기억을 다시 들으세요." },
+    { mark: "B 눈", memory: "본 것은 답이 아니다. 사라진 뒤 말할 수 있어야 한다.", answer: "remember", choices: [["remember", "기억한다"], ["fast", "가장 빠른 길"]], fragment: "leave", fail: "빠르게 보았지만 남은 기록이 없습니다. B 담당자의 문장을 다시 들으세요." },
+    { mark: "C 발자국", memory: "사람 수가 아니라 하나뿐인 발자국을 따른다.", answer: "narrow", choices: [["crowd", "사람들이 많은 길"], ["narrow", "좁은 길"]], fragment: "seek", fail: "사람 수는 길의 증거가 아닙니다. C 담당자의 모양을 다시 들으세요." },
+    { mark: "D 별", memory: "돌아갈 수 있다는 말은 돌아가야 한다는 뜻이 아니다.", answer: "unseen", choices: [["old", "돌아갈 수 있었던 곳"], ["unseen", "아직 보이지 않는 곳을 택한다"]], fragment: "long", fail: "가능과 명령은 같은 뜻이 아닙니다. D 담당자의 기억을 다시 들으세요." },
   ];
-  let index = 0;
-  let loopCount = 0;
-  const history = [];
-  const foundFragments = [];
-  const sentenceSlots = [];
-  const lockInput = [];
-  const surface = getSurface();
-
-  surface.innerHTML = `
-    <p class="instruction">잘못된 선택은 처음 길로 돌아가게 합니다. 루프를 끊으며 문장 조각을 모으고, 완성한 문장의 방향 표식으로 자물쇠를 여십시오.</p>
-    <div class="loop-board">
-      <section class="loop-scene" id="loopScene"></section>
-      <aside class="loop-log">
-        <strong>반복 기록</strong>
-        <div id="loopLog">아직 반복 기록이 없습니다.</div>
-        <div class="direction-strip" id="fragmentStrip">문장 조각: ----</div>
-      </aside>
-    </div>
-    <section class="sentence-lock" id="sentenceLock" hidden>
-      <p class="eyebrow">Sentence Lock</p>
-      <h3>흩어진 문장</h3>
-      <p>조각을 눌러 고백문을 완성하십시오. 조각 위의 작은 표식이 방향 자물쇠의 순서가 됩니다.</p>
-      <div class="sentence-slots" id="sentenceSlots"></div>
-      <div class="sentence-pool" id="sentencePool"></div>
-      <div class="check-line">
-        <button class="primary-button" type="button" id="checkSentence">문장 확인</button>
-        <button class="secondary-button" type="button" id="resetSentence">다시 배열</button>
-      </div>
-      <div class="direction-strip" id="sentenceDirection">문장 방향: ----</div>
-    </section>
-    <section class="direction-lock" id="directionLock" hidden>
-      <p class="eyebrow">Direction Lock</p>
-      <h3>방향 자물쇠</h3>
-      <p>완성한 문장의 작은 표식을 순서대로 누르십시오.</p>
-      <div class="direction-display" id="directionDisplay">입력: ----</div>
-      <div class="direction-pad">
-        <button type="button" data-dir="up">↑</button>
-        <button type="button" data-dir="left">←</button>
-        <button type="button" data-dir="right">→</button>
-        <button type="button" data-dir="down">↓</button>
-      </div>
-      <button class="secondary-button" type="button" id="resetDirection">방향 다시 입력</button>
-    </section>
-    <p class="feedback" id="feedback">편한 길은 빠르지만, 같은 자리로 돌아오게 할 수 있습니다.</p>
-  `;
-
-  drawScene();
-
-  function drawScene() {
-    const scene = scenes[index];
-    document.querySelector("#loopScene").innerHTML = `
-      <span class="loop-count">Loop ${loopCount}</span>
-      <h3>${scene.title}</h3>
-      <p>${scene.text}</p>
-      <div class="choice-grid">
-        ${scene.choices.map((choice) => `<button type="button" data-choice="${choice.value}">${choice.label}</button>`).join("")}
-      </div>
-    `;
-    document.querySelectorAll("[data-choice]").forEach((button) => {
-      button.addEventListener("click", () => {
-        if (button.dataset.choice !== sequence[index]) {
-          loopCount += 1;
-          history.push(`${scene.title}: ${button.textContent.trim()} 때문에 처음으로 돌아옴`);
-          index = 0;
-          updateLoopLog();
-          document.querySelector("#feedback").textContent = "같은 자리로 돌아왔습니다. 이전 루프의 문장을 기억하십시오.";
-          drawScene();
-          return;
-        }
-        history.push(`${scene.title}: ${button.textContent.trim()}`);
-        const fragment = fragments.find((item) => item.id === scene.fragmentId);
-        if (!foundFragments.some((item) => item.id === fragment.id)) foundFragments.push(fragment);
-        index += 1;
-        updateLoopLog();
-        if (index === sequence.length) {
-          document.querySelector("#sentenceLock").hidden = false;
-          drawSentencePuzzle();
-          document.querySelector("#feedback").textContent = "루프가 끊어졌습니다. 모은 문장 조각을 올바른 순서로 배열하십시오.";
-          return;
-        }
-        document.querySelector("#feedback").textContent = "길이 이어졌습니다. 다음 표식을 확인하십시오.";
-        drawScene();
-      });
-    });
+  surface.innerHTML = `<p class="instruction">기억 담당의 증언으로 네 루프를 통과하고, 문장을 조합한 뒤 방향의 의미를 뒤집어 읽으십시오.</p>${adminPreview ? `<button class="secondary-button admin-reset" id="resetRoad" type="button">관리자: 이 스테이지 초기화</button>` : ""}<section class="case-flow" id="roadFlow"></section><p class="feedback" id="feedback" aria-live="polite"></p>`;
+  const flow = document.querySelector("#roadFlow"); const feedback = document.querySelector("#feedback"); const persist = () => savePuzzleState("road", state);
+  function draw() {
+    if (state.phase === "briefing") flow.innerHTML = `<h3>기억 담당 브리핑</h3><p>A 문 · B 눈 · C 발자국 · D 별 담당을 나누십시오. 각자 20초 동안 촬영·필기 없이 관찰하고 합류한 뒤, 담당자가 기억을 말한 다음 선택합니다.</p><div class="role-grid">${scenes.map(s => `<span>${s.mark}</span>`).join("")}</div><button class="primary-button" id="startLoops">네 담당 준비 완료</button>`;
+    if (state.phase === "loops") { const scene = scenes[state.index]; flow.innerHTML = `<div class="loop-board"><section class="loop-scene"><span class="loop-count">Loop ${state.loops} · ${scene.mark}</span><h3>${state.index + 1}번째 갈림길</h3><p class="memory-call">담당자가 기억한 문장을 팀에 먼저 말하십시오.</p><p>${scene.memory}</p><div class="choice-grid">${scene.choices.map(([v,l]) => `<button data-road-choice="${v}">${l}</button>`).join("")}</div></section><aside class="loop-log"><strong>반복 기록</strong>${state.history.length ? state.history.map(x => `<p>${x}</p>`).join("") : "<p>아직 기록 없음</p>"}<div class="direction-strip">회수 조각 ${state.fragments.length}/4</div></aside></div>`; }
+    if (state.phase === "assemble") { const pool = ["seek","return","long","leave"].filter(id => !state.slots.includes(id)); flow.innerHTML = `<section class="sentence-lock"><h3>흩어진 문장</h3><p>방향은 아직 가려져 있습니다. 자연스러운 한 문장을 만드십시오.</p><div class="sentence-slots">${fragments.map((_,i) => { const f = fragments.find(x => x.id === state.slots[i]); return `<button data-slot="${i}" class="${f ? "filled" : ""}">${f ? f.text : i + 1}</button>`; }).join("")}</div><div class="sentence-pool">${pool.map(id => `<button data-fragment="${id}">${fragments.find(x => x.id === id).text}</button>`).join("")}</div><button class="primary-button" id="checkSentence">문장 확인</button></section>`; }
+    if (state.phase === "interpret") flow.innerHTML = `<section class="sentence-lock"><h3>마지막 기록의 의미</h3><p>“표식은 목적지를 가리키지 않는다. 지나온 선택을 기록한다.” 화살표는 무엇입니까?</p><div class="choice-grid"><button data-meaning="road">지금 가야 할 길</button><button data-meaning="record">지나온 선택의 기록</button></div></section>`;
+    if (state.phase === "physical") flow.innerHTML = `<section class="direction-lock physical-only"><p class="eyebrow">Physical Lock</p><h3>실제 방향 자물쇠</h3><p>완성한 문장 순서대로 현장 카드 가장자리의 방향 홈을 읽어 실제 자물쇠를 여십시오.</p><p class="physical-lock-note">방향은 웹에 입력하지 않습니다. 봉투 안 완료 코드를 활동 페이지에 기록하십시오.</p><button class="primary-button" id="opened">실제 봉투를 열었다</button></section>`;
+    if (state.phase === "complete") flow.innerHTML = `<section class="sentence-lock"><h3>봉투의 사건 완료 코드</h3><p>봉투에서 키워드와 완료 코드를 확인한 뒤 활동 페이지에 입력하십시오.</p><a class="primary-button" href="activity.html?stage=road">활동 페이지로 이동</a></section>`;
+    bind();
   }
-
-  function updateLoopLog() {
-    document.querySelector("#loopLog").innerHTML = history.map((item) => `<p>${item}</p>`).join("");
-    document.querySelector("#fragmentStrip").textContent = `문장 조각: ${
-      foundFragments.length ? foundFragments.map((fragment) => fragment.text).join(" / ") : "----"
-    }`;
+  function bind() {
+    document.querySelector("#startLoops")?.addEventListener("click", () => { state.phase = "loops"; persist(); draw(); });
+    flow.querySelectorAll("[data-road-choice]").forEach(b => b.addEventListener("click", () => { const scene = scenes[state.index]; if (b.dataset.roadChoice !== scene.answer) { state.loops += 1; state.history.push(`${scene.mark}: ${b.textContent.trim()} → 처음으로 돌아옴`); state.index = 0; feedback.textContent = scene.fail; persist(); draw(); return; } if (!state.fragments.includes(scene.fragment)) state.fragments.push(scene.fragment); state.history.push(`${scene.mark}: 선택 통과 · 조각 회수`); state.index += 1; if (state.index === 4) state.phase = "assemble"; persist(); draw(); }));
+    flow.querySelectorAll("[data-fragment]").forEach(b => b.addEventListener("click", () => { if (state.slots.length < 4) state.slots.push(b.dataset.fragment); persist(); draw(); }));
+    flow.querySelectorAll("[data-slot]").forEach(b => b.addEventListener("click", () => { state.slots.splice(Number(b.dataset.slot), 1); persist(); draw(); }));
+    document.querySelector("#checkSentence")?.addEventListener("click", () => { if (!fragments.every((f,i) => state.slots[i] === f.id)) { feedback.textContent = "무엇을 떠나 무엇을 사모했는지 한 문장으로 다시 읽으십시오."; return; } state.phase = "interpret"; persist(); draw(); });
+    flow.querySelectorAll("[data-meaning]").forEach(b => b.addEventListener("click", () => { if (b.dataset.meaning !== "record") { feedback.textContent = "화살표가 목적지라면 반복 기록은 필요 없었을 겁니다. D 문구를 다시 확인하십시오."; return; } state.interpretation = "record"; state.phase = "physical"; persist(); draw(); }));
+    document.querySelector("#opened")?.addEventListener("click", () => { state.phase = "complete"; state.solved = true; persist(); draw(); unlock(); });
   }
-
-  function drawSentencePuzzle() {
-    const poolOrder = ["seek", "return", "long", "leave"];
-    const pool = foundFragments
-      .filter((fragment) => !sentenceSlots.includes(fragment.id))
-      .sort((a, b) => poolOrder.indexOf(a.id) - poolOrder.indexOf(b.id));
-    document.querySelector("#sentenceSlots").innerHTML = fragments
-      .map((_, order) => {
-        const fragment = fragments.find((item) => item.id === sentenceSlots[order]);
-        return `<button type="button" data-slot="${order}" class="${fragment ? "filled" : ""}">${fragment ? `<span>${directionLabels[fragment.dir]}</span>${fragment.text}` : order + 1}</button>`;
-      })
-      .join("");
-    document.querySelector("#sentencePool").innerHTML = pool
-      .map((fragment) => `<button type="button" data-fragment-id="${fragment.id}"><span>${directionLabels[fragment.dir]}</span>${fragment.text}</button>`)
-      .join("");
-
-    document.querySelectorAll("[data-fragment-id]").forEach((button) => {
-      button.addEventListener("click", () => {
-        if (sentenceSlots.length >= fragments.length) return;
-        sentenceSlots.push(button.dataset.fragmentId);
-        drawSentencePuzzle();
-      });
-    });
-
-    document.querySelectorAll("[data-slot]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const slot = Number(button.dataset.slot);
-        if (!sentenceSlots[slot]) return;
-        sentenceSlots.splice(slot, 1);
-        drawSentencePuzzle();
-      });
-    });
-  }
-
-  document.querySelector("#checkSentence").addEventListener("click", () => {
-    const sentenceCorrect = fragments.every((fragment, order) => sentenceSlots[order] === fragment.id);
-    if (!sentenceCorrect) {
-      document.querySelector("#feedback").textContent = "문장이 아직 어색합니다. 돌아갈 수 있었지만 어디를 사모했는지 다시 배열하십시오.";
-      return;
-    }
-    document.querySelector("#sentenceDirection").textContent = `문장 방향: ${fragments.map((fragment) => directionLabels[fragment.dir]).join(" > ")}`;
-    document.querySelector("#directionLock").hidden = false;
-    document.querySelector("#feedback").textContent = "문장이 완성되었습니다. 작은 방향 표식을 자물쇠에 입력하십시오.";
-  });
-
-  document.querySelector("#resetSentence").addEventListener("click", () => {
-    sentenceSlots.splice(0, sentenceSlots.length);
-    document.querySelector("#directionLock").hidden = true;
-    lockInput.splice(0, lockInput.length);
-    updateDirectionDisplay();
-    drawSentencePuzzle();
-    document.querySelector("#sentenceDirection").textContent = "문장 방향: ----";
-    document.querySelector("#feedback").textContent = "문장 조각을 다시 배열합니다.";
-  });
-
-  surface.querySelectorAll("[data-dir]").forEach((button) => {
-    button.addEventListener("click", () => {
-      if (lockInput.length >= directionSequence.length) return;
-      lockInput.push(button.dataset.dir);
-      updateDirectionDisplay();
-      if (lockInput.length !== directionSequence.length) return;
-      const correct = directionSequence.every((dir, order) => lockInput[order] === dir);
-      if (correct) {
-        document.querySelector("#feedback").textContent = "방향 자물쇠가 열렸습니다. 더 나은 본향을 향한 길이 열렸습니다.";
-        unlock();
-        return;
-      }
-      document.querySelector("#feedback").textContent = "자물쇠가 열리지 않습니다. 반복 기록의 방향 표식을 다시 확인하십시오.";
-    });
-  });
-
-  document.querySelector("#resetDirection").addEventListener("click", () => {
-    lockInput.splice(0, lockInput.length);
-    updateDirectionDisplay();
-    document.querySelector("#feedback").textContent = "방향 입력을 초기화했습니다.";
-  });
-
-  function updateDirectionDisplay() {
-    document.querySelector("#directionDisplay").textContent = `입력: ${
-      lockInput.length ? lockInput.map((dir) => directionLabels[dir]).join(" > ") : "----"
-    }`;
-  }
+  document.querySelector("#resetRoad")?.addEventListener("click", () => { localStorage.removeItem("homeward-game-road"); window.location.reload(); });
+  draw(); if (state.solved) unlock();
 }
 
 function renderHomePuzzle() {
