@@ -33,7 +33,7 @@ const puzzles = {
     render: renderPhonePuzzleV2,
   },
   ledger: {
-    step: "03 / 주방 및 기타 시설",
+    step: "03 / 창고 및 물자 보관소(청지기실)",
     title: "맡겨진 것을 바꾼 사람",
     intro: "원래 선반과 변경 기록, 담당 권한을 대조해 조작한 사람을 찾으십시오.",
     code: "STEWARD-03",
@@ -73,8 +73,22 @@ const qrToken = params.get("qr");
 const expectedQrToken = window.HomewardSync?.config?.qrToken || window.HOMEWARD_CONFIG?.qrToken || "rodem-2026";
 const adminPreview = params.get("admin") === "1" && localStorage.getItem("homeward-admin-preview") === "true";
 const puzzle = puzzles[stageId] || puzzles.case;
+function isActivityCompleted(id) {
+  try {
+    const saved = JSON.parse(localStorage.getItem("homeward-case-progress") || "{}");
+    return Boolean(saved.completed && saved.completed[id]);
+  } catch {
+    return false;
+  }
+}
+
+function isStageSolved(id) {
+  return localStorage.getItem(`homeward-solved-${id}`) === "true" || isActivityCompleted(id);
+}
+
 const coreStageIds = ["case", "bag", "name", "ledger", "road"];
-const finalPrerequisitesComplete = coreStageIds.every((id) => localStorage.getItem(`homeward-solved-${id}`) === "true");
+const isCaseComplete = isStageSolved("case");
+const finalPrerequisitesComplete = coreStageIds.every((id) => isStageSolved(id));
 const gameBoard = document.querySelector("#gameBoard");
 const codePanel = document.querySelector("#codePanel");
 const codeValue = document.querySelector("#codeValue");
@@ -95,6 +109,24 @@ function savePuzzleState(id, state) {
   localStorage.setItem(`homeward-game-${id}`, JSON.stringify(state));
 }
 
+function triggerShake(element) {
+  if (!element) return;
+  element.classList.remove("shake");
+  void element.offsetWidth;
+  element.classList.add("shake");
+  setTimeout(() => {
+    element.classList.remove("shake");
+  }, 400);
+}
+
+function triggerFeedbackShake(feedbackEl, message) {
+  const el = feedbackEl || document.querySelector("#feedback");
+  if (el) {
+    if (message) el.textContent = message;
+    triggerShake(el);
+  }
+}
+
 if (qrToken !== expectedQrToken && !adminPreview) {
   document.querySelector("#gameStep").textContent = "Locked";
   document.querySelector("#gameTitle").textContent = "현장 QR이 필요합니다";
@@ -104,6 +136,18 @@ if (qrToken !== expectedQrToken && !adminPreview) {
     <section class="locked-panel">
       <strong>잠긴 사건파일</strong>
       <p>활동 페이지로 돌아가 현재 현장의 QR을 찾으십시오. 진행자는 대시보드의 게임 실행 페이지에서 미리 열어볼 수 있습니다.</p>
+      <a class="primary-button" href="activity.html">활동 페이지로 돌아가기</a>
+    </section>
+  `;
+} else if (stageId !== "case" && coreStageIds.includes(stageId) && !isCaseComplete && !adminPreview) {
+  document.querySelector("#gameStep").textContent = puzzle.step + " / 잠김";
+  document.querySelector("#gameTitle").textContent = "아직 열리지 않은 현장";
+  document.querySelector("#gameIntro").textContent = "00 본관 사건을 먼저 완료한 뒤 이 현장의 조사를 진행하십시오.";
+  guideLink.href = "activity.html";
+  gameBoard.innerHTML = `
+    <section class="locked-panel">
+      <strong>현장 사건파일 잠금</strong>
+      <p>00 본관 사건파일을 완료해야 01~04 현장이 해금됩니다. 활동 페이지에서 00 본관을 먼저 확인하십시오.</p>
       <a class="primary-button" href="activity.html">활동 페이지로 돌아가기</a>
     </section>
   `;
@@ -152,6 +196,8 @@ function unlock() {
   codeValue.textContent = puzzle.code;
   codeMessage.textContent = puzzle.message;
   codePanel.hidden = false;
+  codePanel.classList.remove("revealed");
+  void codePanel.offsetWidth;
   codePanel.classList.add("revealed");
   codePanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
@@ -261,12 +307,12 @@ function renderCasePuzzle() {
 
     document.querySelector("#confirmRecords")?.addEventListener("click", () => {
       if (state.selected.length !== 3) {
-        feedback.textContent = "정확히 3건을 선택해야 확정할 수 있습니다.";
+        triggerFeedbackShake(feedback, "정확히 3건을 선택해야 확정할 수 있습니다.");
         return;
       }
       const correct = [...state.selected].sort().join(",") === falseIds;
       if (!correct) {
-        feedback.textContent = "선택 중 일부는 사건 메모와 어긋나지 않습니다. 접수 시각, 위치, 목적지, 사건 번호 기록을 다시 대조하십시오.";
+        triggerFeedbackShake(feedback, "선택 중 일부는 사건 메모와 어긋나지 않습니다. 접수 시각, 위치, 목적지, 사건 번호 기록을 다시 대조하십시오.");
         return;
       }
       state.contradictionsConfirmed = true;
@@ -284,7 +330,7 @@ function renderCasePuzzle() {
         unlock();
         return;
       }
-      feedback.textContent = "아직 정체성이 맞지 않습니다. 도착하지 않았고, 목적지도 미기록인 채 길 위에 있는 사람을 떠올려 보십시오.";
+      triggerFeedbackShake(feedback, "아직 정체성이 맞지 않습니다. 도착하지 않았고, 목적지도 미기록인 채 길 위에 있는 사람을 떠올려 보십시오.");
     });
   }
 
@@ -357,18 +403,18 @@ function renderPhonePuzzleV2() {
     const form = document.querySelector("#phoneForm");
     if (!form) return;
     form.querySelectorAll("[data-key]").forEach(b => b.addEventListener("click", () => { const input = document.querySelector("#phoneCode"); if (b.dataset.key === "확인") return; input.value = b.dataset.key === "지움" ? input.value.slice(0, -1) : (input.value + b.dataset.key).slice(0, 4); updatePasscodeDots(); }));
-    form.addEventListener("submit", e => { e.preventDefault(); const value = document.querySelector("#phoneCode").value; state.attempts += 1; if (value === "0316") { state.unlocked = true; persist(); draw(); return; } feedback.textContent = value === "1113" ? "그 숫자는 날짜가 아니라 퇴실 시각입니다." : value.length !== 4 ? "잠금 기록은 네 자리 MMDD 형식입니다." : "숫자의 모양보다 출처가 중요합니다. ‘약속한 날’의 수령 기록을 찾으십시오."; document.querySelector("#phoneCode").value = ""; updatePasscodeDots(); persist(); });
+    form.addEventListener("submit", e => { e.preventDefault(); const value = document.querySelector("#phoneCode").value; state.attempts += 1; if (value === "0316") { state.unlocked = true; persist(); draw(); return; } triggerFeedbackShake(feedback, value === "1113" ? "그 숫자는 날짜가 아니라 퇴실 시각입니다." : value.length !== 4 ? "잠금 기록은 네 자리 MMDD 형식입니다." : "숫자의 모양보다 출처가 중요합니다. ‘약속한 날’의 수령 기록을 찾으십시오."); document.querySelector("#phoneCode").value = ""; updatePasscodeDots(); persist(); });
   }
   function bindUnlocked(memoReady) {
     screen.querySelectorAll("[data-app]").forEach(b => b.addEventListener("click", () => {
-      if (b.dataset.app === "memo" && !memoReady) { feedback.textContent = "메모의 봉인이 남아 있습니다. 사진 기록의 진위를 먼저 확정하세요."; return; }
+      if (b.dataset.app === "memo" && !memoReady) { triggerFeedbackShake(feedback, "메모의 봉인이 남아 있습니다. 사진 기록의 진위를 먼저 확정하세요."); return; }
       activeApp = b.dataset.app;
       if (activeApp === "memo") state.memo = true;
       persist();
       draw();
     }));
     screen.querySelectorAll("[data-photo]").forEach(b => b.addEventListener("click", () => { if (!state.photos.includes(b.dataset.photo)) state.photos.push(b.dataset.photo); persist(); draw(); }));
-    screen.querySelectorAll("[data-original]").forEach(b => b.addEventListener("click", () => { state.original = b.dataset.original; persist(); if (state.original !== "promise") feedback.textContent = "많이 찍힌 기록이 원본이라는 뜻은 아닙니다. 사진의 상태 도장을 확대하세요."; draw(); }));
+    screen.querySelectorAll("[data-original]").forEach(b => b.addEventListener("click", () => { state.original = b.dataset.original; persist(); draw(); if (state.original !== "promise") triggerFeedbackShake(document.querySelector("#feedback"), "많이 찍힌 기록이 원본이라는 뜻은 아닙니다. 사진의 상태 도장을 확대하세요."); }));
     document.querySelector("#restoreMemo")?.addEventListener("click", () => { state.solved = true; persist(); draw(); unlock(); });
   }
   document.querySelector("#resetStage")?.addEventListener("click", () => { localStorage.removeItem("homeward-game-name"); window.location.reload(); });
@@ -458,7 +504,7 @@ function renderInventoryPuzzleV2() {
     );
     document.querySelector("#next")?.addEventListener("click", () => {
       if (state.step === "search" && state.found.length < 6) {
-        feedback.textContent = "현장에서 6장의 재고 카드를 모두 발견한 뒤 다음으로 진행하십시오.";
+        triggerFeedbackShake(feedback, "현장에서 6장의 재고 카드를 모두 발견한 뒤 다음으로 진행하십시오.");
         return;
       }
       advance({ briefing: "search", search: "restore", restore: "audit" }[state.step]);
@@ -484,9 +530,12 @@ function renderInventoryPuzzleV2() {
     document.querySelector("#audit")?.addEventListener("click", () => {
       const correct = items.filter((x) => x.altered).every((x) => state.suspects.includes(x.id)) && state.suspects.length === 3;
       if (!correct) {
-        feedback.textContent = state.suspects.length !== 3
-          ? "사라진 것은 세 건입니다. 같은 표현이 반복된 기록부터 찾으십시오."
-          : "발견 장소만으로 판단하지 마십시오. 원래 선반, 문장, 권한이 모두 어긋나는지 확인하십시오.";
+        triggerFeedbackShake(
+          feedback,
+          state.suspects.length !== 3
+            ? "사라진 것은 세 건입니다. 같은 표현이 반복된 기록부터 찾으십시오."
+            : "발견 장소만으로 판단하지 마십시오. 원래 선반, 문장, 권한이 모두 어긋나는지 확인하십시오."
+        );
         return;
       }
       advance("accuse");
@@ -501,11 +550,11 @@ function renderInventoryPuzzleV2() {
     flow.querySelectorAll("[data-culprit]").forEach((b) =>
       b.addEventListener("click", () => {
         if (state.checks.length < 3) {
-          feedback.textContent = "최소 세 역할이 위치·문장·권한 근거를 모두 확인해야 합니다.";
+          triggerFeedbackShake(feedback, "최소 세 역할이 위치·문장·권한 근거를 모두 확인해야 합니다.");
           return;
         }
         if (b.dataset.culprit !== "배급 담당") {
-          feedback.textContent = "그 담당자에게 위치와 인계 문장을 함께 바꿀 기회가 있었습니까? 권한표와 서명을 다시 대조하십시오.";
+          triggerFeedbackShake(feedback, "그 담당자에게 위치와 인계 문장을 함께 바꿀 기회가 있었습니까? 권한표와 서명을 다시 대조하십시오.");
           return;
         }
         state.culprit = b.dataset.culprit;
@@ -553,11 +602,11 @@ function renderLoopPuzzleV2() {
   }
   function bind() {
     document.querySelector("#startLoops")?.addEventListener("click", () => { state.phase = "loops"; persist(); draw(); });
-    flow.querySelectorAll("[data-road-choice]").forEach(b => b.addEventListener("click", () => { const scene = scenes[state.index]; if (b.dataset.roadChoice !== scene.answer) { state.loops += 1; state.history.push(`${scene.mark}: ${b.textContent.trim()} → 처음으로 돌아옴`); state.index = 0; feedback.textContent = scene.fail; persist(); draw(); return; } if (!state.fragments.includes(scene.fragment)) state.fragments.push(scene.fragment); state.history.push(`${scene.mark}: 선택 통과 · 조각 회수`); state.index += 1; if (state.index === 4) state.phase = "assemble"; persist(); draw(); }));
+    flow.querySelectorAll("[data-road-choice]").forEach(b => b.addEventListener("click", () => { const scene = scenes[state.index]; if (b.dataset.roadChoice !== scene.answer) { state.loops += 1; state.history.push(`${scene.mark}: ${b.textContent.trim()} → 처음으로 돌아옴`); state.index = 0; persist(); draw(); const fb = document.querySelector("#feedback"); triggerFeedbackShake(fb, scene.fail); return; } if (!state.fragments.includes(scene.fragment)) state.fragments.push(scene.fragment); state.history.push(`${scene.mark}: 선택 통과 · 조각 회수`); state.index += 1; if (state.index === 4) state.phase = "assemble"; persist(); draw(); }));
     flow.querySelectorAll("[data-fragment]").forEach(b => b.addEventListener("click", () => { if (state.slots.length < 4) state.slots.push(b.dataset.fragment); persist(); draw(); }));
     flow.querySelectorAll("[data-slot]").forEach(b => b.addEventListener("click", () => { state.slots.splice(Number(b.dataset.slot), 1); persist(); draw(); }));
-    document.querySelector("#checkSentence")?.addEventListener("click", () => { if (!fragments.every((f,i) => state.slots[i] === f.id)) { feedback.textContent = "무엇을 떠나 무엇을 사모했는지 한 문장으로 다시 읽으십시오."; return; } state.phase = "interpret"; persist(); draw(); });
-    flow.querySelectorAll("[data-meaning]").forEach(b => b.addEventListener("click", () => { if (b.dataset.meaning !== "record") { feedback.textContent = "화살표가 목적지라면 반복 기록은 필요 없었을 겁니다. D 문구를 다시 확인하십시오."; return; } state.interpretation = "record"; state.phase = "physical"; persist(); draw(); }));
+    document.querySelector("#checkSentence")?.addEventListener("click", () => { if (!fragments.every((f,i) => state.slots[i] === f.id)) { triggerFeedbackShake(feedback, "무엇을 떠나 무엇을 사모했는지 한 문장으로 다시 읽으십시오."); return; } state.phase = "interpret"; persist(); draw(); });
+    flow.querySelectorAll("[data-meaning]").forEach(b => b.addEventListener("click", () => { if (b.dataset.meaning !== "record") { triggerFeedbackShake(feedback, "화살표가 목적지라면 반복 기록은 필요 없었을 겁니다. D 문구를 다시 확인하십시오."); return; } state.interpretation = "record"; state.phase = "physical"; persist(); draw(); }));
     document.querySelector("#opened")?.addEventListener("click", () => { state.phase = "complete"; state.solved = true; persist(); draw(); unlock(); });
   }
   document.querySelector("#resetRoad")?.addEventListener("click", () => { localStorage.removeItem("homeward-game-road"); window.location.reload(); });
@@ -569,7 +618,7 @@ function renderHomePuzzle() {
     { id: "case", label: "00 본관", answer: "나그네" },
     { id: "bag", label: "01 야외", answer: "장막" },
     { id: "name", label: "02 숙소", answer: "약속" },
-    { id: "ledger", label: "03 주방", answer: "청지기" },
+    { id: "ledger", label: "03 창고 및 물자 보관소(청지기실)", answer: "청지기" },
     { id: "road", label: "04 길", answer: "더 나은 본향" },
   ];
   const surface = getSurface();
@@ -640,7 +689,7 @@ function renderHomePuzzle() {
         input.dataset.status = normalize(input.value) === normalize(input.dataset.answer) ? "correct" : "miss";
       });
       if (!correct) {
-        document.querySelector("#feedback").textContent = "앞선 사건파일의 키워드를 다시 확인하십시오.";
+        triggerFeedbackShake(document.querySelector("#feedback"), "앞선 사건파일의 키워드를 다시 확인하십시오.");
         return;
       }
       state.teamName = document.querySelector("#teamDeclarationName").value.trim() || "우리 팀";

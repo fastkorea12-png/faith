@@ -1626,6 +1626,60 @@ input {
   background:
     linear-gradient(rgba(255, 253, 246, 0.96), rgba(255, 253, 246, 0.96)),
     radial-gradient(circle at top right, rgba(185, 138, 53, 0.34), transparent 36%);
+  animation: revealPulse 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.verse-panel:not([hidden]) {
+  animation: revealPulse 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Keyframe animations for game feedback and transitions */
+@keyframes revealPulse {
+  0% {
+    transform: scale(0.96);
+    box-shadow: 0 0 0 0 rgba(185, 138, 53, 0);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 30px 6px rgba(185, 138, 53, 0.48), 0 0 16px 2px rgba(36, 58, 49, 0.3);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 18px 42px rgba(32, 35, 31, 0.1);
+  }
+}
+
+@keyframes errorShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-6px);
+  }
+  40%, 80% {
+    transform: translateX(6px);
+  }
+}
+
+@keyframes fadeInSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shake {
+  animation: errorShake 0.4s ease-in-out;
+}
+
+.fade-in-slide-up,
+.puzzle-surface,
+.case-flow {
+  animation: fadeInSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .code-panel h2 {

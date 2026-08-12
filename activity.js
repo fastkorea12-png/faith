@@ -24,6 +24,7 @@ const stages = [
     hint: "그늘, 함께 앉는 자리, 낮은 무게, 길목의 순서로 숫자를 읽으십시오.",
     answers: ["TENT-01"],
     unlock: "두 번째 키워드 '장막'을 확보했습니다.",
+    codeCollision: { value: "2741", message: "2741은 야외 자물쇠 번호였습니다. 봉투 안의 완료 코드 TENT-01을 입력하세요." },
   },
   {
     id: "name",
@@ -42,7 +43,7 @@ const stages = [
   {
     id: "ledger",
     step: "03",
-    place: "주방 및 기타 시설",
+    place: "창고 및 물자 보관소(청지기실)",
     title: "맡겨진 것을 바꾼 사람",
     story:
       "세 품목의 위치와 인계 문장이 바뀌었습니다. 원본 선반과 변경 기록, 담당 권한을 대조해야 합니다.",
@@ -51,6 +52,7 @@ const stages = [
     hint: "수량은 계산하지 않습니다. 발견 위치와 원래 선반, ‘먼저 처리’ 문장과 기록자를 대조하십시오.",
     answers: ["STEWARD-03"],
     unlock: "네 번째 키워드 '청지기'를 확보했습니다.",
+    codeCollision: { value: "432", message: "432는 창고 자물쇠 번호였습니다. 상자/봉투 안의 완료 코드 STEWARD-03을 입력하세요." },
   },
   {
     id: "road",
@@ -77,6 +79,7 @@ const stages = [
     hint: "나그네, 장막, 약속, 청지기, 더 나은 본향을 순서대로 확인하십시오.",
     answers: ["HOMEWARD-05"],
     unlock: "사건 종결. 우리는 더 나은 본향을 향해 걷는 순례자입니다.",
+    codeCollision: { value: "1116", message: "1116은 최종 상자 번호였습니다. 상자 안의 완료 코드 HOMEWARD-05를 입력하세요." },
   },
 ];
 
@@ -86,7 +89,7 @@ const initialStage = params.get("stage") || window.location.hash.replace("#", ""
 
 const state = loadState();
 let activeStageId = stages.some((stage) => stage.id === initialStage) ? initialStage : state.activeStageId;
-if (activeStageId === "home" && !allCoreStagesComplete()) activeStageId = "case";
+if (isStageLocked(activeStageId)) activeStageId = "case";
 
 const stageList = document.querySelector("#stageList");
 const stageStep = document.querySelector("#stageStep");
@@ -143,6 +146,7 @@ answerForm.addEventListener("submit", (event) => {
   }
 
   state.completed[stage.id] = true;
+  localStorage.setItem(`homeward-solved-${stage.id}`, "true");
   recorderMessage.textContent = `기록자: ${stage.unlock}`;
   recorderMessage.dataset.status = "success";
   saveState();
@@ -159,6 +163,7 @@ teamNote.addEventListener("input", () => {
 
 resetButton.addEventListener("click", () => {
   localStorage.removeItem(storageKey);
+  stages.forEach((s) => localStorage.removeItem(`homeward-solved-${s.id}`));
   window.location.href = "activity.html";
 });
 
@@ -183,8 +188,16 @@ function render() {
 
   stageList.innerHTML = stages
     .map((item) => {
-      const locked = item.id === "home" && !allCoreStagesComplete();
-      const status = state.completed[item.id] ? "완료" : locked ? "앞 단계 필요" : item.id === stage.id ? "진행 중" : "대기";
+      const locked = isStageLocked(item.id);
+      let status = "대기";
+      if (state.completed[item.id]) {
+        status = "완료";
+      } else if (locked) {
+        status = item.id === "home" ? "01~04 완료 필요" : "00 본관 완료 필요";
+      } else if (item.id === stage.id) {
+        status = "진행 중";
+      }
+
       return `
         <button type="button" class="${item.id === stage.id ? "active" : ""}" data-stage="${item.id}" ${locked ? "disabled" : ""}>
           <span>${item.step}</span>
@@ -213,14 +226,27 @@ function getActiveStage() {
   return stages.find((stage) => stage.id === activeStageId) || stages[0];
 }
 
+function isStageLocked(stageId) {
+  if (stageId === "case") return false;
+  if (stageId === "home") return !allCoreStagesComplete();
+  return !state.completed["case"];
+}
+
 function allCoreStagesComplete() {
-  return stages.filter((stage) => stage.id !== "home").every((stage) => state.completed[stage.id]);
+  const coreIds = ["case", "bag", "name", "ledger", "road"];
+  return coreIds.every((id) => Boolean(state.completed[id]));
 }
 
 function loadState() {
   const fallback = { teamName: "", teamPassword: "", activeStageId: "case", completed: {}, notes: {} };
   try {
-    return { ...fallback, ...JSON.parse(localStorage.getItem(storageKey)) };
+    const loaded = { ...fallback, ...JSON.parse(localStorage.getItem(storageKey)) };
+    stages.forEach((stage) => {
+      if (localStorage.getItem(`homeward-solved-${stage.id}`) === "true") {
+        loaded.completed[stage.id] = true;
+      }
+    });
+    return loaded;
   } catch {
     return fallback;
   }
