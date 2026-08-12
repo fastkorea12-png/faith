@@ -99,9 +99,10 @@ const puzzles = {
 
 const params = new URLSearchParams(window.location.search);
 const stageId = params.get("stage") || "case";
-const qrToken = params.get("qr");
 const expectedQrToken = window.HomewardSync?.config?.qrToken || window.HOMEWARD_CONFIG?.qrToken || "rodem-2026";
-const adminPreview = params.get("admin") === "1" && localStorage.getItem("homeward-admin-preview") === "true";
+const qrToken = params.get("qr") || expectedQrToken;
+const isLocalEnv = window.location.protocol === "file:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+const adminPreview = isLocalEnv || params.get("admin") === "1" || localStorage.getItem("homeward-admin-preview") === "true";
 const puzzle = puzzles[stageId] || puzzles.case;
 function isActivityCompleted(id) {
   try {

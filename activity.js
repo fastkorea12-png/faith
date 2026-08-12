@@ -204,7 +204,7 @@ function render() {
   stageStory.textContent = stage.story;
   stageMission.textContent = stage.mission;
   stageHint.textContent = stage.hint;
-  gameLink.textContent = `${stage.place}에 숨겨진 QR을 찾아 스캔하십시오. 직접 주소 입력으로는 게임이 열리지 않습니다.`;
+  gameLink.innerHTML = `📱 현장 QR 스캔 또는 직접 접속: <a href="game.html?stage=${stage.id}&qr=rodem-2026" class="text-link" style="color:var(--gold-light); font-weight:bold; text-decoration:underline;" target="_blank">🔍 [${stage.title}] 현장 퍼즐 실행하기 (클릭)</a>`;
   currentPlace.textContent = stage.place;
   teamNote.value = state.notes[stage.id] || "";
   answerInput.value = "";

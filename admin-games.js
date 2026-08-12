@@ -45,8 +45,8 @@ function renderAdminGames() {
             <div><dt>관리자 실행</dt><dd>QR 없이 바로 열기</dd></div>
           </dl>
           <div class="admin-game-actions">
-            <a href="game.html?stage=${stage.id}&admin=1">게임 열기</a>
-            <a class="secondary" href="activity.html?stage=${stage.id}">활동 페이지</a>
+            <a href="game.html?stage=${stage.id}&qr=rodem-2026&admin=1" target="_blank">게임 열기</a>
+            <a class="secondary" href="activity.html?stage=${stage.id}" target="_blank">활동 페이지</a>
           </div>
         </article>
       `,
