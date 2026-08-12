@@ -37,6 +37,7 @@ const stages = [
     hint: "알림 두 개를 모두 읽고, 사진에서는 반복 횟수보다 임시·원본 상태 도장을 비교하십시오.",
     answers: ["PROMISE-02"],
     unlock: "세 번째 키워드 '약속'을 확보했습니다.",
+    codeCollision: { value: "0316", message: "0316은 휴대폰 암호였습니다. 활동 페이지에는 사건 완료 코드를 입력하세요." },
   },
   {
     id: "ledger",
@@ -133,7 +134,10 @@ answerForm.addEventListener("submit", (event) => {
   const matched = stage.answers.some((item) => answer === normalize(item));
 
   if (!matched) {
-    recorderMessage.textContent = "기록자: 코드가 맞지 않습니다. QR 게임을 완료한 뒤 열린 코드를 그대로 입력하십시오.";
+    const collision = stage.codeCollision && answer === normalize(stage.codeCollision.value);
+    recorderMessage.textContent = collision
+      ? `기록자: ${stage.codeCollision.message}`
+      : "기록자: 코드가 맞지 않습니다. QR 게임을 완료한 뒤 열린 코드를 그대로 입력하십시오.";
     recorderMessage.dataset.status = "warn";
     return;
   }

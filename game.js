@@ -250,17 +250,29 @@ function renderPhonePuzzleV2() {
     const length = document.querySelector("#phoneCode")?.value.length || 0;
     screen.querySelectorAll(".passcode-dots span").forEach((dot, index) => dot.classList.toggle("filled", index < length));
   }
+  const noticeDetails = [["mom", "엄마", "약속한 날은 숙소 문 앞 기록에 남겨뒀어."], ["roommate", "룸메이트", "비밀번호 형식은 MMDD야."]];
+  let activeApp = state.memo ? "memo" : "photo";
   function draw() {
     if (!state.unlocked) {
-      const notices = [["mom", "엄마", "약속한 날은 숙소 문 앞 기록에 남겨뒀어."], ["roommate", "룸메이트", "비밀번호 형식은 MMDD야."]];
-      screen.innerHTML = `<div class="phone-lockscreen"><p>잠긴 휴대폰</p><strong>11:13</strong><span>${state.notices.length}/2 알림 확인</span></div><div class="lock-notifications">${notices.map(([id, from, text]) => `<button type="button" data-notice="${id}" class="notification-button ${state.notices.includes(id) ? "read" : ""}"><b>${from}</b><p>${state.notices.includes(id) ? text : "탭해서 알림 펼치기"}</p></button>`).join("")}</div>${state.notices.length === 2 ? `<form class="phone-passcode" id="phoneForm"><label>문 앞 기록을 MMDD로 입력</label><input id="phoneCode" inputmode="numeric" maxlength="4" autocomplete="off"><div class="passcode-dots"><span></span><span></span><span></span><span></span></div><div class="phone-keypad">${["1","2","3","4","5","6","7","8","9","지움","0","확인"].map(k => `<button type="${k === "확인" ? "submit" : "button"}" data-key="${k}">${k}</button>`).join("")}</div></form>` : ""}`;
+      screen.innerHTML = `<div class="phone-lockscreen"><p>잠긴 휴대폰</p><strong>11:13</strong><span>${state.notices.length}/2 알림 확인</span></div><div class="lock-notifications">${noticeDetails.map(([id, from, text]) => `<button type="button" data-notice="${id}" class="notification-button ${state.notices.includes(id) ? "read" : ""}"><b>${from}</b><p>${state.notices.includes(id) ? text : "탭해서 알림 펼치기"}</p></button>`).join("")}</div>${state.notices.length === 2 ? `<form class="phone-passcode" id="phoneForm"><label>문 앞 기록을 MMDD로 입력</label><input id="phoneCode" inputmode="numeric" maxlength="4" autocomplete="off"><div class="passcode-dots"><span></span><span></span><span></span><span></span></div><div class="phone-keypad">${["1","2","3","4","5","6","7","8","9","지움","0","확인"].map(k => `<button type="${k === "확인" ? "submit" : "button"}" data-key="${k}">${k}</button>`).join("")}</div></form>` : ""}`;
       bindLocked();
       feedback.textContent = state.notices.length < 2 ? "두 알림을 모두 펼쳐 자료와 형식을 확인하십시오." : "숙소 문 앞에서 ‘약속한 날’을 찾아 MMDD로 입력하십시오.";
       return;
     }
-    screen.innerHTML = `<div class="phone-apps phone-apps-two"><button class="selected" type="button"><span>□</span>사진</button><button type="button" id="memoApp" ${state.original === "promise" ? "" : "disabled"}><span>${state.original === "promise" ? "M" : "🔒"}</span>메모</button></div><div class="phone-screen evidence-screen">${state.memo ? `<div class="memo-note"><p><s>성공한 사람</s> — 삭제됨</p><p><s>인정받는 사람</s> — 삭제됨</p><button id="restoreMemo" class="memo-final" type="button">${state.solved ? "빌린 이름은 바뀌지만, 바뀌지 않은 것은 약속이다." : "마지막 줄 복원"}</button></div>` : `<div class="phone-app-title"><span>사진 감식</span><strong>${state.photos.length}/3 확대</strong></div><div class="photo-evidence-grid">${photos.map(p => `<button type="button" data-photo="${p.id}" class="${state.photos.includes(p.id) ? "viewed" : ""}"><strong>${p.title}</strong><small>${state.photos.includes(p.id) ? p.stamp : "탭해 상태 도장 확대"}</small></button>`).join("")}</div>${state.photos.length === 3 ? `<p class="phone-caption">세 기록 중 원본으로 남은 기록을 선택하십시오.</p><div class="original-choice">${photos.map(p => `<button type="button" data-original="${p.id}">${p.title}</button>`).join("")}</div>` : ""}`}</div>`;
-    bindUnlocked();
-    feedback.textContent = state.memo ? "삭제된 두 이름과 마지막 줄을 대조해 복원하십시오." : state.photos.length < 3 ? "사진 세 장의 상태 도장을 모두 확대하십시오." : "반복 노출보다 ‘임시/반납’과 ‘원본/수정 없음’을 비교하십시오.";
+    const memoReady = state.original === "promise";
+    if (activeApp === "memo" && !memoReady) activeApp = "photo";
+    screen.innerHTML = `<div class="phone-apps phone-apps-three"><button type="button" data-app="notices" class="${activeApp === "notices" ? "selected" : ""}"><span>✉</span>알림</button><button type="button" data-app="photo" class="${activeApp === "photo" ? "selected" : ""}"><span>□</span>사진</button><button type="button" data-app="memo" class="${activeApp === "memo" ? "selected" : ""} ${memoReady ? "" : "app-locked"}" ${memoReady ? "" : 'aria-disabled="true"'}><span>${memoReady ? "M" : "🔒"}</span>메모${memoReady ? "" : `<small>사진 기록을 먼저 검증하세요</small>`}</button></div><div class="phone-screen evidence-screen">${renderAppBody(memoReady)}</div>`;
+    bindUnlocked(memoReady);
+    feedback.textContent = activeApp === "notices" ? "이미 확인한 알림입니다. 사진 감식으로 돌아가 상태 도장을 비교하십시오." : activeApp === "memo" ? "삭제된 두 이름과 마지막 줄을 대조해 복원하십시오." : state.photos.length < 3 ? "사진 세 장의 상태 도장을 모두 확대하십시오." : "반복 노출보다 ‘임시/반납’과 ‘원본/수정 없음’을 비교하십시오.";
+  }
+  function renderAppBody(memoReady) {
+    if (activeApp === "notices") {
+      return `<div class="phone-app-title"><span>알림 보관함</span><strong>읽기 전용</strong></div><div class="lock-notifications">${noticeDetails.map(([, from, text]) => `<article><b>${from}</b><p>${text}</p></article>`).join("")}</div>`;
+    }
+    if (activeApp === "memo" && memoReady) {
+      return `<div class="memo-note"><p><s>성공한 사람</s> — 삭제됨</p><p><s>인정받는 사람</s> — 삭제됨</p><button id="restoreMemo" class="memo-final" type="button">${state.solved ? "빌린 이름은 바뀌지만, 바뀌지 않은 것은 약속이다." : "마지막 줄 복원"}</button></div>`;
+    }
+    return `<div class="phone-app-title"><span>사진 감식</span><strong>${state.photos.length}/3 확대</strong></div><div class="photo-evidence-grid">${photos.map(p => `<button type="button" data-photo="${p.id}" class="${state.photos.includes(p.id) ? "viewed" : ""}"><strong>${p.title}</strong><small>${state.photos.includes(p.id) ? p.stamp : "탭해 상태 도장 확대"}</small></button>`).join("")}</div>${state.photos.length === 3 ? `<p class="phone-caption">세 기록 중 원본으로 남은 기록을 선택하십시오.</p><div class="original-choice">${photos.map(p => `<button type="button" data-original="${p.id}" class="${state.original === p.id ? "selected" : ""}">${p.title}</button>`).join("")}</div>` : ""}`;
   }
   function bindLocked() {
     screen.querySelectorAll("[data-notice]").forEach(b => b.addEventListener("click", () => { if (!state.notices.includes(b.dataset.notice)) state.notices.push(b.dataset.notice); persist(); draw(); }));
@@ -269,10 +281,16 @@ function renderPhonePuzzleV2() {
     form.querySelectorAll("[data-key]").forEach(b => b.addEventListener("click", () => { const input = document.querySelector("#phoneCode"); if (b.dataset.key === "확인") return; input.value = b.dataset.key === "지움" ? input.value.slice(0, -1) : (input.value + b.dataset.key).slice(0, 4); updatePasscodeDots(); }));
     form.addEventListener("submit", e => { e.preventDefault(); const value = document.querySelector("#phoneCode").value; state.attempts += 1; if (value === "0316") { state.unlocked = true; persist(); draw(); return; } feedback.textContent = value === "1113" ? "그 숫자는 날짜가 아니라 퇴실 시각입니다." : value.length !== 4 ? "잠금 기록은 네 자리 MMDD 형식입니다." : "숫자의 모양보다 출처가 중요합니다. ‘약속한 날’의 수령 기록을 찾으십시오."; document.querySelector("#phoneCode").value = ""; updatePasscodeDots(); persist(); });
   }
-  function bindUnlocked() {
+  function bindUnlocked(memoReady) {
+    screen.querySelectorAll("[data-app]").forEach(b => b.addEventListener("click", () => {
+      if (b.dataset.app === "memo" && !memoReady) { feedback.textContent = "메모의 봉인이 남아 있습니다. 사진 기록의 진위를 먼저 확정하세요."; return; }
+      activeApp = b.dataset.app;
+      if (activeApp === "memo") state.memo = true;
+      persist();
+      draw();
+    }));
     screen.querySelectorAll("[data-photo]").forEach(b => b.addEventListener("click", () => { if (!state.photos.includes(b.dataset.photo)) state.photos.push(b.dataset.photo); persist(); draw(); }));
-    screen.querySelectorAll("[data-original]").forEach(b => b.addEventListener("click", () => { state.original = b.dataset.original; if (state.original !== "promise") { feedback.textContent = "많이 찍힌 기록이 원본이라는 뜻은 아닙니다. 상태 도장을 다시 보십시오."; persist(); return; } persist(); draw(); }));
-    document.querySelector("#memoApp")?.addEventListener("click", () => { state.memo = true; persist(); draw(); });
+    screen.querySelectorAll("[data-original]").forEach(b => b.addEventListener("click", () => { state.original = b.dataset.original; persist(); if (state.original !== "promise") feedback.textContent = "많이 찍힌 기록이 원본이라는 뜻은 아닙니다. 사진의 상태 도장을 확대하세요."; draw(); }));
     document.querySelector("#restoreMemo")?.addEventListener("click", () => { state.solved = true; persist(); draw(); unlock(); });
   }
   document.querySelector("#resetStage")?.addEventListener("click", () => { localStorage.removeItem("homeward-game-name"); window.location.reload(); });

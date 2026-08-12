@@ -1666,7 +1666,10 @@ input {
 .notification-button p { color: rgba(255, 253, 246, 0.76); }
 .notification-button.read { outline: 2px solid var(--gold); }
 .phone-apps-two { grid-template-columns: repeat(2, 1fr); }
-.phone-apps button:disabled { cursor: not-allowed; opacity: 0.58; }
+.phone-apps-three { grid-template-columns: repeat(3, 1fr); }
+.phone-apps button:disabled,
+.phone-apps button.app-locked { cursor: not-allowed; opacity: 0.58; }
+.phone-apps button small { display: block; color: rgba(255, 253, 246, 0.68); font-size: 9px; font-weight: 700; line-height: 1.25; }
 .evidence-screen { height: 390px; }
 
 .photo-evidence-grid,
@@ -1689,6 +1692,7 @@ input {
 }
 
 .photo-evidence-grid button.viewed { outline: 2px solid var(--gold); }
+.original-choice button.selected { outline: 2px solid var(--clay); background: rgba(155, 86, 61, 0.22); }
 .photo-evidence-grid small { color: rgba(255, 253, 246, 0.7); line-height: 1.45; }
 .memo-final { min-height: 52px; border: 1px solid var(--gold); border-radius: 8px; background: var(--gold); font-weight: 900; }
 
