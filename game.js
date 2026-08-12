@@ -356,7 +356,7 @@ function unlock() {
 
 function renderCasePuzzle() {
   const surface = getSurface();
-  const state = loadPuzzleState("case", { selected: [], revealed: [], contradictionsConfirmed: false, solved: false });
+  const state = loadPuzzleState("case", { selected: [], revealed: [], teamSlot: null, contradictionsConfirmed: false, solved: false });
   const records = [
     { id: "stampA", label: "기록 A", source: "도장 기록", text: "조사팀은 11:13에 목적지 본향 도착 확인 도장을 받았다.", false: true },
     { id: "listB", label: "기록 B", source: "명단 기록", text: "미도착 명단에는 아직 길 위에 있는 조사팀의 이름만 남는다.", false: false },
@@ -476,13 +476,37 @@ function renderCasePuzzle() {
         const id = form.dataset.passcodeForm;
         const input = form.querySelector(`[data-passcode-input="${id}"]`);
         const value = input.value.trim();
-        if (passcodes[id].includes(value)) {
+
+        // 첫 암호를 입력하는 순간 그 팀의 슬롯(1~5)이 고정된다. 이후 기록은
+        // 반드시 같은 슬롯의 암호만 인정해, 다른 팀 카드가 섞여도 통과되지 않는다.
+        if (state.teamSlot === null) {
+          const matchedSlot = passcodes[id].indexOf(value);
+          if (matchedSlot !== -1) {
+            state.teamSlot = matchedSlot;
+            state.revealed = [...state.revealed, id];
+            persist();
+            draw();
+            return;
+          }
+          triggerFeedbackShake(feedback, "그 암호로는 이 기록이 열리지 않습니다. 카드의 알파벳과 기록 이름이 맞는지 다시 확인하십시오.");
+          input.value = "";
+          return;
+        }
+
+        if (value === passcodes[id][state.teamSlot]) {
           state.revealed = [...state.revealed, id];
           persist();
           draw();
           return;
         }
-        triggerFeedbackShake(feedback, "그 암호로는 이 기록이 열리지 않습니다. 카드의 알파벳과 기록 이름이 맞는지 다시 확인하십시오.");
+
+        const belongsToOtherTeam = passcodes[id].includes(value);
+        triggerFeedbackShake(
+          feedback,
+          belongsToOtherTeam
+            ? "그 암호는 다른 팀의 카드입니다. 우리 팀 카드가 맞는지 다시 확인하십시오."
+            : "그 암호로는 이 기록이 열리지 않습니다. 카드의 알파벳과 기록 이름이 맞는지 다시 확인하십시오.",
+        );
         input.value = "";
       });
     });
