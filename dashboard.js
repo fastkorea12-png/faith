@@ -36,7 +36,7 @@ const stages = [
     id: "ledger",
     step: "03",
     place: "주방/기타",
-    title: "사라진 식량 장부",
+    title: "맡겨진 것을 바꾼 사람",
     code: "STEWARD-03",
     minutes: 18,
     hint1: "현장 재고 카드 다섯 장을 찾아 장부와 실제 수량을 대조하게 합니다.",

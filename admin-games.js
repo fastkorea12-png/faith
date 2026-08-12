@@ -2,7 +2,7 @@ const adminStages = [
   { id: "case", step: "00", place: "본관", title: "조작된 사건파일", code: "PILGRIM-00" },
   { id: "bag", step: "01", place: "야외 시설", title: "가짜 안식처", code: "TENT-01" },
   { id: "name", step: "02", place: "숙소", title: "잠긴 휴대폰", code: "PROMISE-02" },
-  { id: "ledger", step: "03", place: "주방 및 기타 시설", title: "사라진 식량 장부", code: "STEWARD-03" },
+  { id: "ledger", step: "03", place: "주방 및 기타 시설", title: "맡겨진 것을 바꾼 사람", code: "STEWARD-03" },
   { id: "road", step: "04", place: "비아 돌로로사", title: "되돌아가는 길", code: "BETTER-04" },
   { id: "home", step: "05", place: "예배당", title: "예비된 성", code: "HOMEWARD-05" },
 ];
