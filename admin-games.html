@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>본향 사건파일 | 관리자 게임 실행</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="admin-games.css" />
+  </head>
+  <body>
+    <section class="lock-screen" id="lockScreen">
+      <form class="lock-card" id="lockForm">
+        <p class="eyebrow">Game Preview Access</p>
+        <h1>관리자 게임 실행</h1>
+        <label for="adminPassword">비밀번호</label>
+        <input id="adminPassword" type="password" placeholder="진행자 비밀번호" autocomplete="off" />
+        <button type="submit">게임 목록 열기</button>
+        <p id="lockMessage" aria-live="polite">QR 없이 게임을 확인하는 관리자 전용 화면입니다.</p>
+      </form>
+    </section>
+
+    <main class="dashboard-shell admin-game-shell">
+      <header class="dashboard-header">
+        <div>
+          <p class="eyebrow">Admin Game Launcher</p>
+          <h1>QR 없이 게임 실행</h1>
+          <p>
+            리허설, 진행자 설명, 현장 점검 때 사용하는 관리자용 실행 페이지입니다.
+            참가자에게는 이 링크를 공유하지 말고 현장 QR을 사용하게 하십시오.
+          </p>
+        </div>
+        <nav aria-label="관리자 링크">
+          <a href="dashboard.html">대시보드</a>
+          <a href="qr.html">QR</a>
+          <a href="activity.html">진행 페이지</a>
+        </nav>
+      </header>
+
+      <section class="admin-notice">
+        <strong>운영 메모</strong>
+        <p>
+          아래 버튼은 QR 토큰 없이도 게임을 열 수 있는 관리자 미리보기입니다.
+          실제 참가자 동선에서는 각 현장에 숨겨진 QR을 스캔해야 게임이 열립니다.
+        </p>
+      </section>
+
+      <section class="admin-game-grid" id="adminGameGrid"></section>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="admin-games.js"></script>
+  </body>
+</html>

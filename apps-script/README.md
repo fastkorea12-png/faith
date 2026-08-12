@@ -15,7 +15,7 @@
 6. 실행 권한은 `나`, 액세스 권한은 필요에 따라 `모든 사용자` 또는 `링크가 있는 모든 사용자`로 설정합니다.
 7. 배포 URL이 제안서 웹 주소입니다.
 
-활동 페이지는 배포 URL 뒤에 `?page=activity`를 붙이면 열립니다.
+참가자용 활동 페이지는 GitHub Pages의 `activity.html`을 사용하십시오. 기존 Apps Script 활동 주소로 접속하면 GitHub Pages 화면으로 안내됩니다.
 QR 샘플 페이지는 배포 URL 뒤에 `?page=qr`을 붙이면 열립니다.
 
 ## GitHub Pages와 진행 대시보드 연결

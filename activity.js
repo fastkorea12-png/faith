@@ -3,66 +3,66 @@ const stages = [
     id: "case",
     step: "00",
     place: "본관 / 접수 지점",
-    title: "찢어진 본향 지도",
+    title: "조작된 사건파일",
     story:
-      "본관 접수 지점에서 오래된 지도가 찢어진 채 발견되었습니다. 지도 가장자리에는 히브리서 11장의 일부 단어가 비어 있습니다.",
+      "본관 접수 기록에는 조사팀이 아직 도착하지 않았다고 적혀 있습니다. 사건 메모에는 지우면 안 되는 문자와 기록을 여는 위치가 남아 있습니다.",
     mission:
-      "QR을 찍어 지도 조각 퍼즐을 완료하십시오. 퍼즐이 열어 주는 완료 코드를 이 페이지에 입력하면 다음 현장으로 이동할 수 있습니다.",
-    hint: "게임 화면의 조각을 맞추면 대문자와 숫자로 된 코드가 나타납니다.",
-    answers: ["MAP-1113"],
-    unlock: "접수 완료. 순례자는 길을 잃은 것이 아니라 누군가가 따라오도록 흔적을 남겼습니다.",
+      "QR을 찍어 사건 메모를 해석하십시오. 입력은 하나입니다. 아직 목적지에 이르지 않은 조사팀의 정체성을 찾으십시오.",
+    hint: "도착하지 않았고, 최종 목적지도 미기록인 채 길 위에 있는 사람을 무엇이라 부를지 생각해 보십시오.",
+    answers: ["PILGRIM-00"],
+    unlock: "접수 완료. 첫 키워드 '나그네'를 확보했습니다.",
   },
   {
     id: "bag",
     step: "01",
     place: "야외 시설 / 마당",
-    title: "남겨진 배낭",
+    title: "너무 오래 머문 자리",
     story:
-      "마당 한쪽에 무거운 배낭이 놓여 있습니다. 안에는 돌, 돈 봉투, 트로피, 거울, 시계가 들어 있고 각각 짧은 메모가 붙어 있습니다.",
+      "야외 시설의 편안한 자리마다 숫자 표식이 남아 있습니다. 쉬는 자리는 필요하지만, 너무 오래 머물면 목적지가 됩니다.",
     mission:
-      "QR 게임에서 배낭 속 물건과 마음의 짐을 바르게 연결하십시오. 완료 코드를 이 페이지에 입력합니다.",
-    hint: "게임을 끝내면 EMPTY로 시작하는 코드가 나타납니다.",
-    answers: ["EMPTY-240"],
-    unlock: "그는 도망친 것이 아니라 가벼워지고 있었습니다. 지도 조각 하나를 획득하십시오.",
+      "QR 게임이 알려 주는 순서대로 표식 숫자를 읽고, 4자리 자물쇠 봉투를 여십시오.",
+    hint: "그늘, 함께 앉는 자리, 낮은 무게, 길목의 순서로 숫자를 읽으십시오.",
+    answers: ["TENT-01"],
+    unlock: "두 번째 키워드 '장막'을 확보했습니다.",
   },
   {
     id: "name",
     step: "02",
     place: "숙소 / 방문 앞",
-    title: "찢어진 이름표",
+    title: "잠긴 휴대폰",
     story:
-      "숙소 문 앞에 찢어진 이름표가 흩어져 있습니다. 어떤 이름은 평가처럼 보이고, 어떤 이름은 믿음의 정체성처럼 보입니다.",
+      "숙소 앞에 주인을 알 수 없는 휴대폰과 문 앞 안내문이 남겨져 있습니다. 잠금화면 알림은 약속한 날과 비밀번호 형식을 말합니다.",
     mission:
-      "QR 게임에서 찢어진 이름표 조각을 순서대로 선택하십시오. 완료 코드를 이 페이지에 입력합니다.",
-    hint: "게임을 끝내면 PILGRIM으로 시작하는 코드가 나타납니다.",
-    answers: ["PILGRIM-313"],
-    unlock: "정체성 확인. 그들은 땅에서는 나그네였지만 방향을 잃지 않았습니다.",
+      "잠금화면 알림을 읽고, 숙소 문 앞 안내문에서 약속한 날짜를 찾아 휴대폰 잠금번호를 해제하십시오.",
+    hint: "알림은 약속한 날과 MMDD 형식을 말합니다. 이름처럼 보이는 기록은 가짜 단서입니다.",
+    answers: ["PROMISE-02"],
+    unlock: "세 번째 키워드 '약속'을 확보했습니다.",
   },
   {
     id: "ledger",
     step: "03",
     place: "주방 및 기타 시설",
-    title: "비어 있는 장부",
+    title: "사라진 식량 장부",
     story:
-      "섬김 테이블 위에 시간, 돈, 재능, 관계, 마음 장부가 놓여 있습니다. 주인 칸은 비어 있고 맡은 사람 칸만 남아 있습니다.",
+      "주방의 식량 장부와 실제 재고가 맞지 않습니다. 맡겨진 양식을 돌보던 사람은 누락된 기록을 남겨 두었습니다.",
     mission:
-      "QR 게임에서 장부의 항목들을 맡겨진 것의 자리로 옮기십시오. 완료 코드를 이 페이지에 입력합니다.",
-    hint: "게임을 끝내면 STEWARD로 시작하는 코드가 나타납니다.",
-    answers: ["STEWARD-503"],
-    unlock: "장부 복원. 순례자는 소유자가 아니라 맡은 사람이었습니다.",
+      "현장 재고 카드 다섯 장을 찾아 QR 게임의 장부와 대조하고, 부족분으로 보관함 자물쇠를 여십시오.",
+    hint: "장부보다 실제가 적은 품목만 남깁니다. 부족분을 장부에 적힌 순서대로 읽으십시오.",
+    answers: ["STEWARD-03"],
+    unlock: "네 번째 키워드 '청지기'를 확보했습니다.",
   },
   {
     id: "road",
     step: "04",
     place: "비아 돌로로사 / 길",
-    title: "돌아갈 수 있었던 길",
+    title: "되돌아가는 길",
     story:
-      "길 위에는 두 방향의 발자국이 있습니다. 하나는 익숙한 곳으로 돌아가고, 다른 하나는 아직 보이지 않는 곳을 향합니다.",
+      "길 위의 선택은 계속 같은 자리로 돌아옵니다. 이전 루프에서 본 문장을 기억해야 다음 길이 열립니다.",
     mission:
-      "QR 게임에서 발자국 순서를 맞춰 더 나은 본향으로 가는 길을 여십시오. 완료 코드를 이 페이지에 입력합니다.",
-    hint: "게임을 끝내면 BETTER로 시작하는 코드가 나타납니다.",
-    answers: ["BETTER-1116"],
-    unlock: "길 확인. 그는 돌아갈 기회가 있었지만 더 나은 본향을 사모했습니다.",
+      "QR 게임에서 반복되는 갈림길을 통과해 더 나은 본향으로 향하십시오.",
+    hint: "편하고 빠른 선택은 루프를 만듭니다. 이전 장면의 문장을 기억하십시오.",
+    answers: ["BETTER-04"],
+    unlock: "다섯 번째 키워드 '더 나은 본향'을 확보했습니다.",
   },
   {
     id: "home",
@@ -70,11 +70,11 @@ const stages = [
     place: "예배당 / 마무리",
     title: "예비된 성",
     story:
-      "모든 지도 조각이 예배당에 모였습니다. 찢어진 지도 뒤에는 마지막 고백이 숨겨져 있습니다.",
+      "모든 사건 키워드가 예배당에 모였습니다. 앞선 장소의 단어들이 마지막 고백의 빈칸이 됩니다.",
     mission:
       "QR 게임에서 앞 단계의 키워드로 마지막 고백을 완성하십시오. 완료 코드를 이 페이지에 입력하면 사건이 종결됩니다.",
-    hint: "게임을 끝내면 CITY로 시작하는 코드가 나타납니다.",
-    answers: ["CITY-516"],
+    hint: "나그네, 장막, 약속, 청지기, 더 나은 본향을 순서대로 확인하십시오.",
+    answers: ["HOMEWARD-05"],
     unlock: "사건 종결. 우리는 더 나은 본향을 향해 걷는 순례자입니다.",
   },
 ];
@@ -85,6 +85,7 @@ const initialStage = params.get("stage") || window.location.hash.replace("#", ""
 
 const state = loadState();
 let activeStageId = stages.some((stage) => stage.id === initialStage) ? initialStage : state.activeStageId;
+if (activeStageId === "home" && !allCoreStagesComplete()) activeStageId = "case";
 
 const stageList = document.querySelector("#stageList");
 const stageStep = document.querySelector("#stageStep");
@@ -140,7 +141,6 @@ answerForm.addEventListener("submit", (event) => {
   state.completed[stage.id] = true;
   recorderMessage.textContent = `기록자: ${stage.unlock}`;
   recorderMessage.dataset.status = "success";
-  moveToNextStage(stage.id);
   saveState();
   syncProgress("stage_completed");
   render();
@@ -179,9 +179,10 @@ function render() {
 
   stageList.innerHTML = stages
     .map((item) => {
-      const status = state.completed[item.id] ? "완료" : item.id === stage.id ? "진행 중" : "대기";
+      const locked = item.id === "home" && !allCoreStagesComplete();
+      const status = state.completed[item.id] ? "완료" : locked ? "앞 단계 필요" : item.id === stage.id ? "진행 중" : "대기";
       return `
-        <button type="button" class="${item.id === stage.id ? "active" : ""}" data-stage="${item.id}">
+        <button type="button" class="${item.id === stage.id ? "active" : ""}" data-stage="${item.id}" ${locked ? "disabled" : ""}>
           <span>${item.step}</span>
           <strong>${item.title}</strong>
           <small>${status}</small>
@@ -192,6 +193,7 @@ function render() {
 
   stageList.querySelectorAll("button").forEach((button) => {
     button.addEventListener("click", () => {
+      if (button.disabled) return;
       activeStageId = button.dataset.stage;
       recorderMessage.textContent = "기록자: 선택한 현장의 사건기록을 불러왔습니다.";
       recorderMessage.dataset.status = "";
@@ -207,11 +209,8 @@ function getActiveStage() {
   return stages.find((stage) => stage.id === activeStageId) || stages[0];
 }
 
-function moveToNextStage(stageId) {
-  const index = stages.findIndex((stage) => stage.id === stageId);
-  if (index >= 0 && index < stages.length - 1) {
-    activeStageId = stages[index + 1].id;
-  }
+function allCoreStagesComplete() {
+  return stages.filter((stage) => stage.id !== "home").every((stage) => state.completed[stage.id]);
 }
 
 function loadState() {

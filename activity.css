@@ -233,6 +233,15 @@ button {
   color: #fffdf6;
 }
 
+.stage-list button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.stage-list button:disabled strong {
+  color: inherit;
+}
+
 .stage-list span {
   display: grid;
   place-items: center;
