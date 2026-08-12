@@ -1928,6 +1928,21 @@ input {
 .polaroid-thumb.viewed { outline: 2px solid var(--gold); }
 .polaroid-thumb.chosen { outline: 2px solid var(--leaf); background: rgba(111, 138, 93, 0.22); }
 
+.polaroid-thumb.locked {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.polaroid-thumb.locked small {
+  color: rgba(255, 253, 246, 0.5);
+}
+
+.locked-wrap {
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+}
+
 .polaroid-image-wrap {
   position: relative;
   aspect-ratio: 4 / 5;

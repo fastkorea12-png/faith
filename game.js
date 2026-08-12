@@ -38,12 +38,12 @@ const puzzles = {
     code: "PROMISE-02",
     keyword: "약속",
     message: "세 번째 키워드 '약속'을 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
-    evidence: ["알림 2개", "0316", "사진 5장", "검색 기록", "원본 약속 카드", "메모"],
-    objective: "알림과 현장 기록으로 휴대폰을 열고, 다섯 장의 사진 도장과 검색 기록으로 원본을 판별합니다.",
+    evidence: ["알림 2개", "0316", "벽면 실물 사진 5장", "검색 기록", "원본 약속 카드", "메모"],
+    objective: "알림과 현장 기록으로 휴대폰을 열고, 벽에 걸린 실물 사진을 순서대로 찾아 갤러리를 채운 뒤 원본을 판별합니다.",
     hints: {
       focus: "휴대폰 잠금화면의 상단 알림 2개와 숙소 문 앞 안내문에 적힌 날짜 표시를 주시하십시오.",
-      contrast: "알림 속 약속된 날짜와 문 앞 안내문의 월/일(MMDD) 형식을 대조하고, 잠금 해제 후 다섯 장의 사진을 모두 확대해 도장 종류를 확인하십시오.",
-      action: "휴대폰 잠금 비밀번호 '0316'을 입력해 연 뒤, 도장 문구 '수정 없음'을 그대로 입력해 원본을 확정하고, 검색 기록 마지막 줄의 문구 '약속을 지키는 사람'을 입력해 메모를 복원하십시오.",
+      contrast: "알림 속 약속된 날짜와 문 앞 안내문의 월/일(MMDD) 형식을 대조하고, 잠금 해제 후 화면에 뜨는 다음 사진의 이름을 보고 벽에서 실물 사진을 찾아 도장 옆 숫자를 확인하십시오.",
+      action: "휴대폰 잠금 비밀번호 '0316'을 입력해 연 뒤, 벽면 사진을 성공한 사람(52) → 인정받는 사람(19) → 이달의 새 가족(36) → 퇴실 안내 사본(07) 순서로 찾아 숫자를 입력하고, 도장 문구 '수정 없음'으로 원본을 확정한 뒤 검색 기록 마지막 줄 '약속을 지키는 사람'으로 메모를 복원하십시오.",
     },
     render: renderPhonePuzzleV2,
   },
@@ -649,6 +649,8 @@ function renderPhonePuzzleV2() {
     wrongStreak: 0,
     lockedUntil: 0,
     photos: [],
+    photoWrongStreak: 0,
+    photoLockedUntil: 0,
     zoomedPhoto: null,
     original: "",
     originalWrongStreak: 0,
@@ -659,16 +661,16 @@ function renderPhonePuzzleV2() {
     solved: false,
     attempts: 0,
   });
-  // 사진은 3장→5장으로 늘려 "셋 중 하나 찍기"가 안 통하게 하고, 실제 도장을
-  // 텍스트가 아니라 확대(라이트박스) 안의 도장 그래픽으로 보여준다. img 경로는
-  // GPT 등으로 만든 실제 목업 사진을 assets/stage-02/에 넣으면 자동으로 뜨고,
-  // 파일이 없으면 폴라로이드 프레임만 남아 레이아웃이 깨지지 않는다(§CSS onerror).
+  // 사진 5장은 실물로도 인쇄해 현장에 걸어둔다(§GPT 목업 이미지, assets/stage-02/).
+  // 웹 갤러리는 한 번에 다 안 보여주고 한 장씩만 순서대로 연다: 각 사진의 도장
+  // 문구 옆에 실물 인쇄에서만 보이는 숫자(code)를 심어 두고, 그 숫자를 웹에
+  // 입력해야 다음 사진이 열린다. img가 없으면 폴라로이드 프레임만 남는다.
   const photos = [
     { id: "success", title: "성공한 사람", img: "assets/stage-02/photo-success.jpg", stamp: "임시 발급 · 반납 대상", real: false },
-    { id: "approval", title: "인정받는 사람", img: "assets/stage-02/photo-approval.jpg", stamp: "임시 발급 · 반납 대상", real: false },
-    { id: "welcome", title: "이달의 새 가족", img: "assets/stage-02/photo-welcome.jpg", stamp: "임시 발급 · 행사용", real: false },
-    { id: "checkout", title: "퇴실 안내 사본", img: "assets/stage-02/photo-checkout.jpg", stamp: "사본 · 재발급", real: false },
-    { id: "promise", title: "약속 카드 03/16", img: "assets/stage-02/photo-promise.jpg", stamp: "원본 · 수정 없음", real: true },
+    { id: "approval", title: "인정받는 사람", img: "assets/stage-02/photo-approval.jpg", stamp: "임시 발급 · 반납 대상", real: false, code: "52" },
+    { id: "welcome", title: "이달의 새 가족", img: "assets/stage-02/photo-welcome.jpg", stamp: "임시 발급 · 행사용", real: false, code: "19" },
+    { id: "checkout", title: "퇴실 안내 사본", img: "assets/stage-02/photo-checkout.jpg", stamp: "사본 · 재발급", real: false, code: "36" },
+    { id: "promise", title: "약속 카드 03/16", img: "assets/stage-02/photo-promise.jpg", stamp: "원본 · 수정 없음", real: true, code: "07" },
   ];
   // 원래 기획(GAME_DEVELOPMENT_PLAN.md)엔 있었지만 구현에서 빠졌던 "검색 기록" 앱.
   // 정답을 확인해주진 않는 세 번째 단서층으로, "성공/인정"을 좇다가 "약속"으로
@@ -679,7 +681,7 @@ function renderPhonePuzzleV2() {
     { query: "본향이 무슨 뜻", time: "어제" },
     { query: "약속을 지키는 사람", time: "오늘" },
   ];
-  surface.innerHTML = `<p class="instruction">알림 → 현장 암호 → 사진 다섯 장 대조 → 원본 선택 → 메모 복원 순서로 확인하십시오.</p><div class="phone-board"><section class="phone-device"><div class="phone-island"></div><div class="phone-topbar"><span>11:13</span><span>숙소 Wi-Fi</span></div><div id="phoneFlow"></div><div class="phone-homebar"></div></section><section class="phone-investigation"><div class="deduction-steps"><strong>포렌식 진행</strong><ol><li>엄마와 룸메이트 알림을 각각 펼친다.</li><li>문 앞의 약속한 날을 MMDD로 입력한다.</li><li>사진 다섯 장의 상태 도장을 모두 확대한다.</li><li>원본 기록을 골라 메모 마지막 줄을 복원한다.</li></ol></div>${adminPreview ? `<div class="fragment-board admin-preview-only"><p class="eyebrow">관리자 미리보기</p><h3>현장 기록 후보</h3><p>약속 카드 수령일 03/16 · 임시 이름표 2장 · 퇴실 안내 11:13</p><button class="secondary-button" id="resetStage" type="button">이 스테이지 초기화</button></div>` : ""}</section></div><p class="feedback" id="feedback" aria-live="polite"></p>`;
+  surface.innerHTML = `<p class="instruction">알림 → 현장 암호 → 벽에 걸린 실물 사진 순서대로 코드 입력 → 원본 판별 → 메모 복원 순서로 확인하십시오.</p><div class="phone-board"><section class="phone-device"><div class="phone-island"></div><div class="phone-topbar"><span>11:13</span><span>숙소 Wi-Fi</span></div><div id="phoneFlow"></div><div class="phone-homebar"></div></section><section class="phone-investigation"><div class="deduction-steps"><strong>포렌식 진행</strong><ol><li>엄마와 룸메이트 알림을 각각 펼친다.</li><li>문 앞의 약속한 날을 MMDD로 입력한다.</li><li>화면에 뜨는 다음 사진의 이름을 보고, 벽에 걸린 실물 사진을 찾아 도장 옆 숫자를 입력해 한 장씩 연다.</li><li>다섯 장을 다 열면 원본 도장 문구를 입력하고, 메모 마지막 줄을 복원한다.</li></ol></div>${adminPreview ? `<div class="fragment-board admin-preview-only"><p class="eyebrow">관리자 미리보기</p><h3>현장 기록 후보</h3><p>약속 카드 수령일 03/16 · 임시 이름표 2장 · 퇴실 안내 11:13 · 사진 5장 실물 인쇄본을 벽에 순서 무관하게 게시(각 도장 옆 숫자로 순서 강제)</p><button class="secondary-button" id="resetStage" type="button">이 스테이지 초기화</button></div>` : ""}</section></div><p class="feedback" id="feedback" aria-live="polite"></p>`;
   const screen = document.querySelector("#phoneFlow");
   const feedback = document.querySelector("#feedback");
   const persist = () => savePuzzleState("name", state);
@@ -709,8 +711,8 @@ function renderPhonePuzzleV2() {
     if (activeApp === "memo" && !memoReady) activeApp = "photo";
     screen.innerHTML = `<div class="phone-apps phone-apps-four"><button type="button" data-app="notices" class="${activeApp === "notices" ? "selected" : ""}"><span>✉</span>알림</button><button type="button" data-app="photo" class="${activeApp === "photo" ? "selected" : ""}"><span>□</span>사진</button><button type="button" data-app="search" class="${activeApp === "search" ? "selected" : ""}"><span>⌕</span>검색</button><button type="button" data-app="memo" class="${activeApp === "memo" ? "selected" : ""} ${memoReady ? "" : "app-locked"}" ${memoReady ? "" : 'aria-disabled="true"'}><span>${memoReady ? "M" : "🔒"}</span>메모${memoReady ? "" : `<small>사진 기록을 먼저 검증하세요</small>`}</button></div><div class="phone-screen evidence-screen">${renderAppBody(memoReady)}</div>`;
     bindUnlocked(memoReady);
-    feedback.textContent = activeApp === "notices" ? "이미 확인한 알림입니다. 사진 감식으로 돌아가 상태 도장을 비교하십시오." : activeApp === "search" ? "검색 기록은 정답을 알려주지 않습니다. 무엇을 좇다가 무엇으로 옮겨갔는지만 살펴보십시오." : activeApp === "memo" ? "삭제된 두 이름 대신 들어갈 표현을 검색 기록에서 찾아 그대로 입력하십시오." : state.photos.length < 5 ? "사진 다섯 장의 상태 도장을 모두 확대하십시오." : state.original === "promise" ? "원본이 확정되었습니다. 메모 탭으로 이동하십시오." : "다섯 장의 도장 문구를 직접 옮겨 적어 보십시오. 반복해서 등장하는 문구는 정답이 아닙니다.";
-    const subLockRemaining = activeApp === "photo" ? state.originalLockedUntil - Date.now() : activeApp === "memo" ? state.memoLockedUntil - Date.now() : 0;
+    feedback.textContent = activeApp === "notices" ? "이미 확인한 알림입니다. 사진 감식으로 돌아가 상태 도장을 비교하십시오." : activeApp === "search" ? "검색 기록은 정답을 알려주지 않습니다. 무엇을 좇다가 무엇으로 옮겨갔는지만 살펴보십시오." : activeApp === "memo" ? "삭제된 두 이름 대신 들어갈 표현을 검색 기록에서 찾아 그대로 입력하십시오." : state.photos.length < 5 ? "벽에 걸린 실물 사진에서 다음 순서를 찾아 도장 옆 숫자를 입력하십시오." : state.original === "promise" ? "원본이 확정되었습니다. 메모 탭으로 이동하십시오." : "다섯 장의 도장 문구를 직접 옮겨 적어 보십시오. 반복해서 등장하는 문구는 정답이 아닙니다.";
+    const subLockRemaining = activeApp === "photo" ? (state.photos.length < 5 ? state.photoLockedUntil - Date.now() : state.originalLockedUntil - Date.now()) : activeApp === "memo" ? state.memoLockedUntil - Date.now() : 0;
     if (subLockRemaining > 0) lockTimer = setTimeout(draw, 1000);
   }
   function renderAppBody(memoReady) {
@@ -735,18 +737,22 @@ function renderPhonePuzzleV2() {
     if (zoomed) {
       return `<div class="photo-lightbox"><button type="button" class="lightbox-close" id="closeLightbox">✕ 닫기</button><div class="polaroid-large"><div class="polaroid-image-wrap"><img src="${zoomed.img}" alt="${zoomed.title}" onerror="this.style.display='none'" /><span class="photo-stamp ${zoomed.real ? "stamp-real" : "stamp-fake"}">${zoomed.stamp}</span></div><p class="polaroid-caption">${zoomed.title}</p></div></div>`;
     }
-    let originalPanel = "";
-    if (state.photos.length === 5) {
-      if (state.original === "promise") {
-        originalPanel = `<p class="phone-caption">원본이 확정되었습니다. 메모 탭에서 마지막 줄을 복원하십시오.</p>`;
-      } else {
-        const remaining = Math.max(0, Math.ceil((state.originalLockedUntil - Date.now()) / 1000));
-        originalPanel = remaining > 0
-          ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
-          : `<form id="originalForm" class="phone-answer-form"><label>다섯 기록 중 원본에만 있는 도장 문구를 그대로 입력하십시오.</label><input id="originalAnswer" autocomplete="off" placeholder="도장 문구" /><button type="submit" class="primary-button">제출</button></form>`;
-      }
+    let sequencePanel = "";
+    if (state.photos.length < 5) {
+      const next = photos[state.photos.length];
+      const remaining = Math.max(0, Math.ceil((state.photoLockedUntil - Date.now()) / 1000));
+      sequencePanel = `<p class="phone-caption">다음 사진 ‘${next.title}’을 벽에서 찾아, 도장 옆에 적힌 숫자를 입력하십시오.</p>` + (remaining > 0
+        ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
+        : `<form id="photoCodeForm" class="phone-answer-form"><label>‘${next.title}’ 사진 도장 옆 숫자 입력</label><input id="photoCodeAnswer" inputmode="numeric" autocomplete="off" placeholder="숫자" /><button type="submit" class="primary-button">확인</button></form>`);
+    } else if (state.original === "promise") {
+      sequencePanel = `<p class="phone-caption">원본이 확정되었습니다. 메모 탭에서 마지막 줄을 복원하십시오.</p>`;
+    } else {
+      const remaining = Math.max(0, Math.ceil((state.originalLockedUntil - Date.now()) / 1000));
+      sequencePanel = remaining > 0
+        ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
+        : `<form id="originalForm" class="phone-answer-form"><label>다섯 기록 중 원본에만 있는 도장 문구를 그대로 입력하십시오.</label><input id="originalAnswer" autocomplete="off" placeholder="도장 문구" /><button type="submit" class="primary-button">제출</button></form>`;
     }
-    return `<div class="phone-app-title"><span>사진 감식</span><strong>${state.photos.length}/5 확대</strong></div><div class="photo-evidence-grid photo-evidence-grid-5">${photos.map(p => `<button type="button" data-photo="${p.id}" class="polaroid-thumb ${state.photos.includes(p.id) ? "viewed" : ""}"><div class="polaroid-image-wrap"><img src="${p.img}" alt="" onerror="this.style.display='none'" /></div><small>${p.title}</small></button>`).join("")}</div>${originalPanel}`;
+    return `<div class="phone-app-title"><span>사진 감식</span><strong>${state.photos.length}/5 확보</strong></div><div class="photo-evidence-grid photo-evidence-grid-5">${photos.map(p => state.photos.includes(p.id) ? `<button type="button" data-photo="${p.id}" class="polaroid-thumb viewed"><div class="polaroid-image-wrap"><img src="${p.img}" alt="" onerror="this.style.display='none'" /></div><small>${p.title}</small></button>` : `<div class="polaroid-thumb locked"><div class="polaroid-image-wrap locked-wrap"><span>🔒</span></div><small>???</small></div>`).join("")}</div>${sequencePanel}`;
   }
   function bindLocked() {
     screen.querySelectorAll("[data-notice]").forEach(b => b.addEventListener("click", () => { if (!state.notices.includes(b.dataset.notice)) state.notices.push(b.dataset.notice); persist(); draw(); }));
@@ -760,6 +766,7 @@ function renderPhonePuzzleV2() {
       if (value === "0316") {
         state.unlocked = true;
         state.wrongStreak = 0;
+        if (state.photos.length === 0) state.photos.push(photos[0].id);
         persist();
         draw();
         return;
@@ -788,12 +795,35 @@ function renderPhonePuzzleV2() {
       draw();
     }));
     screen.querySelectorAll("[data-photo]").forEach(b => b.addEventListener("click", () => {
-      if (!state.photos.includes(b.dataset.photo)) state.photos.push(b.dataset.photo);
       state.zoomedPhoto = b.dataset.photo;
       persist();
       draw();
     }));
     document.querySelector("#closeLightbox")?.addEventListener("click", () => { state.zoomedPhoto = null; persist(); draw(); });
+    document.querySelector("#photoCodeForm")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = document.querySelector("#photoCodeAnswer");
+      const next = photos[state.photos.length];
+      if (next && normalize(input.value) === normalize(next.code)) {
+        state.photos.push(next.id);
+        state.photoWrongStreak = 0;
+        state.zoomedPhoto = next.id;
+        persist();
+        draw();
+        return;
+      }
+      state.photoWrongStreak = (state.photoWrongStreak || 0) + 1;
+      if (state.photoWrongStreak >= 3) {
+        state.photoLockedUntil = Date.now() + 10000;
+        state.photoWrongStreak = 0;
+        persist();
+        draw();
+        return;
+      }
+      triggerFeedbackShake(document.querySelector("#feedback"), "그 숫자가 아닙니다. 사진 도장을 다시 확인하십시오.");
+      input.value = "";
+      persist();
+    });
     document.querySelector("#originalForm")?.addEventListener("submit", (e) => {
       e.preventDefault();
       const input = document.querySelector("#originalAnswer");
