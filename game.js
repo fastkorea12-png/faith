@@ -8,6 +8,11 @@ const puzzles = {
     message: "첫 키워드 '나그네'를 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
     evidence: ["사건 메모", "접수 기록 5건", "거짓 기록 3건", "정체성 입력"],
     objective: "접수 기록 5건을 사건 메모와 대조해 거짓 기록 3건을 가려낸 뒤, 아직 목적지에 이르지 않은 조사팀의 정체성을 추리합니다.",
+    hints: {
+      focus: "현장 사건 메모(CASE H-11-13)의 지침에 시선을 집중하십시오. '미도착', '본관 접수대는 출발 지점일 뿐', 'H를 절대로 지우지 말 것' 세 항목이 핵심 단서입니다.",
+      contrast: "접수 기록 5건 중 메모의 지침과 정면으로 모순되는 거짓 기록 3건(stampA, deskC, numberD)을 가려내십시오.",
+      action: "거짓 기록 3건을 모두 지목하면 열리는 정체성 입력창에 사건번호 H-11-13(히브리서 11:13 '나그네와 외국인임을 증언하였으니')이 가리키는 성경적 정체성인 '나그네'를 입력하십시오.",
+    },
     render: renderCasePuzzle,
   },
   bag: {
@@ -19,6 +24,11 @@ const puzzles = {
     message: "봉투 속 '장막 카드'를 확보하십시오. 활동 페이지에 완료 코드를 입력하면 다음 장소가 열립니다.",
     evidence: ["그늘 표식", "벤치 표식", "돌 표식", "길목 표식", "4자리 자물쇠"],
     objective: "야외 시설에서 네 표식의 숫자를 찾고, 화면이 제시하는 순서대로 조합해 봉투 자물쇠를 엽니다.",
+    hints: {
+      focus: "야외 휴식 공간의 네 표식(그늘, 벤치, 돌, 길목)에 새겨진 숫자 표식을 주시하십시오.",
+      contrast: "사건 지침의 순서인 '그늘 → 벤치(함께 앉는 자리) → 돌(낮은 무게) → 길목' 순서로 각 표식의 숫자를 읽어 대조하십시오.",
+      action: "순서대로 읽은 4자리 자물쇠 비밀번호 '2741'을 맞춰 봉투 자물쇠를 해금하십시오.",
+    },
     render: renderFieldPuzzle,
   },
   name: {
@@ -30,6 +40,11 @@ const puzzles = {
     message: "세 번째 키워드 '약속'을 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
     evidence: ["알림 2개", "0316", "사진 3장", "원본 약속 카드", "메모"],
     objective: "알림과 현장 기록으로 휴대폰을 열고, 사진의 상태와 메모 수정 이력으로 원본을 판별합니다.",
+    hints: {
+      focus: "휴대폰 잠금화면의 상단 알림 2개와 숙소 문 앞 안내문에 적힌 날짜 표시를 주시하십시오.",
+      contrast: "알림 속 약속된 날짜와 문 앞 안내문의 월/일(MMDD) 형식을 대조하고, 잠금 해제 후 사진의 수정 도장 유무를 확인하십시오.",
+      action: "휴대폰 잠금 비밀번호 '0316'을 입력하여 연 뒤, 원본 사진 상태를 확인하고 확인 버튼을 누르십시오.",
+    },
     render: renderPhonePuzzleV2,
   },
   ledger: {
@@ -41,6 +56,11 @@ const puzzles = {
     message: "네 번째 키워드 '청지기'를 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
     evidence: ["역할 분담", "재고 카드 6장", "변경 기록", "권한표", "3자리 자물쇠"],
     objective: "카드의 원래 위치를 복원하고 기록과 권한을 감식해 물리 자물쇠의 순서를 찾습니다.",
+    hints: {
+      focus: "물품 수량을 세거나 계산하려 하지 말고, 물품 배치 변경 기록과 담당 권한표에 시선을 맞추십시오.",
+      contrast: "선반의 원래 위치와 위치 변경 기록, '먼저 처리' 지침의 권한 위반자를 서로 대조하여 조작자를 가려내십시오.",
+      action: "권한을 남용하여 기록을 바꾼 조작자의 순서에 맞춰 3자리 자물쇠 번호 '432'를 맞추십시오.",
+    },
     render: renderInventoryPuzzleV2,
   },
   road: {
@@ -52,6 +72,11 @@ const puzzles = {
     message: "다섯 번째 키워드 '더 나은 본향'을 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
     evidence: ["기억 담당 A~D", "4개 루프", "문장 조각", "방향 홈", "실제 자물쇠"],
     objective: "분담한 현장 기억으로 네 갈림길을 통과하고 문장과 방향 기록의 의미를 복원합니다.",
+    hints: {
+      focus: "4개 루프 갈림길마다 기억 담당 A~D가 기록해 둔 현장 문장 조각에 집중하십시오.",
+      contrast: "익숙하고 편안해 보이는 선택(루프) 대신, 말씀을 기억하며 나아가는 '불편하지만 진실된 길'의 순서를 대조하십시오.",
+      action: "'문을 떠난다 → 기억한다 → 좁은 길 → 더 나은 본향' 순서로 길을 선택하여 루프를 통과하십시오.",
+    },
     render: renderLoopPuzzleV2,
   },
   home: {
@@ -63,6 +88,11 @@ const puzzles = {
     message: "최종 사건파일이 열렸습니다. 활동 페이지에 마지막 코드를 입력하십시오.",
     evidence: ["키워드 5개", "색상 순서", "최종 선언문", "팀 이름"],
     objective: "앞선 키워드를 순서대로 배치하고 팀 이름으로 귀향 선언문을 완성합니다.",
+    hints: {
+      focus: "00~04 현장에서 회수한 5개의 디지털 키워드 카드(나그네, 장막, 약속, 청지기, 더 나은 본향)에 시선을 두십시오.",
+      contrast: "스테이지 순서대로 회수된 키워드의 의미와 귀향 선언문의 빈칸 위치를 대조하십시오.",
+      action: "5개 키워드를 순서대로 조합 및 배치하고 팀 이름을 작성하여 최종 귀향 선언을 완료하십시오.",
+    },
     render: renderHomePuzzle,
   },
 };
@@ -127,6 +157,110 @@ function triggerFeedbackShake(feedbackEl, message) {
   }
 }
 
+function updateHeaderKeywordBadge() {
+  const headerKeywordBadge = document.querySelector("#headerKeywordBadge");
+  if (!headerKeywordBadge) return;
+  const count = coreStageIds.filter((id) => isStageSolved(id)).length;
+  headerKeywordBadge.textContent = `🔑 키워드 ${count} / 5`;
+}
+
+function setupAutonomousHintSystem() {
+  const hintStep1Content = document.querySelector("#hintStep1Content");
+  const hintStep2Content = document.querySelector("#hintStep2Content");
+  const hintStep3Content = document.querySelector("#hintStep3Content");
+  const hintStatusBadge = document.querySelector("#hintStatusBadge");
+
+  if (!puzzle.hints) return;
+
+  if (hintStep1Content) hintStep1Content.textContent = puzzle.hints.focus;
+  if (hintStep2Content) hintStep2Content.textContent = puzzle.hints.contrast;
+  if (hintStep3Content) hintStep3Content.textContent = puzzle.hints.action;
+
+  const detailsElements = document.querySelectorAll(".hint-steps-grid details");
+  const viewedSteps = new Set();
+
+  detailsElements.forEach((details, idx) => {
+    details.addEventListener("toggle", () => {
+      if (details.open && !viewedSteps.has(idx)) {
+        viewedSteps.add(idx);
+        if (hintStatusBadge) {
+          hintStatusBadge.textContent = `힌트 열람 ${viewedSteps.size}건`;
+        }
+        try {
+          const hintsUsed = Number(localStorage.getItem("homeward-team-hints") || "0") + 1;
+          localStorage.setItem("homeward-team-hints", hintsUsed.toString());
+
+          const progress = JSON.parse(localStorage.getItem("homeward-case-progress") || "{}");
+          progress.hintsCount = (progress.hintsCount || 0) + 1;
+          localStorage.setItem("homeward-case-progress", JSON.stringify(progress));
+        } catch (e) {
+          console.error("Hint count save error:", e);
+        }
+      }
+    });
+  });
+}
+
+function fallbackCopyText(text, statusEl) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    document.execCommand("copy");
+    if (statusEl) {
+      statusEl.textContent = "✅ 코드가 복사되었으며 사건 수첩에 자동 기록되었습니다!";
+    }
+  } catch (err) {
+    if (statusEl) {
+      statusEl.textContent = `코드 [ ${text} ] 사건 수첩에 자동 기록 완료!`;
+    }
+  }
+  document.body.removeChild(textarea);
+}
+
+function setupCopyRecordAction() {
+  const copyBtn = document.querySelector("#copyRecordBtn");
+  const copyStatusMsg = document.querySelector("#copyStatusMsg");
+  if (!copyBtn) return;
+
+  copyBtn.addEventListener("click", () => {
+    try {
+      localStorage.setItem(`homeward-solved-${stageId}`, "true");
+      localStorage.setItem(`homeward-keyword-${stageId}`, puzzle.keyword);
+      const progress = JSON.parse(localStorage.getItem("homeward-case-progress") || "{}");
+      if (!progress.completed) progress.completed = {};
+      progress.completed[stageId] = true;
+      if (!progress.codes) progress.codes = {};
+      progress.codes[stageId] = puzzle.code;
+      localStorage.setItem("homeward-case-progress", JSON.stringify(progress));
+      updateHeaderKeywordBadge();
+    } catch (e) {
+      console.error("Save progress error:", e);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(puzzle.code)
+        .then(() => {
+          if (copyStatusMsg) {
+            copyStatusMsg.textContent = "✅ 코드가 클립보드에 복사되었으며 사건 수첩에 자동 기록되었습니다!";
+          }
+        })
+        .catch(() => {
+          fallbackCopyText(puzzle.code, copyStatusMsg);
+        });
+    } else {
+      fallbackCopyText(puzzle.code, copyStatusMsg);
+    }
+  });
+}
+
+updateHeaderKeywordBadge();
+setupAutonomousHintSystem();
+setupCopyRecordAction();
+
 if (qrToken !== expectedQrToken && !adminPreview) {
   document.querySelector("#gameStep").textContent = "Locked";
   document.querySelector("#gameTitle").textContent = "현장 QR이 필요합니다";
@@ -171,6 +305,9 @@ if (qrToken !== expectedQrToken && !adminPreview) {
   completeLink.href = `activity.html?stage=${stageId}`;
   renderShell();
   puzzle.render();
+  if (isStageSolved(stageId)) {
+    unlock();
+  }
 }
 
 function renderShell() {
@@ -193,6 +330,20 @@ function unlock() {
   solved = true;
   localStorage.setItem(`homeward-solved-${stageId}`, "true");
   localStorage.setItem(`homeward-keyword-${stageId}`, puzzle.keyword);
+
+  try {
+    const progress = JSON.parse(localStorage.getItem("homeward-case-progress") || "{}");
+    if (!progress.completed) progress.completed = {};
+    progress.completed[stageId] = true;
+    if (!progress.codes) progress.codes = {};
+    progress.codes[stageId] = puzzle.code;
+    localStorage.setItem("homeward-case-progress", JSON.stringify(progress));
+  } catch (e) {
+    console.error("Auto record progress error:", e);
+  }
+
+  updateHeaderKeywordBadge();
+
   codeValue.textContent = puzzle.code;
   codeMessage.textContent = puzzle.message;
   codePanel.hidden = false;

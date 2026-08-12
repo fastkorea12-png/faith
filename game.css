@@ -1,14 +1,21 @@
 :root {
   color-scheme: light;
-  --bg: #edf0e8;
-  --paper: #fffdf6;
-  --ink: #20231f;
-  --muted: #687066;
-  --line: #d4d9cf;
-  --forest: #243a31;
-  --leaf: #6f8a5d;
-  --clay: #9b563d;
-  --gold: #b98a35;
+  --bg: #e5dfd3;
+  --paper: #fcf8ee;
+  --paper-pattern: rgba(245, 237, 222, 0.95);
+  --ink: #1f241e;
+  --muted: #5e665c;
+  --line: #cbcfc4;
+  --forest: #1f352b;
+  --leaf: #567345;
+  --clay: #944931;
+  --gold: #b3822a;
+  --gold-glow: #e2af43;
+  --stamp-red: #aa2828;
+  --warn: #8a3d31;
+  --postit-yellow: #fbf3cd;
+  --postit-green: #e1f2db;
+  --postit-blue: #deebf7;
 }
 
 * {
@@ -18,37 +25,73 @@
 body {
   margin: 0;
   font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-  background: var(--bg);
+  background:
+    linear-gradient(rgba(229, 223, 211, 0.9), rgba(215, 207, 192, 0.96)),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.015) 0px, rgba(0, 0, 0, 0.015) 1px, transparent 1px, transparent 4px),
+    url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80");
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
   color: var(--ink);
 }
 
 button,
 select,
-input {
+input,
+textarea {
   font: inherit;
 }
 
+.notebook-wrapper {
+  position: relative;
+  width: min(1000px, calc(100% - 24px));
+  margin: 20px auto 60px;
+}
+
+.binder-rings {
+  position: absolute;
+  top: 40px;
+  left: -14px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 120px;
+  pointer-events: none;
+}
+
+.binder-rings .ring {
+  width: 28px;
+  height: 14px;
+  border: 2px solid #5a5f56;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #d8ddd5, #7a8276 50%, #474d43);
+  box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.35);
+}
+
 .game-shell {
-  width: min(980px, calc(100% - 28px));
+  width: 100%;
   margin: 0 auto;
-  padding: 24px 0 56px;
+  padding: 0;
 }
 
 .game-header,
 .game-board,
+.hint-system-panel,
 .code-panel {
-  border: 1px solid rgba(36, 58, 49, 0.16);
-  border-radius: 8px;
-  background: rgba(255, 253, 246, 0.96);
-  box-shadow: 0 18px 42px rgba(32, 35, 31, 0.1);
+  position: relative;
+  border: 1px solid rgba(36, 58, 49, 0.22);
+  border-radius: 12px;
+  background:
+    linear-gradient(rgba(252, 248, 238, 0.94), rgba(248, 241, 227, 0.96)),
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(179, 130, 42, 0.08) 28px);
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.04),
+    0 16px 36px rgba(32, 35, 31, 0.14);
 }
 
 .game-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 18px;
-  padding: clamp(20px, 4vw, 36px);
+  padding: clamp(20px, 4vw, 32px);
+  margin-bottom: 16px;
 }
 
 .eyebrow {
@@ -1954,4 +1997,300 @@ input {
   .ledger-row small {
     font-size: 10px;
   }
+}
+
+/* ==========================================================================
+   조사팀 사건 수첩 (Investigator's Case Notebook) 테마 & 자율 힌트 고도화
+   ========================================================================== */
+
+.tape-mark {
+  position: absolute;
+  top: -12px;
+  left: 30%;
+  width: 90px;
+  height: 24px;
+  background: rgba(240, 230, 190, 0.65);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transform: rotate(-2deg);
+  pointer-events: none;
+}
+
+.header-content {
+  display: grid;
+  gap: 10px;
+}
+
+.header-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.eyebrow-tag {
+  color: var(--clay);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.keyword-counter-badge {
+  border: 1px solid var(--gold);
+  border-radius: 20px;
+  padding: 5px 14px;
+  background: rgba(179, 130, 42, 0.14);
+  color: var(--forest);
+  font-weight: 900;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.lead-desc {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.header-action-row {
+  margin-top: 6px;
+}
+
+.back-notebook-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--forest);
+  border-radius: 8px;
+  padding: 10px 18px;
+  background: var(--forest);
+  color: #fcf8ee;
+  font-weight: 900;
+  text-decoration: none;
+  transition: transform 120ms ease, background-color 120ms ease;
+}
+
+.back-notebook-btn:hover {
+  background: #14241d;
+  transform: translateY(-1px);
+}
+
+/* 무인 자율 힌트 시스템 3단계 (시선/대조/행동) */
+.hint-system-panel {
+  margin-top: 20px;
+  padding: clamp(20px, 3.5vw, 30px);
+  border: 2px solid rgba(179, 130, 42, 0.35);
+  background:
+    radial-gradient(circle at 90% 10%, rgba(226, 175, 67, 0.06), transparent 50%),
+    linear-gradient(rgba(252, 248, 238, 0.96), rgba(246, 238, 222, 0.98));
+}
+
+.hint-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+  border-bottom: 2px solid rgba(179, 130, 42, 0.2);
+  padding-bottom: 10px;
+}
+
+.hint-title-group h2 {
+  margin: 0;
+  font-size: clamp(20px, 3vw, 26px);
+  color: var(--forest);
+}
+
+.hint-status-badge {
+  border: 1px solid var(--gold);
+  border-radius: 20px;
+  padding: 4px 12px;
+  background: rgba(179, 130, 42, 0.1);
+  color: var(--forest);
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.hint-subtext {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.hint-steps-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.hint-card {
+  border: 1px solid #d4c89e;
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.05);
+  transition: background-color 200ms ease;
+}
+
+.sticky-note-step1 {
+  background: var(--postit-yellow);
+}
+
+.sticky-note-step2 {
+  background: var(--postit-green);
+}
+
+.sticky-note-step3 {
+  background: var(--postit-blue);
+}
+
+.hint-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-weight: 900;
+  color: var(--forest);
+  user-select: none;
+  list-style: none;
+}
+
+.hint-summary::-webkit-details-marker {
+  display: none;
+}
+
+.hint-step-badge {
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 900;
+  margin-right: 8px;
+  color: #ffffff;
+}
+
+.hint-step-badge.step1 {
+  background: var(--clay);
+}
+
+.hint-step-badge.step2 {
+  background: var(--leaf);
+}
+
+.hint-step-badge.step3 {
+  background: var(--forest);
+}
+
+.hint-toggle-icon {
+  font-size: 12px;
+  transition: transform 200ms ease;
+}
+
+details[open] .hint-toggle-icon {
+  transform: rotate(180deg);
+}
+
+.hint-content {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.15);
+  color: var(--ink);
+  line-height: 1.65;
+  font-size: 15px;
+}
+
+/* 퍼즐 해금 코드 패널 & 스탬프 쾅! 연출 */
+.code-panel {
+  position: relative;
+  margin-top: 20px;
+  padding: clamp(24px, 4vw, 40px);
+  border: 2px solid var(--gold);
+  text-align: center;
+  overflow: hidden;
+}
+
+.stamp-unlocked {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  border: 3px double var(--stamp-red);
+  border-radius: 6px;
+  padding: 6px 16px;
+  color: var(--stamp-red);
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transform: rotate(-10deg) scale(3);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.code-panel.revealed .stamp-unlocked {
+  animation: stampDrop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes stampDrop {
+  0% {
+    opacity: 0;
+    transform: rotate(-25deg) scale(3);
+  }
+  100% {
+    opacity: 0.9;
+    transform: rotate(-10deg) scale(1);
+  }
+}
+
+.code-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.copy-record-btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 20px;
+  background: var(--clay);
+  color: #fcf8ee;
+  font-weight: 900;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(148, 73, 49, 0.3);
+  transition: transform 120ms ease, background-color 120ms ease;
+}
+
+.copy-record-btn:hover {
+  background: #7a3924;
+  transform: translateY(-1px);
+}
+
+.complete-link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--forest);
+  border-radius: 8px;
+  padding: 12px 20px;
+  background: var(--forest);
+  color: #fcf8ee;
+  font-weight: 900;
+  font-size: 15px;
+  text-decoration: none;
+  transition: transform 120ms ease, background-color 120ms ease;
+}
+
+.complete-link-btn:hover {
+  background: #14241d;
+  transform: translateY(-1px);
+}
+
+.copy-status-msg {
+  margin-top: 10px;
+  font-weight: 900;
+  color: var(--leaf);
+  font-size: 14px;
+  min-height: 20px;
 }

@@ -3,29 +3,110 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>본향 사건파일 | 현장 퍼즐</title>
+    <title>본향 사건파일 | 현장 퍼즐 감식</title>
     <link rel="stylesheet" href="game.css" />
   </head>
   <body>
-    <main class="game-shell">
-      <header class="game-header">
-        <div>
-          <p class="eyebrow" id="gameStep">CASE</p>
-          <h1 id="gameTitle">현장 퍼즐</h1>
-          <p id="gameIntro"></p>
-        </div>
-        <a id="guideLink" class="guide-link" href="activity.html">가이드 페이지</a>
-      </header>
+    <div class="notebook-wrapper">
+      <!-- 사건 수첩 바인더 링 장식 -->
+      <div class="binder-rings" aria-hidden="true">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+      </div>
 
-      <section class="game-board" id="gameBoard"></section>
+      <main class="game-shell notebook-container">
+        <!-- 현장 감식 파일 상단 헤더 -->
+        <header class="game-header notebook-cover">
+          <div class="tape-mark"></div>
+          <div class="header-content">
+            <div class="header-badge-row">
+              <span class="eyebrow-tag" id="gameStep">FIELD EVIDENCE SHEET</span>
+              <span class="keyword-counter-badge" id="headerKeywordBadge">🔑 키워드 0 / 5</span>
+            </div>
+            <h1 id="gameTitle">현장 퍼즐</h1>
+            <p id="gameIntro" class="lead-desc"></p>
+            <div class="header-action-row">
+              <a id="guideLink" class="back-notebook-btn" href="activity.html">← 조사팀 사건 수첩으로 돌아가기</a>
+            </div>
+          </div>
+        </header>
 
-      <section class="code-panel" id="codePanel" hidden>
-        <p class="eyebrow">Unlocked Code</p>
-        <h2 id="codeValue"></h2>
-        <p id="codeMessage"></p>
-        <a id="completeLink" href="activity.html">활동 페이지에 코드 입력하기</a>
-      </section>
-    </main>
+        <!-- 퍼즐 메인 감식 판 -->
+        <section class="game-board notebook-page" id="gameBoard"></section>
+
+        <!-- 무인 자율 힌트 시스템 3단계 (시선/대조/행동) -->
+        <section class="hint-system-panel notebook-page" id="hintSystemPanel">
+          <div class="hint-header">
+            <div class="hint-title-group">
+              <span class="eyebrow">AUTONOMOUS HINT SYSTEM</span>
+              <h2>💡 무인 자율 힌트 시스템 (3단계)</h2>
+            </div>
+            <span class="hint-status-badge" id="hintStatusBadge">힌트 열람 0건</span>
+          </div>
+          <p class="hint-subtext">조사 진행 막힘 방지를 위해 1단계(시선), 2단계(대조), 3단계(행동) 자율 힌트를 조회할 수 있습니다.</p>
+
+          <div class="hint-steps-grid">
+            <!-- 1단계: 시선 (Focus) -->
+            <details class="hint-card sticky-note-step1" id="hintStep1Details">
+              <summary class="hint-summary">
+                <span class="hint-step-badge step1">1단계</span>
+                <strong>시선 (Focus) - 관찰 포인트</strong>
+                <span class="hint-toggle-icon">▼</span>
+              </summary>
+              <div class="hint-content" id="hintStep1Content">
+                <!-- JS dynamic inserted -->
+              </div>
+            </details>
+
+            <!-- 2단계: 대조 (Contrast) -->
+            <details class="hint-card sticky-note-step2" id="hintStep2Details">
+              <summary class="hint-summary">
+                <span class="hint-step-badge step2">2단계</span>
+                <strong>대조 (Contrast) - 규칙 & 모순 감식</strong>
+                <span class="hint-toggle-icon">▼</span>
+              </summary>
+              <div class="hint-content" id="hintStep2Content">
+                <!-- JS dynamic inserted -->
+              </div>
+            </details>
+
+            <!-- 3단계: 행동 (Action) -->
+            <details class="hint-card sticky-note-step3" id="hintStep3Details">
+              <summary class="hint-summary">
+                <span class="hint-step-badge step3">3단계</span>
+                <strong>행동 (Action) - 정답 & 자물쇠 해금</strong>
+                <span class="hint-toggle-icon">▼</span>
+              </summary>
+              <div class="hint-content" id="hintStep3Content">
+                <!-- JS dynamic inserted -->
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- 퍼즐 해금 시 나타나는 코드 패널 -->
+        <section class="code-panel notebook-page" id="codePanel" hidden>
+          <div class="stamp-unlocked" id="stampUnlocked">EVIDENCE UNLOCKED</div>
+          <div class="code-content">
+            <p class="eyebrow">UNLOCKED CODE</p>
+            <h2 id="codeValue"></h2>
+            <p id="codeMessage"></p>
+            <div class="code-action-group">
+              <button type="button" id="copyRecordBtn" class="copy-record-btn">
+                📋 사건 수첩에 코드 자동 기록 & 복사
+              </button>
+              <a id="completeLink" class="complete-link-btn" href="activity.html">
+                📖 사건 수첩으로 이동하기
+              </a>
+            </div>
+            <p id="copyStatusMsg" class="copy-status-msg" aria-live="polite"></p>
+          </div>
+        </section>
+      </main>
+    </div>
 
     <script src="config.js"></script>
     <script src="game.js"></script>
