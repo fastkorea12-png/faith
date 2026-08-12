@@ -18,16 +18,16 @@ const puzzles = {
   bag: {
     step: "01 / 야외 시설",
     title: "너무 오래 머문 자리",
-    intro: "쉬는 자리를 집으로 착각하게 만든 네 표식을 찾아 잠긴 봉투를 여십시오.",
+    intro: "현장에서 발견한 메모 한 장으로 쉬는 자리를 집으로 착각하게 만든 네 표식의 순서를 읽어내고, 실제 키박스를 여십시오.",
     code: "TENT-01",
     keyword: "장막",
-    message: "봉투 속 '장막 카드'를 확보하십시오. 활동 페이지에 완료 코드를 입력하면 다음 장소가 열립니다.",
-    evidence: ["그늘 표식", "벤치 표식", "돌 표식", "길목 표식", "4자리 자물쇠"],
-    objective: "야외 시설에서 네 표식의 숫자를 찾고, 화면이 제시하는 순서대로 조합해 봉투 자물쇠를 엽니다.",
+    message: "키박스 속 '장막 카드'를 확보하십시오. 활동 페이지에 완료 코드를 입력하면 다음 장소가 열립니다.",
+    evidence: ["발견된 메모", "그늘 표식", "벤치 표식", "돌 표식", "길목 표식", "4자리 키박스"],
+    objective: "현장 메모에 등장한 순서대로 네 표식(그늘, 벤치, 돌, 길목)의 숫자를 찾아 조합해 키박스를 엽니다.",
     hints: {
-      focus: "야외 휴식 공간의 네 표식(그늘, 벤치, 돌, 길목)에 새겨진 숫자 표식을 주시하십시오.",
-      contrast: "사건 지침의 순서인 '그늘 → 벤치(함께 앉는 자리) → 돌(낮은 무게) → 길목' 순서로 각 표식의 숫자를 읽어 대조하십시오.",
-      action: "순서대로 읽은 4자리 자물쇠 비밀번호 '2741'을 맞춰 봉투 자물쇠를 해금하십시오.",
+      focus: "메모는 순서를 알려 주는 목록이 아닙니다. 문장을 다시 읽으며 장소가 언급되는 순서를 그대로 따라가십시오.",
+      contrast: "메모 속 '그늘 → 벤치 → 돌베개 → 길목' 순서로 각 표식의 숫자를 읽어 대조하십시오.",
+      action: "순서대로 읽은 4자리 번호 '2741'을 키박스에 맞춰 여십시오.",
     },
     render: renderFieldPuzzle,
   },
@@ -560,22 +560,53 @@ function renderCasePuzzle() {
 
 function renderFieldPuzzle() {
   const surface = getSurface();
+  const state = loadPuzzleState("bag", { opened: false, solved: false });
+  const persist = () => savePuzzleState("bag", state);
 
-  surface.innerHTML = `
-    <p class="instruction">야외 시설에 숨겨진 숫자 표식 4개를 찾으십시오. 이 화면은 자물쇠 번호를 입력하는 곳이 아니라, 표식을 읽는 순서를 알려 주는 현장 지시문입니다.</p>
-    <div class="field-map">
-      <article><span>첫 번째</span><strong>그늘 아래 오래 머문 자리</strong><p>가장 편한 곳부터 확인하고, 현장 표식의 숫자를 기록하십시오.</p></article>
-      <article><span>두 번째</span><strong>둘이 앉지만 한 방향을 보는 자리</strong><p>벤치나 의자 주변에서 두 번째 숫자를 찾으십시오.</p></article>
-      <article><span>세 번째</span><strong>무게가 놓인 낮은 자리</strong><p>돌 또는 낮은 구조물 주변의 표식을 확인하십시오.</p></article>
-      <article><span>네 번째</span><strong>다시 길이 갈라지는 자리</strong><p>길목의 마지막 표식을 읽고 네 자리 번호를 완성하십시오.</p></article>
-    </div>
-    <div class="lock-result">
-      <strong>다음 행동</strong>
-      <p>네 자리 숫자를 찾았다면 실제 자물쇠 봉투를 여십시오. 봉투 안에 들어 있는 완료 코드를 활동 페이지에 입력하면 다음 장소가 열립니다.</p>
-      <a class="primary-button" href="activity.html?stage=bag">활동 페이지로 돌아가기</a>
-    </div>
-    <p class="feedback" id="feedback">쉬는 자리는 필요하지만, 목적지가 되면 길을 멈추게 합니다.</p>
-  `;
+  function draw() {
+    if (state.opened) {
+      surface.innerHTML = `
+        <section class="lock-result">
+          <strong>키박스 개방 완료</strong>
+          <p>완료 코드 <strong>TENT-01</strong>을 확인했습니다. 활동 페이지에 입력하십시오.</p>
+        </section>
+        <p class="feedback" id="feedback">쉬는 자리는 필요하지만, 목적지가 되면 길을 멈추게 합니다.</p>
+        <a class="primary-button" href="activity.html?stage=bag">활동 페이지로 돌아가기</a>
+      `;
+      return;
+    }
+
+    surface.innerHTML = `
+      <p class="instruction">현장에 떨어진 메모 한 장을 발견했습니다. 순서를 알려 주는 목록이 아니라, 문장 속에서 스스로 장소의 순서를 읽어내야 합니다.</p>
+      <div class="field-memo">
+        <span class="eyebrow">발견된 메모</span>
+        <p>"그늘에 앉아 벤치를 보니, 저곳이 더 편해 보이는구나. 내가 머물 곳은 돌베개를 베고 자는 것처럼 불편한 곳이고 싶지는 않다. 하지만 저 길목이 나를 부른다."</p>
+      </div>
+      <div class="field-map">
+        <article><strong>그늘 아래 오래 머문 자리</strong><p>가장 편한 곳부터 확인하고, 현장 표식의 숫자를 기록하십시오.</p></article>
+        <article><strong>다시 길이 갈라지는 자리</strong><p>길목의 표식을 확인하십시오.</p></article>
+        <article><strong>둘이 앉지만 한 방향을 보는 자리</strong><p>벤치나 의자 주변에서 표식을 찾으십시오.</p></article>
+        <article><strong>무게가 놓인 낮은 자리</strong><p>돌 또는 낮은 구조물 주변의 표식을 확인하십시오.</p></article>
+      </div>
+      <div class="lock-result">
+        <strong>다음 행동</strong>
+        <p>메모에 등장한 순서대로 네 표식의 숫자를 읽어 네 자리 번호를 완성하고, 실제 키박스를 여십시오.</p>
+        <button class="primary-button" id="openedField" type="button">실제 키박스를 열었다</button>
+      </div>
+      <p class="feedback" id="feedback">쉬는 자리는 필요하지만, 목적지가 되면 길을 멈추게 합니다.</p>
+    `;
+
+    document.querySelector("#openedField").addEventListener("click", () => {
+      state.opened = true;
+      state.solved = true;
+      persist();
+      draw();
+      unlock();
+    });
+  }
+
+  draw();
+  if (state.solved) unlock();
 }
 
 function renderPhonePuzzleV2() {
