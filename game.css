@@ -1716,6 +1716,22 @@ input {
 .record-grid button { display: grid; gap: 6px; padding: 12px; text-align: left; }
 .record-grid button span, .record-grid button small { color: var(--muted); }
 .record-grid button.selected { outline: 3px solid var(--clay); background: rgba(155,86,61,.1); }
+.role-grid .role-card { display: grid; gap: 4px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: rgba(111,138,93,.08); color: var(--forest); text-align: left; cursor: pointer; }
+.role-grid .role-card.selected { outline: 2px solid var(--forest); background: rgba(111,138,93,.22); font-weight: 900; }
+.role-grid .role-card small { color: var(--muted); font-size: 12px; }
+
+.authority-summary { display: grid; gap: 6px; border: 1px dashed var(--line); border-radius: 8px; padding: 12px; background: rgba(240, 232, 213, 0.5); font-size: 13px; line-height: 1.4; color: var(--ink); }
+.authority-summary strong { color: var(--forest); font-size: 14px; margin-bottom: 2px; }
+.authority-summary div b { color: var(--clay); }
+.authority-summary div small { color: var(--muted); }
+.authority-summary div em { display: block; color: var(--forest); font-style: italic; font-size: 12px; }
+
+.lock-sequence-box { display: flex; justify-content: space-around; align-items: center; gap: 8px; padding: 14px; border: 2px solid var(--forest); border-radius: 8px; background: rgba(111, 138, 93, 0.08); font-weight: 900; text-align: center; }
+.lock-sequence-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.lock-sequence-item .mark { font-size: 24px; color: var(--clay); }
+.lock-sequence-item .item-name { font-size: 14px; color: var(--forest); }
+.lock-sequence-item .shelf-num { font-size: 20px; font-weight: 950; color: var(--ink); }
+
 .physical-lock-note { border: 1px solid rgba(185,138,53,.5); border-radius: 8px; padding: 14px; background: rgba(185,138,53,.12); color: var(--forest); font-weight: 900; }
 .memory-call { border-left: 4px solid var(--gold); padding-left: 12px; font-weight: 900; }
 .physical-only { margin: 0; }

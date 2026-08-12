@@ -282,41 +282,154 @@ function renderPhonePuzzleV2() {
 
 function renderInventoryPuzzleV2() {
   const surface = getSurface();
-  const state = loadPuzzleState("ledger", { step: "briefing", found: [], suspects: [], culprit: "", checks: [], solved: false });
+  const state = loadPuzzleState("ledger", {
+    step: "briefing",
+    roles: [],
+    found: [],
+    suspects: [],
+    culprit: "",
+    checks: [],
+    solved: false,
+  });
   const items = [
     { id: "wheat", mark: "○", item: "밀", found: "조리대", shelf: 2, text: "먼저 처리 — 조리대로 이동", author: "배급 담당", altered: true },
     { id: "oil", mark: "△", item: "기름", found: "출입구", shelf: 3, text: "먼저 처리 — 출입구로 이동", author: "배급 담당", altered: true },
     { id: "salt", mark: "□", item: "소금", found: "조리대", shelf: 4, text: "먼저 처리 — 조리대로 이동", author: "배급 담당", altered: true },
-    { id: "bean", mark: "◇", item: "콩", found: "선반 5", shelf: 5, text: "확인 뒤 인계 — 원래 자리 유지", author: "장부 담당" },
-    { id: "fruit", mark: "☆", item: "건과일", found: "선반 1", shelf: 1, text: "확인 뒤 인계 — 원래 자리 유지", author: "보관 담당" },
-    { id: "water", mark: "+", item: "물", found: "선반 6", shelf: 6, text: "확인 뒤 인계 — 원래 자리 유지", author: "열쇠 담당" },
+    { id: "bean", mark: "◇", item: "콩", found: "선반 5", shelf: 5, text: "확인 뒤 인계 — 원래 자리 유지", author: "장부 담당", altered: false },
+    { id: "fruit", mark: "☆", item: "건과일", found: "선반 1", shelf: 1, text: "확인 뒤 인계 — 원래 자리 유지", author: "보관 담당", altered: false },
+    { id: "water", mark: "+", item: "물", found: "선반 6", shelf: 6, text: "확인 뒤 인계 — 원래 자리 유지", author: "열쇠 담당", altered: false },
   ];
+  const roleList = [
+    { name: "수색 담당 A", task: "조리대와 홀수 선반의 재고 카드 3장 회수" },
+    { name: "수색 담당 B", task: "출입구와 짝수 선반의 재고 카드 3장 회수" },
+    { name: "보관 복원 담당", task: "원본 선반 안내도 지침으로 카드 6장 위치 복원" },
+    { name: "기록 감식 담당", task: "웹 변경 기록 6건 감식 및 반복 문구 포착" },
+    { name: "권한 확인 담당", task: "네 담당자 권한표 대조해 직권 오남용 판단" },
+    { name: "반증·발표 담당", task: "사실·추론·결론 정리 및 최종 지목" },
+  ];
+  const authorityList = [
+    { role: "보관 담당", perm: "봉인 전 선반 배치", forbid: "장부 문장 수정", quote: "“원본 안내도대로 여섯 자리를 채웠다.”" },
+    { role: "장부 담당", perm: "인계 완료 뒤 문장 확정", forbid: "혼자 위치 변경", quote: "“`확인 뒤 인계`가 원래 문장이다.”" },
+    { role: "열쇠 담당", perm: "두 사람 입회 때 창고 개방", forbid: "카드·장부 단독 변경", quote: "“봉인 뒤에는 혼자 문을 연 적이 없다.”" },
+    { role: "배급 담당", perm: "확정된 장부대로 전달", forbid: "위치·조건 임의 변경", quote: "“급한 품목은 먼저 처리해도 된다고 판단했다.”" },
+  ];
+
   surface.innerHTML = `<p class="instruction">역할을 나누고 원본 위치·변경 문장·권한을 대조해 실제 상자의 번호를 복원하십시오.</p>${adminPreview ? `<button class="secondary-button admin-reset" id="resetLedger" type="button">관리자: 이 스테이지 초기화</button>` : ""}<section class="case-flow" id="ledgerFlow"></section><p class="feedback" id="feedback" aria-live="polite"></p>`;
   const flow = document.querySelector("#ledgerFlow");
   const feedback = document.querySelector("#feedback");
   const persist = () => savePuzzleState("ledger", state);
-  const advance = step => { state.step = step; persist(); draw(); };
+  const advance = (step) => {
+    state.step = step;
+    persist();
+    draw();
+  };
+
   function draw() {
-    const progress = `<div class="flow-progress">브리핑 · 수색 · 복원 · 기록 감식 · 용의자 · 실제 자물쇠</div>`;
-    if (state.step === "briefing") flow.innerHTML = `${progress}<h3>식량 장부 사건 브리핑</h3><p>수색 A/B, 보관 복원, 기록 감식, 권한 확인, 반증·발표 역할을 나누십시오. 최소 세 역할이 결론 전에 근거를 확인해야 합니다.</p><div class="role-grid">${["수색 A", "수색 B", "보관 복원", "기록 감식", "권한 확인", "반증·발표"].map(x => `<span>${x}</span>`).join("")}</div><button class="primary-button" id="next" type="button">역할 배정 완료</button>`;
-    if (state.step === "search") flow.innerHTML = `${progress}<h3>재고 카드 6장 회수</h3><p>발견 위치는 원래 위치가 아닐 수 있습니다. 찾은 카드만 체크하십시오.</p><div class="check-grid">${items.map(x => `<button data-found="${x.id}" class="${state.found.includes(x.id) ? "selected" : ""}">${x.mark} ${x.item}<small>${x.found}</small></button>`).join("")}</div><button class="primary-button" id="next" ${state.found.length === 6 ? "" : "disabled"}>6장 인계</button>`;
-    if (state.step === "restore") flow.innerHTML = `${progress}<h3>봉인 전 원본 선반 안내도</h3><ol class="shelf-clues"><li>물은 가장 아래 선반</li><li>콩은 물 바로 위</li><li>소금은 콩 바로 위</li><li>기름은 소금 바로 위</li><li>밀은 기름 바로 위</li><li>건과일은 가장 위</li></ol><div class="shelf-stack">${[1,2,3,4,5,6].map(n => `<div><b>선반 ${n}</b><span>${items.find(x => x.shelf === n).mark} ${items.find(x => x.shelf === n).item}</span></div>`).join("")}</div><button class="primary-button" id="next">현장 매트 복원 완료</button>`;
-    if (state.step === "audit") flow.innerHTML = `${progress}<h3>변경 기록 6건 감식</h3><p>원래 선반, 원본 문장 ‘확인 뒤 인계’, 담당 권한이 모두 어긋난 세 건을 선택하십시오.</p><div class="record-grid">${items.map(x => `<button data-suspect="${x.id}" class="${state.suspects.includes(x.id) ? "selected" : ""}"><b>${x.mark} ${x.item}</b><span>발견: ${x.found}</span><span>${x.text}</span><small>${x.author}</small></button>`).join("")}</div><button class="primary-button" id="audit">의심 기록 3건 확정</button>`;
-    if (state.step === "accuse") flow.innerHTML = `${progress}<h3>사건 결론</h3><p>세 기록을 바꾼 사람을 고르기 전에 세 역할의 근거를 확인하십시오.</p><div class="check-grid">${["복원 위치 확인", "기록 문장 확인", "권한표 확인"].map(x => `<button data-check="${x}" class="${state.checks.includes(x) ? "selected" : ""}">${x}</button>`).join("")}</div><div class="choice-grid">${["보관 담당", "장부 담당", "열쇠 담당", "배급 담당"].map(x => `<button data-culprit="${x}">${x}</button>`).join("")}</div>`;
-    if (state.step === "unlock") flow.innerHTML = `${progress}<h3>인계 표식 순서: □ → △ → ○</h3><p>해당 품목 카드를 복원 매트에서 찾아 <strong>원래 선반 번호</strong>를 순서대로 읽고 실제 3자리 자물쇠를 여십시오.</p><div class="physical-lock-note">웹에는 번호를 입력하지 않습니다. 상자를 열었으면 안의 결과 카드를 꺼내십시오.</div><button class="primary-button" id="opened">실제 상자를 열었다</button>`;
-    if (state.step === "complete") flow.innerHTML = `${progress}<h3>결과 카드 확인</h3><p>상자 안 카드의 키워드와 완료 코드를 확인해 활동 페이지에 기록하십시오.</p><a class="primary-button" href="activity.html?stage=ledger">활동 페이지로 이동</a>`;
+    const progress = `<div class="flow-progress">1. 브리핑 · 2. 수색 · 3. 복원 · 4. 기록 감식 · 5. 용의자 · 6. 자물쇠 · 7. 완료</div>`;
+
+    if (state.step === "briefing") {
+      flow.innerHTML = `${progress}<h3>03 식량 장부 사건 브리핑</h3><p>수색 A/B, 보관 복원, 기록 감식, 권한 확인, 반증·발표 역할을 나누십시오. 최소 세 역할이 결론 전에 근거를 확인해야 합니다.</p><div class="role-grid">${roleList.map((r) => `<button type="button" data-role="${r.name}" class="role-card ${state.roles.includes(r.name) ? "selected" : ""}"><strong>${r.name}</strong><small>${r.task}</small></button>`).join("")}</div><button class="primary-button" id="next" type="button">역할 배정 완료 (${state.roles.length}/6)</button>`;
+    }
+    if (state.step === "search") {
+      flow.innerHTML = `${progress}<h3>재고 카드 6장 회수</h3><p>조리대, 출입구, 선반 주변에서 찾은 흑백 재고 카드를 체크하십시오. 발견 위치는 원래 자리가 아닐 수 있습니다.</p><div class="check-grid">${items.map((x) => `<button type="button" data-found="${x.id}" class="${state.found.includes(x.id) ? "selected" : ""}"><b>${x.mark} ${x.item}</b><small>발견 장소: ${x.found}</small></button>`).join("")}</div><button class="primary-button" id="next" ${state.found.length === 6 ? "" : "disabled"}>6장 인계 (${state.found.length}/6)</button>`;
+    }
+    if (state.step === "restore") {
+      flow.innerHTML = `${progress}<h3>봉인 전 원본 선반 안내도 (웹 화면 A)</h3><p class="eyebrow">보관 복원 담당 지침</p><ol class="shelf-clues"><li>물은 가장 아래 선반에 둔다 (선반 6).</li><li>콩은 물 바로 위에 둔다 (선반 5).</li><li>소금은 콩 바로 위에 둔다 (선반 4).</li><li>기름은 소금 바로 위에 둔다 (선반 3).</li><li>밀은 기름 바로 위에 둔다 (선반 2).</li><li>건과일은 가장 위 선반에 둔다 (선반 1).</li></ol><div class="shelf-stack"><strong>복원된 원래 선반 위치 (현장 매트 대조용)</strong>${[1, 2, 3, 4, 5, 6].map((n) => { const item = items.find((x) => x.shelf === n); return `<div><b>선반 ${n}</b><span>${item.mark} ${item.item}</span></div>`; }).join("")}</div><p class="phone-caption">보관 복원 담당자는 현장 매트의 선반 1~6에 카드를 올바르게 배치했는지 확인하십시오.</p><button class="primary-button" id="next" type="button">현장 매트 복원 완료</button>`;
+    }
+    if (state.step === "audit") {
+      flow.innerHTML = `${progress}<h3>변경 기록 6건 감식 (웹 화면 B)</h3><p>원래 선반, 원본 문장 ‘확인 뒤 인계’, 담당 권한이 모두 어긋난 <strong>세 건의 조작 기록</strong>을 고르십시오.</p><div class="authority-summary"><strong>담당별 권한표 요약</strong>${authorityList.map((a) => `<div><b>${a.role}:</b> ${a.perm} | <small>금지: ${a.forbid}</small> <em>${a.quote}</em></div>`).join("")}</div><div class="record-grid">${items.map((x) => `<button type="button" data-suspect="${x.id}" class="${state.suspects.includes(x.id) ? "selected" : ""}"><b>${x.mark} ${x.item}</b><span>발견 장소: ${x.found}</span><span>기록 문장: ${x.text}</span><small>기록자: ${x.author}</small></button>`).join("")}</div><button class="primary-button" id="audit" type="button">의심 기록 3건 확정 (${state.suspects.length}/3)</button>`;
+    }
+    if (state.step === "accuse") {
+      flow.innerHTML = `${progress}<h3>사건 결론 (웹 화면 C)</h3><p>맡겨진 위치와 인계 원칙을 자기 판단으로 바꾼 담당자는 누구인가?</p><p class="eyebrow">세 역할의 근거 확인 (필수)</p><div class="check-grid">${["복원 위치 확인", "기록 문장 확인", "권한표 확인"].map((x) => `<button type="button" data-check="${x}" class="${state.checks.includes(x) ? "selected" : ""}">✓ ${x}</button>`).join("")}</div><p class="eyebrow">용의자 지목</p><div class="choice-grid">${["보관 담당", "장부 담당", "열쇠 담당", "배급 담당"].map((x) => `<button type="button" data-culprit="${x}">${x}</button>`).join("")}</div>`;
+    }
+    if (state.step === "unlock") {
+      flow.innerHTML = `${progress}<h3>실제 자물쇠 개방 지시</h3><div class="lock-sequence-box"><div class="lock-sequence-item"><span class="mark">□</span><span class="item-name">소금</span><span class="shelf-num">선반 4</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">△</span><span class="item-name">기름</span><span class="shelf-num">선반 3</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">○</span><span class="item-name">밀</span><span class="shelf-num">선반 2</span></div></div><p>복원 매트의 <strong>원래 선반 번호</strong>를 인계 표식 순서(<strong>□ → △ → ○</strong>)대로 읽어 실제 3자리 자물쇠를 여십시오.</p><div class="physical-lock-note">웹에는 번호를 입력하지 않습니다. 상자를 열었으면 안의 결과 카드를 꺼내십시오.</div><button class="primary-button" id="opened" type="button">실제 상자를 열었다</button>`;
+    }
+    if (state.step === "complete") {
+      flow.innerHTML = `${progress}<h3>결과 카드 확인</h3><p>배급 담당은 빠르게 나누려는 자기 판단으로 맡겨진 위치와 인계 원칙을 바꾸었습니다. 여러분은 수량을 맞춘 것이 아니라, 원래 뜻대로 자리를 복원하고 변경의 책임을 밝혔습니다. 맡은 것을 주인의 뜻대로 지키고 설명하는 사람이 청지기입니다.</p><div class="evidence-strip"><span>결과 키워드: 청지기</span><span>완료 코드: STEWARD-03</span></div><a class="primary-button" href="activity.html?stage=ledger">활동 페이지로 이동</a>`;
+    }
     bind();
   }
+
   function bind() {
-    document.querySelector("#next")?.addEventListener("click", () => advance({ briefing: "search", search: "restore", restore: "audit" }[state.step]));
-    flow.querySelectorAll("[data-found]").forEach(b => b.addEventListener("click", () => { state.found = state.found.includes(b.dataset.found) ? state.found.filter(x => x !== b.dataset.found) : [...state.found, b.dataset.found]; persist(); draw(); }));
-    flow.querySelectorAll("[data-suspect]").forEach(b => b.addEventListener("click", () => { state.suspects = state.suspects.includes(b.dataset.suspect) ? state.suspects.filter(x => x !== b.dataset.suspect) : state.suspects.length < 3 ? [...state.suspects, b.dataset.suspect] : state.suspects; persist(); draw(); }));
-    document.querySelector("#audit")?.addEventListener("click", () => { const correct = items.filter(x => x.altered).every(x => state.suspects.includes(x.id)) && state.suspects.length === 3; if (!correct) { feedback.textContent = state.suspects.length !== 3 ? "사라진 것은 세 건입니다. 같은 표현이 반복된 기록부터 찾으십시오." : "발견 장소만으로 판단하지 마십시오. 원래 선반, 문장, 권한을 모두 대조하십시오."; return; } advance("accuse"); });
-    flow.querySelectorAll("[data-check]").forEach(b => b.addEventListener("click", () => { if (!state.checks.includes(b.dataset.check)) state.checks.push(b.dataset.check); persist(); draw(); }));
-    flow.querySelectorAll("[data-culprit]").forEach(b => b.addEventListener("click", () => { if (state.checks.length < 3) { feedback.textContent = "최소 세 역할이 위치·문장·권한 근거를 모두 확인해야 합니다."; return; } if (b.dataset.culprit !== "배급 담당") { feedback.textContent = "그 담당자에게 위치와 인계 문장을 함께 바꿀 기회가 있었습니까?"; return; } state.culprit = b.dataset.culprit; advance("unlock"); }));
-    document.querySelector("#opened")?.addEventListener("click", () => { state.step = "complete"; state.solved = true; persist(); draw(); unlock(); });
+    flow.querySelectorAll("[data-role]").forEach((b) =>
+      b.addEventListener("click", () => {
+        const role = b.dataset.role;
+        state.roles = state.roles.includes(role) ? state.roles.filter((r) => r !== role) : [...state.roles, role];
+        persist();
+        draw();
+      })
+    );
+    document.querySelector("#next")?.addEventListener("click", () => {
+      if (state.step === "search" && state.found.length < 6) {
+        feedback.textContent = "현장에서 6장의 재고 카드를 모두 발견한 뒤 다음으로 진행하십시오.";
+        return;
+      }
+      advance({ briefing: "search", search: "restore", restore: "audit" }[state.step]);
+    });
+    flow.querySelectorAll("[data-found]").forEach((b) =>
+      b.addEventListener("click", () => {
+        state.found = state.found.includes(b.dataset.found) ? state.found.filter((x) => x !== b.dataset.found) : [...state.found, b.dataset.found];
+        persist();
+        draw();
+      })
+    );
+    flow.querySelectorAll("[data-suspect]").forEach((b) =>
+      b.addEventListener("click", () => {
+        state.suspects = state.suspects.includes(b.dataset.suspect)
+          ? state.suspects.filter((x) => x !== b.dataset.suspect)
+          : state.suspects.length < 3
+          ? [...state.suspects, b.dataset.suspect]
+          : state.suspects;
+        persist();
+        draw();
+      })
+    );
+    document.querySelector("#audit")?.addEventListener("click", () => {
+      const correct = items.filter((x) => x.altered).every((x) => state.suspects.includes(x.id)) && state.suspects.length === 3;
+      if (!correct) {
+        feedback.textContent = state.suspects.length !== 3
+          ? "사라진 것은 세 건입니다. 같은 표현이 반복된 기록부터 찾으십시오."
+          : "발견 장소만으로 판단하지 마십시오. 원래 선반, 문장, 권한이 모두 어긋나는지 확인하십시오.";
+        return;
+      }
+      advance("accuse");
+    });
+    flow.querySelectorAll("[data-check]").forEach((b) =>
+      b.addEventListener("click", () => {
+        if (!state.checks.includes(b.dataset.check)) state.checks.push(b.dataset.check);
+        persist();
+        draw();
+      })
+    );
+    flow.querySelectorAll("[data-culprit]").forEach((b) =>
+      b.addEventListener("click", () => {
+        if (state.checks.length < 3) {
+          feedback.textContent = "최소 세 역할이 위치·문장·권한 근거를 모두 확인해야 합니다.";
+          return;
+        }
+        if (b.dataset.culprit !== "배급 담당") {
+          feedback.textContent = "그 담당자에게 위치와 인계 문장을 함께 바꿀 기회가 있었습니까? 권한표와 서명을 다시 대조하십시오.";
+          return;
+        }
+        state.culprit = b.dataset.culprit;
+        advance("unlock");
+      })
+    );
+    document.querySelector("#opened")?.addEventListener("click", () => {
+      state.step = "complete";
+      state.solved = true;
+      persist();
+      draw();
+      unlock();
+    });
   }
-  document.querySelector("#resetLedger")?.addEventListener("click", () => { localStorage.removeItem("homeward-game-ledger"); window.location.reload(); });
+
+  document.querySelector("#resetLedger")?.addEventListener("click", () => {
+    localStorage.removeItem("homeward-game-ledger");
+    window.location.reload();
+  });
+
   draw();
   if (state.solved) unlock();
 }
