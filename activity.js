@@ -98,7 +98,6 @@ const initialStage = params.get("stage") || window.location.hash.replace("#", ""
 
 const state = loadState();
 let activeStageId = stages.some((stage) => stage.id === initialStage) ? initialStage : state.activeStageId;
-if (isStageLocked(activeStageId)) activeStageId = "case";
 
 const stageList = document.querySelector("#stageList");
 const stageStep = document.querySelector("#stageStep");
@@ -236,7 +235,7 @@ function render() {
       }
 
       return `
-        <button type="button" class="${item.id === stage.id ? "active" : ""}" data-stage="${item.id}" ${locked ? "disabled" : ""}>
+        <button type="button" class="${item.id === stage.id ? "active" : ""}" data-stage="${item.id}">
           <span>${item.step}</span>
           <strong>${item.title}</strong>
           <small>${status}</small>
@@ -247,7 +246,6 @@ function render() {
 
   stageList.querySelectorAll("button").forEach((button) => {
     button.addEventListener("click", () => {
-      if (button.disabled) return;
       activeStageId = button.dataset.stage;
       recorderMessage.textContent = "기록자: 선택한 현장의 사건기록을 불러왔습니다.";
       recorderMessage.dataset.status = "";
