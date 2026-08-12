@@ -69,6 +69,8 @@ const stages = [
 
 const storageKey = "homeward-host-dashboard";
 const totalSeconds = 150 * 60;
+const STUCK_WARNING_MINUTES = 15;
+const STUCK_CRITICAL_MINUTES = 25;
 const state = loadState();
 
 const teamForm = document.querySelector("#teamForm");
@@ -196,9 +198,6 @@ function renderTimer() {
   timerDisplay.textContent = [hours, minutes, seconds].map((item) => String(item).padStart(2, "0")).join(":");
   timerStatus.textContent = state.timer.running ? "진행 중" : remaining === totalSeconds ? "대기 중" : "일시정지";
 }
-
-const STUCK_WARNING_MINUTES = 15;
-const STUCK_CRITICAL_MINUTES = 25;
 
 function isTeamFinished(team) {
   return stages.every((stage) => team.completed[stage.id]);
