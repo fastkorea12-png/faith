@@ -1586,6 +1586,36 @@ input {
   font-weight: 900;
 }
 
+.unlock-terminal .record-grid {
+  grid-template-columns: 1fr;
+}
+
+.unlock-terminal .record-grid button {
+  background: rgba(255, 253, 246, 0.1);
+  border-color: rgba(255, 253, 246, 0.22);
+  color: #fffdf6;
+}
+
+.unlock-terminal .record-grid button span {
+  color: rgba(255, 253, 246, 0.72);
+}
+
+.unlock-terminal .record-grid button.selected {
+  outline: 3px solid var(--gold);
+  background: rgba(185, 138, 53, 0.22);
+}
+
+.unlock-terminal .record-grid button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.locked-hint {
+  margin: 0;
+  color: rgba(255, 253, 246, 0.68);
+  font-weight: 800;
+}
+
 .code-panel {
   margin-top: 14px;
   padding: clamp(20px, 4vw, 30px);
