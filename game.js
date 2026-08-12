@@ -70,12 +70,12 @@ const puzzles = {
     code: "BETTER-04",
     keyword: "더 나은 본향",
     message: "다섯 번째 키워드 '더 나은 본향'을 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
-    evidence: ["기억 담당 A~D", "4개 루프", "문장 조각", "방향 홈", "실제 자물쇠"],
-    objective: "분담한 현장 기억으로 네 갈림길을 통과하고 문장과 방향 기록의 의미를 복원합니다.",
+    evidence: ["기억 담당 A~D", "4개 루프", "문장 조각", "방향 홈", "웹 방향 자물쇠"],
+    objective: "분담한 현장 기억으로 네 갈림길을 통과하고 문장과 방향 기록의 의미를 복원한 뒤, 완성한 순서로 웹 방향 자물쇠를 해제합니다.",
     hints: {
       focus: "4개 루프 갈림길마다 기억 담당 A~D가 기록해 둔 현장 문장 조각에 집중하십시오.",
       contrast: "익숙하고 편안해 보이는 선택(루프) 대신, 말씀을 기억하며 나아가는 '불편하지만 진실된 길'의 순서를 대조하십시오.",
-      action: "'문을 떠난다 → 기억한다 → 좁은 길 → 더 나은 본향' 순서로 길을 선택하여 루프를 통과하십시오.",
+      action: "'문을 떠난다 → 기억한다 → 좁은 길 → 더 나은 본향' 순서로 길을 선택해 루프를 통과한 뒤, 문장 조각의 방향 홈을 읽어 화면의 방향 자물쇠를 순서대로 누르십시오.",
     },
     render: renderLoopPuzzleV2,
   },
@@ -801,7 +801,11 @@ function renderInventoryPuzzleV2() {
 
 function renderLoopPuzzleV2() {
   const surface = getSurface();
-  const state = loadPuzzleState("road", { phase: "briefing", index: 0, loops: 0, history: [], fragments: [], slots: [], interpretation: "", solved: false });
+  const state = loadPuzzleState("road", { phase: "briefing", index: 0, loops: 0, history: [], fragments: [], slots: [], interpretation: "", directionInput: [], solved: false });
+  // 방향 자물쇠는 실물 하드웨어(방향 자물쇠 봉투) 없이 웹에서 직접 입력한다.
+  // 04는 이미 루프 탐색·장면 카드·문장 조각 조합으로 현장 물리 활동이 충분해서,
+  // 마지막 방향 입력만 웹으로 옮겨도 스테이지의 물리성이 사라지지 않는다(02와 동일한 예외).
+  const correctDirection = ["오른쪽", "위", "왼쪽", "위"];
   const fragments = [{ id: "return", text: "돌아갈 수 있었지만" }, { id: "leave", text: "그 길을 떠나" }, { id: "seek", text: "더 나은 본향을" }, { id: "long", text: "사모하였다" }];
   const scenes = [
     { mark: "A 문", memory: "열려 있다는 것과 들어가야 한다는 것은 다르다.", answer: "leave", choices: [["return", "익숙한 문으로 돌아간다"], ["leave", "문을 떠난다"]], fragment: "return", fail: "문은 열렸지만 길은 제자리입니다. A 담당자의 기억을 다시 들으세요." },
@@ -816,8 +820,16 @@ function renderLoopPuzzleV2() {
     if (state.phase === "loops") { const scene = scenes[state.index]; flow.innerHTML = `<div class="loop-board"><section class="loop-scene"><span class="loop-count">Loop ${state.loops} · ${scene.mark}</span><h3>${state.index + 1}번째 갈림길</h3><p class="memory-call">담당자가 기억한 문장을 팀에 먼저 말하십시오.</p><p>${scene.memory}</p><div class="choice-grid">${scene.choices.map(([v,l]) => `<button data-road-choice="${v}">${l}</button>`).join("")}</div></section><aside class="loop-log"><strong>반복 기록</strong>${state.history.length ? state.history.map(x => `<p>${x}</p>`).join("") : "<p>아직 기록 없음</p>"}<div class="direction-strip">회수 조각 ${state.fragments.length}/4</div></aside></div>`; }
     if (state.phase === "assemble") { const pool = ["seek","return","long","leave"].filter(id => !state.slots.includes(id)); flow.innerHTML = `<section class="sentence-lock"><h3>흩어진 문장</h3><p>방향은 아직 가려져 있습니다. 자연스러운 한 문장을 만드십시오.</p><div class="sentence-slots">${fragments.map((_,i) => { const f = fragments.find(x => x.id === state.slots[i]); return `<button data-slot="${i}" class="${f ? "filled" : ""}">${f ? f.text : i + 1}</button>`; }).join("")}</div><div class="sentence-pool">${pool.map(id => `<button data-fragment="${id}">${fragments.find(x => x.id === id).text}</button>`).join("")}</div><button class="primary-button" id="checkSentence">문장 확인</button></section>`; }
     if (state.phase === "interpret") flow.innerHTML = `<section class="sentence-lock"><h3>마지막 기록의 의미</h3><p>“표식은 목적지를 가리키지 않는다. 지나온 선택을 기록한다.” 화살표는 무엇입니까?</p><div class="choice-grid"><button data-meaning="road">지금 가야 할 길</button><button data-meaning="record">지나온 선택의 기록</button></div></section>`;
-    if (state.phase === "physical") flow.innerHTML = `<section class="direction-lock physical-only"><p class="eyebrow">Physical Lock</p><h3>실제 방향 자물쇠</h3><p>완성한 문장 순서대로 현장 카드 가장자리의 방향 홈을 읽어 실제 자물쇠를 여십시오.</p><p class="physical-lock-note">방향은 웹에 입력하지 않습니다. 봉투 안 완료 코드를 활동 페이지에 기록하십시오.</p><button class="primary-button" id="opened">실제 봉투를 열었다</button></section>`;
-    if (state.phase === "complete") flow.innerHTML = `<section class="sentence-lock"><h3>봉투의 사건 완료 코드</h3><p>봉투에서 키워드와 완료 코드를 확인한 뒤 활동 페이지에 입력하십시오.</p><a class="primary-button" href="activity.html?stage=road">활동 페이지로 이동</a></section>`;
+    if (state.phase === "direction") {
+      const dirLabels = [
+        ["오른쪽", "→"],
+        ["위", "↑"],
+        ["왼쪽", "←"],
+        ["아래", "↓"],
+      ];
+      flow.innerHTML = `<section class="direction-lock"><p class="eyebrow">Direction Lock</p><h3>방향 자물쇠</h3><p>완성한 문장 순서대로 현장 카드 가장자리의 방향 홈을 읽고, 같은 순서로 아래 방향을 눌러 자물쇠를 여십시오.</p><div class="direction-slots">${[0, 1, 2, 3].map((i) => `<span class="direction-slot ${state.directionInput[i] ? "filled" : ""}">${state.directionInput[i] || i + 1}</span>`).join("")}</div><div class="direction-pad">${dirLabels.map(([label, arrow]) => `<button type="button" data-direction="${label}" ${state.directionInput.length >= 4 ? "disabled" : ""}>${arrow}<small>${label}</small></button>`).join("")}</div><button class="secondary-button" id="resetDirection" type="button">다시 입력</button></section>`;
+    }
+    if (state.phase === "complete") flow.innerHTML = `<section class="sentence-lock"><h3>방향 자물쇠 해제 완료</h3><p>완료 코드 <strong>BETTER-04</strong>를 확인했습니다. 활동 페이지에 입력하십시오.</p><a class="primary-button" href="activity.html?stage=road">활동 페이지로 이동</a></section>`;
     bind();
   }
   function bind() {
@@ -826,8 +838,30 @@ function renderLoopPuzzleV2() {
     flow.querySelectorAll("[data-fragment]").forEach(b => b.addEventListener("click", () => { if (state.slots.length < 4) state.slots.push(b.dataset.fragment); persist(); draw(); }));
     flow.querySelectorAll("[data-slot]").forEach(b => b.addEventListener("click", () => { state.slots.splice(Number(b.dataset.slot), 1); persist(); draw(); }));
     document.querySelector("#checkSentence")?.addEventListener("click", () => { if (!fragments.every((f,i) => state.slots[i] === f.id)) { triggerFeedbackShake(feedback, "무엇을 떠나 무엇을 사모했는지 한 문장으로 다시 읽으십시오."); return; } state.phase = "interpret"; persist(); draw(); });
-    flow.querySelectorAll("[data-meaning]").forEach(b => b.addEventListener("click", () => { if (b.dataset.meaning !== "record") { triggerFeedbackShake(feedback, "화살표가 목적지라면 반복 기록은 필요 없었을 겁니다. D 문구를 다시 확인하십시오."); return; } state.interpretation = "record"; state.phase = "physical"; persist(); draw(); }));
-    document.querySelector("#opened")?.addEventListener("click", () => { state.phase = "complete"; state.solved = true; persist(); draw(); unlock(); });
+    flow.querySelectorAll("[data-meaning]").forEach(b => b.addEventListener("click", () => { if (b.dataset.meaning !== "record") { triggerFeedbackShake(feedback, "화살표가 목적지라면 반복 기록은 필요 없었을 겁니다. D 문구를 다시 확인하십시오."); return; } state.interpretation = "record"; state.phase = "direction"; persist(); draw(); }));
+    flow.querySelectorAll("[data-direction]").forEach(b => b.addEventListener("click", () => {
+      if (state.directionInput.length >= 4) return;
+      state.directionInput = [...state.directionInput, b.dataset.direction];
+      if (state.directionInput.length === 4) {
+        const correct = correctDirection.every((d, i) => state.directionInput[i] === d);
+        if (correct) {
+          state.phase = "complete";
+          state.solved = true;
+          persist();
+          draw();
+          unlock();
+          return;
+        }
+        persist();
+        draw();
+        triggerFeedbackShake(feedback, "그 방향으로는 자물쇠가 열리지 않습니다. 완성한 문장 순서를 다시 떠올려 보십시오.");
+        window.setTimeout(() => { state.directionInput = []; persist(); draw(); }, 900);
+        return;
+      }
+      persist();
+      draw();
+    }));
+    document.querySelector("#resetDirection")?.addEventListener("click", () => { state.directionInput = []; persist(); draw(); });
   }
   document.querySelector("#resetRoad")?.addEventListener("click", () => { localStorage.removeItem("homeward-game-road"); window.location.reload(); });
   draw(); if (state.solved) unlock();
