@@ -615,14 +615,25 @@ function renderLoopPuzzleV2() {
 
 function renderHomePuzzle() {
   const answers = [
-    { id: "case", label: "00 본관", answer: "나그네" },
-    { id: "bag", label: "01 야외", answer: "장막" },
-    { id: "name", label: "02 숙소", answer: "약속" },
-    { id: "ledger", label: "03 창고 및 물자 보관소(청지기실)", answer: "청지기" },
-    { id: "road", label: "04 길", answer: "더 나은 본향" },
+    { id: "case", label: "00 본관 키워드", answer: "나그네" },
+    { id: "bag", label: "01 야외 키워드", answer: "장막" },
+    { id: "name", label: "02 숙소 키워드", answer: "약속" },
+    { id: "ledger", label: "03 창고 키워드", answer: "청지기" },
+    { id: "road", label: "04 길 키워드", answer: "더 나은 본향" },
   ];
   const surface = getSurface();
   const state = loadPuzzleState("home", { phase: "assemble", teamName: "", solved: false });
+
+  // 활동 페이지에 저장된 팀 이름 가져오기
+  try {
+    const activityState = JSON.parse(localStorage.getItem("homeward-case-progress") || "{}");
+    if (activityState.teamName && !state.teamName) {
+      state.teamName = activityState.teamName;
+    }
+  } catch {
+    // fallback
+  }
+
   const persist = () => savePuzzleState("home", state);
   const declarationText = (team) =>
     `${team}은 장막을 집으로 착각했던 나그네였지만, 약속을 붙들고 청지기로 살아, 더 나은 본향을 향해 걷는 사람입니다.`;
@@ -631,13 +642,16 @@ function renderHomePuzzle() {
     if (state.phase === "physical") {
       surface.innerHTML = `
         <section class="direction-lock physical-only">
-          <p class="eyebrow">Physical Lock</p>
-          <h3>실제 최종 상자</h3>
-          <p>웹에서 확인한 다섯 키워드 카드를 순서대로 최종 상자 앞에 나란히 놓고, 실제 자물쇠를 열어 상자를 여십시오.</p>
-          <p class="physical-lock-note">웹에는 상자 번호를 입력하지 않습니다. 상자를 열었으면 안의 완료 코드 카드를 꺼내십시오.</p>
+          <p class="eyebrow">Physical Lock Verification</p>
+          <h3>실제 최종 상자 개방</h3>
+          <div class="declaration-preview-box" style="margin: 16px 0; padding: 18px; border: 2px solid var(--gold); border-radius: 8px; background: rgba(185,138,53,0.1); color: var(--forest); font-weight: 900; font-size: 18px; line-height: 1.6;">
+            ✨ ${declarationText(state.teamName || "우리 팀")}
+          </div>
+          <p>웹에서 완성한 귀향 선언문과 5개 키워드 카드를 최종 상자 앞에 나란히 놓고, 상자의 실제 4자리 자물쇠(1116)를 열어 상자를 개방하십시오.</p>
+          <p class="physical-lock-note">상자를 열었다면 내부에서 종결 완료 코드 <strong>HOMEWARD-05</strong>를 확인하십시오.</p>
           <button class="primary-button" id="opened" type="button">실제 최종 상자를 열었다</button>
         </section>
-        <p class="feedback" id="feedback">상자를 열기 전까지 귀향 선언문은 완성되지 않습니다.</p>
+        <p class="feedback" id="feedback">상자를 열고 안의 완료 코드를 활동 페이지 수첩에 입력하십시오.</p>
       `;
       document.querySelector("#opened").addEventListener("click", () => {
         state.phase = "complete";
@@ -651,36 +665,72 @@ function renderHomePuzzle() {
 
     if (state.phase === "complete") {
       surface.innerHTML = `
-        <div class="declaration" id="declaration">${declarationText(state.teamName || "우리 팀")}</div>
-        <p class="feedback" id="feedback">최종 상자가 열렸습니다. 귀향 선언문이 완성되었습니다. 활동 페이지에 완료 코드를 입력하십시오.</p>
+        <div class="declaration" id="declaration" style="padding: 24px; border: 2px solid var(--gold); border-radius: 10px; background: #16261f; color: #fffdf6; font-size: 22px; font-weight: 900; line-height: 1.6; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+          ${declarationText(state.teamName || "우리 팀")}
+        </div>
+        <p class="feedback" id="feedback" style="color: var(--leaf); font-weight: 900; margin-top: 16px;">
+          🎉 최종 사건파일이 종결되었습니다! 수첩(활동 페이지)으로 돌아가 최종 완료 코드 <strong>HOMEWARD-05</strong>를 입력하십시오.
+        </p>
       `;
       return;
     }
 
+    // 회수된 키워드 확인
+    const savedKeywords = {};
+    answers.forEach((item) => {
+      savedKeywords[item.id] = localStorage.getItem(`homeward-keyword-${item.id}`) || "";
+    });
+
     surface.innerHTML = `
-      <p class="instruction">앞선 다섯 현장에서 회수한 키워드 카드를 직접 확인하며 입력하십시오. 자동으로 채워지지 않습니다.</p>
+      <p class="instruction">수첩에 모은 5개 디지털 키워드를 순서대로 확인하고 조합하여 마지막 귀향 선언문을 완성하십시오.</p>
+      <div class="keyword-auto-fill-strip" style="margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+        <span style="font-weight: 900; color: var(--forest); font-size: 14px;">보관된 키워드 뱃지:</span>
+        ${answers
+          .map((item) => {
+            const kw = savedKeywords[item.id];
+            return kw
+              ? `<button type="button" class="secondary-button autofill-btn" data-target="${item.id}" data-val="${kw}" style="padding: 4px 10px; font-size: 13px;">${item.label.split(" ")[0]}: ${kw}</button>`
+              : `<span style="font-size: 12px; color: var(--muted); padding: 4px 8px; border: 1px dashed var(--line); border-radius: 6px;">${item.label.split(" ")[0]}: 미회수</span>`;
+          })
+          .join("")}
+      </div>
+
       <div class="final-board">
         ${answers
           .map(
             (item) => `
               <label>
                 <span>${item.label}</span>
-                <input data-answer="${item.answer}" autocomplete="off" placeholder="키워드 입력" />
+                <input id="input-${item.id}" data-answer="${item.answer}" autocomplete="off" placeholder="예: ${item.answer}" value="${savedKeywords[item.id] || ""}" />
               </label>
             `,
           )
           .join("")}
         <label>
-          <span>팀 이름</span>
-          <input id="teamDeclarationName" autocomplete="off" placeholder="예: 3조 순례자들" value="${state.teamName}" />
+          <span>조사팀 이름</span>
+          <input id="teamDeclarationName" autocomplete="off" placeholder="예: 3조 순례자들" value="${state.teamName || ""}" />
         </label>
       </div>
-      <div class="declaration" id="declaration">
-        우리는 이 땅에서 아직 도착하지 않은 사람들입니다.
+
+      <div class="declaration" id="declaration" style="margin-top: 16px; padding: 18px; border: 1px dashed var(--gold); border-radius: 8px; background: rgba(185,138,53,0.08); color: var(--forest); font-weight: 900; text-align: center;">
+        "[팀 이름]은 장막을 집으로 착각했던 나그네였지만, 약속을 붙들고 청지기로 살아, 더 나은 본향을 향해 걷는 사람입니다."
       </div>
-      <div class="check-line"><button class="primary-button" type="button" id="checkFinal">웹 조합 확인</button></div>
-      <p class="feedback" id="feedback">단어와 순서가 모두 맞아야 실제 최종 상자를 여는 단계로 넘어갑니다.</p>
+
+      <div class="check-line" style="margin-top: 18px;">
+        <button class="primary-button" type="button" id="checkFinal">귀향 선언문 조합 검증</button>
+      </div>
+      <p class="feedback" id="feedback">5개 단어와 순서가 모두 일치해야 클라이맥스 검증 단계로 넘어갑니다.</p>
     `;
+
+    // autofill 버튼 이벤트
+    surface.querySelectorAll(".autofill-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const targetId = btn.dataset.target;
+        const val = btn.dataset.val;
+        const input = surface.querySelector(`#input-${targetId}`);
+        if (input) input.value = val;
+      });
+    });
 
     document.querySelector("#checkFinal").addEventListener("click", () => {
       const inputs = [...surface.querySelectorAll("[data-answer]")];
@@ -688,11 +738,14 @@ function renderHomePuzzle() {
       inputs.forEach((input) => {
         input.dataset.status = normalize(input.value) === normalize(input.dataset.answer) ? "correct" : "miss";
       });
+
       if (!correct) {
-        triggerFeedbackShake(document.querySelector("#feedback"), "앞선 사건파일의 키워드를 다시 확인하십시오.");
+        triggerFeedbackShake(document.querySelector("#feedback"), "키워드 단어나 순서가 올바르지 않습니다. 수집 보드의 단서들을 다시 확인하십시오.");
+        triggerShake(surface.querySelector(".final-board"));
         return;
       }
-      state.teamName = document.querySelector("#teamDeclarationName").value.trim() || "우리 팀";
+
+      state.teamName = document.querySelector("#teamDeclarationName").value.trim() || state.teamName || "우리 팀";
       state.phase = "physical";
       persist();
       draw();

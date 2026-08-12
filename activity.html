@@ -3,94 +3,147 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>본향 사건파일 | 활동 페이지</title>
+    <title>본향 사건파일 | 조사팀 사건 수첩</title>
     <link rel="stylesheet" href="activity.css" />
   </head>
   <body>
-    <main class="app-shell">
-      <section class="top-panel">
-        <div>
-          <p class="eyebrow">CASE 11-13</p>
-          <h1>본향 사건파일</h1>
-          <p class="lead">
-            이곳은 조사팀의 진행표와 기록장입니다. 실제 퍼즐은 각 현장에 숨겨진
-            QR을 찍어 열고, 해결 후 나온 완료 코드를 여기에 기록하십시오. 00~04는
-            원하는 순서로 조사하고, 05 예배당은 모든 키워드를 모은 뒤 열립니다.
-          </p>
-          <a class="home-action" href="index.html">메인 페이지로 돌아가기</a>
-        </div>
-        <form class="team-card" id="teamForm">
-          <label for="teamName">조사팀 이름</label>
-          <div>
-            <input id="teamName" name="teamName" type="text" placeholder="예: 3조 순례자들" autocomplete="off" />
+    <div class="notebook-wrapper">
+      <!-- 사건 수첩 바인더 링 장식 -->
+      <div class="binder-rings" aria-hidden="true">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+      </div>
+
+      <main class="app-shell notebook-container">
+        <!-- 상단 헤더 & 팀 카드 -->
+        <section class="top-panel notebook-cover">
+          <div class="notebook-header-info">
+            <p class="eyebrow">CASE 11-13 | INVESTIGATOR NOTEBOOK</p>
+            <h1>본향 사건파일</h1>
+            <p class="lead">
+              조사팀 사건 수첩입니다. 각 현장의 QR을 스캔하여 퍼즐을 풀고, 발급된 완료 코드를 수첩에 기록하십시오.
+              모인 디지털 키워드 뱃지 5개가 수집 보드에 완성되면 05 예배당이 해금됩니다.
+            </p>
+            <a class="home-action" href="index.html">← 메인 페이지로 돌아가기</a>
           </div>
-          <label for="teamPassword">팀 비밀번호</label>
-          <div>
-            <input id="teamPassword" name="teamPassword" type="password" placeholder="팀 전용 비밀번호" autocomplete="off" />
-            <button type="submit">저장</button>
-          </div>
-          <p id="saveStatus" aria-live="polite">팀 이름, 비밀번호, 진행 상황은 저장 후 대시보드에 반영됩니다.</p>
-        </form>
-      </section>
-
-      <section class="progress-panel" aria-label="진행 현황">
-        <div class="progress-copy">
-          <span id="progressText">0 / 6 완료</span>
-          <strong id="currentPlace">본관 / 접수 지점</strong>
-        </div>
-        <div class="progress-track"><div id="progressBar"></div></div>
-      </section>
-
-      <section class="stage-layout">
-        <nav class="stage-list" id="stageList" aria-label="현장 선택"></nav>
-
-        <article class="stage-card">
-          <div class="stage-kicker">
-            <span id="stageStep">00</span>
-            <span id="stagePlace">본관 / 접수 지점</span>
-          </div>
-          <h2 id="stageTitle">조작된 사건파일</h2>
-          <p id="stageStory"></p>
-
-          <div class="mission-box">
-            <h3>조사 지시</h3>
-            <p id="stageMission"></p>
-          </div>
-
-          <details class="hint-box">
-            <summary>힌트 열기</summary>
-            <p id="stageHint"></p>
-          </details>
-
-          <form class="answer-form" id="answerForm">
-            <label for="answerInput">게임 완료 코드</label>
-            <input id="answerInput" type="text" placeholder="예: PILGRIM-00" autocomplete="off" />
-            <p class="qr-reminder" id="gameLink">현재 현장의 QR을 찾아 스캔하면 게임이 열립니다.</p>
-            <button type="submit">코드 제출</button>
+          <form class="team-card sticky-note-form" id="teamForm">
+            <div class="tape-mark"></div>
+            <label for="teamName">조사팀 이름</label>
+            <div>
+              <input id="teamName" name="teamName" type="text" placeholder="예: 3조 순례자들" autocomplete="off" />
+            </div>
+            <label for="teamPassword">팀 비밀번호</label>
+            <div>
+              <input id="teamPassword" name="teamPassword" type="password" placeholder="팀 전용 비밀번호" autocomplete="off" />
+              <button type="submit">저장</button>
+            </div>
+            <p id="saveStatus" aria-live="polite">팀 이름과 비밀번호를 저장하면 대시보드와 동기화됩니다.</p>
           </form>
+        </section>
 
-          <div class="recorder" id="recorderMessage" aria-live="polite">
-            기록자: 사건파일을 열고 첫 단서를 확인하십시오.
+        <!-- 디지털 키워드 수집 보드 (Keyword Collection Board) -->
+        <section class="keyword-board-section" id="keywordBoardSection" aria-label="디지털 키워드 수집 보드">
+          <div class="board-header">
+            <div class="board-title-group">
+              <span class="eyebrow">DIGITAL KEYWORD BOARD</span>
+              <h2>디지털 키워드 수집 보드</h2>
+            </div>
+            <span class="keyword-counter" id="keywordCounter">0 / 5 키워드 수집 완료</span>
+          </div>
+          <p class="board-subtext">현장 퍼즐 해결 후 발급된 완료 코드를 입력하면 해당 단서 뱃지가 즉시 실시간 보관됩니다.</p>
+
+          <!-- 5개 단서 슬롯 -->
+          <div class="keyword-slots-grid" id="keywordSlotsGrid">
+            <!-- JS dynamic render -->
           </div>
 
-          <div class="note-panel">
-            <label for="teamNote">우리 팀 관찰 기록</label>
-            <textarea id="teamNote" rows="5" placeholder="현장에서 본 것, 이상한 점, 자물쇠 번호 후보를 적어두세요."></textarea>
+          <!-- 5개 키워드 수집 시 자동 완성되는 '귀향 선언문' 영역 -->
+          <div class="declaration-banner" id="declarationBanner" hidden>
+            <div class="declaration-stamp" id="declarationStamp">귀향 선언 완료</div>
+            <div class="declaration-content">
+              <p class="eyebrow">HOMELAND DECLARATION</p>
+              <h3 class="declaration-text" id="declarationText">
+                <!-- JS dynamic inserted -->
+              </h3>
+              <p class="declaration-unlock-note">
+                ✨ 5개 키워드가 모두 모여 05 예배당(예비된 성) 사건파일이 정상 해금되었습니다!
+              </p>
+            </div>
           </div>
-        </article>
-      </section>
+        </section>
 
-      <section class="final-panel" id="finalPanel" hidden>
-        <p class="eyebrow">Final Confession</p>
-        <h2>사건의 진실이 열렸습니다</h2>
-        <p>
-          순례자는 사라진 것이 아니라, 후대의 조사팀이 장막과 약속을 지나
-          더 나은 본향을 향하도록 흔적을 남겼습니다.
-        </p>
-        <blockquote>우리는 더 나은 본향을 향해 걷는 순례자입니다.</blockquote>
-        <button type="button" id="resetButton">처음부터 다시 시작</button>
-      </section>
-    </main>
+        <!-- 진행 현황 바 -->
+        <section class="progress-panel" aria-label="진행 현황">
+          <div class="progress-copy">
+            <span id="progressText">0 / 6 완료</span>
+            <strong id="currentPlace">본관 / 접수 지점</strong>
+          </div>
+          <div class="progress-track"><div id="progressBar"></div></div>
+        </section>
+
+        <!-- 수첩 내 현장 스테이지 선택 및 내용 (바인더 탭 & 스티커 메모) -->
+        <section class="stage-layout">
+          <!-- 바인더 링 탭 메뉴 -->
+          <nav class="stage-list binder-tabs" id="stageList" aria-label="현장 선택 탭"></nav>
+
+          <article class="stage-card notebook-page">
+            <div class="stage-card-stamp" id="stageCardStamp" hidden>회수 완료</div>
+
+            <div class="stage-kicker">
+              <span id="stageStep">00</span>
+              <span id="stagePlace">본관 / 접수 지점</span>
+            </div>
+            <h2 id="stageTitle">조작된 사건파일</h2>
+            <p id="stageStory"></p>
+
+            <div class="mission-box sticky-note-green">
+              <h3>조사 지시</h3>
+              <p id="stageMission"></p>
+            </div>
+
+            <details class="hint-box sticky-note-yellow">
+              <summary>💡 사건 힌트 열기</summary>
+              <p id="stageHint"></p>
+            </details>
+
+            <form class="answer-form" id="answerForm">
+              <label for="answerInput">🔑 게임 완료 코드 입력</label>
+              <div class="input-with-button">
+                <input id="answerInput" type="text" placeholder="예: PILGRIM-00" autocomplete="off" />
+                <button type="submit">코드 제출</button>
+              </div>
+              <p class="qr-reminder" id="gameLink">현재 현장의 QR을 찾아 스캔하면 게임이 열립니다.</p>
+            </form>
+
+            <div class="recorder" id="recorderMessage" aria-live="polite">
+              기록자: 사건파일을 열고 첫 단서를 확인하십시오.
+            </div>
+
+            <div class="note-panel sticky-note-blue">
+              <div class="tape-mark top-right"></div>
+              <label for="teamNote">📝 우리 팀 관찰 및 수사 기록</label>
+              <textarea id="teamNote" rows="4" placeholder="현장에서 본 이상한 점, 단서 수치, 자물쇠 후보 번호를 기록해 두세요."></textarea>
+            </div>
+          </article>
+        </section>
+
+        <!-- final-panel: 사건 최종 종결 -->
+        <section class="final-panel notebook-page" id="finalPanel" hidden>
+          <div class="final-stamp">사건 종결</div>
+          <p class="eyebrow">FINAL CONFESSION</p>
+          <h2>사건의 진실이 열렸습니다</h2>
+          <p>
+            순례자는 사라진 것이 아니라, 후대의 조사팀이 장막과 약속을 지나
+            더 나은 본향을 향하도록 흔적을 남겼습니다.
+          </p>
+          <blockquote id="finalQuote">우리는 더 나은 본향을 향해 걷는 순례자입니다.</blockquote>
+          <button type="button" id="resetButton" class="reset-btn">처음부터 다시 시작</button>
+        </section>
+      </main>
+    </div>
 
     <script src="config.js"></script>
     <script src="sync.js"></script>

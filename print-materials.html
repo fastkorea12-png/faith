@@ -281,11 +281,24 @@
   </head>
   <body>
     <div class="no-print-bar">
-      <div>
-        <h1>본향 사건파일 — 5팀 실물 인쇄물 마스터 패키지</h1>
-        <p>A4 용지 개별 출력 및 재단용 인쇄 서식 (인쇄 시 설정: A4, 여백 없음 또는 최소)</p>
+      <div style="flex: 1 1 100%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h1>본향 사건파일 — 5팀 실물 인쇄물 마스터 패키지</h1>
+          <p>A4 용지 개별 출력 및 재단용 인쇄 서식 (인쇄 시 설정: A4, 여백 없음 또는 최소)</p>
+        </div>
+        <button class="print-btn" onclick="window.print()">🯎 인쇄하기 (Ctrl+P / Cmd+P)</button>
       </div>
-      <div style="display:flex; gap:12px; align-items:center;">
+
+      <!-- 디지털 키워드 카드 수집 보드 운용 안내 배너 -->
+      <div style="width: 100%; background: #0f172a; border: 1px solid #38bdf8; border-radius: 8px; padding: 12px 18px; margin-top: 8px; font-size: 13px; color: #e2e8f0; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.15);">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <span style="background: #0284c7; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">시스템 안내</span>
+          <strong style="color: #38bdf8; font-size: 14px;">📱 디지털 키워드 카드 수집 보드 (Digital Keyword Collection System) 운용 안내:</strong>
+          <span>모바일 사건 수첩 UI 운용 시, 각 스테이지 완료에 따라 키워드 카드가 <strong>웹 사건 수첩 내에 자동 배부·수집</strong>됩니다. 실물 종이 키워드 카드(30장) 인쇄는 <strong>선택사항(Optional)</strong>이며, 인쇄 없이 <strong>인쇄 부담 0% (Zero-Print)</strong> 라이브 운용이 가능합니다.</span>
+        </div>
+      </div>
+
+      <div style="flex: 1 1 100%; display: flex; gap: 12px; align-items: center; margin-top: 4px;">
         <div class="stage-filter" id="filterGroup">
           <button class="active" onclick="filterStage('all', this)">전체 풀 패키지</button>
           <button onclick="filterStage('essential', this)" style="background:#16a34a; color:white; font-weight:bold;">📱 모바일 퍼스트 필수 인쇄 (추천! 3종만 출력)</button>
@@ -295,9 +308,8 @@
           <button onclick="filterStage('st03', this)">03 창고</button>
           <button onclick="filterStage('st04', this)">04 길</button>
           <button onclick="filterStage('st05', this)">05 예배당</button>
-          <button onclick="filterStage('keywords', this)">키워드 카드 30장</button>
+          <button onclick="filterStage('keywords', this)">키워드 카드 30장 (선택사항)</button>
         </div>
-        <button class="print-btn" onclick="window.print()">🯎 인쇄하기 (Ctrl+P / Cmd+P)</button>
       </div>
     </div>
 
@@ -513,8 +525,8 @@
       <!-- 키워드 카드 30장 마스터 재단 Sheet (6종 x 5팀) -->
       <section class="page-sheet keywords essential-sheet">
         <div class="sheet-header">
-          <h2>실물 키워드 카드 30장 (00~05 메타 퍼즐 교구)</h2>
-          <span>규격: A4 220g 고급 켄트지 (점선 재단 후 해당 자물쇠 상자/봉투 삽입)</span>
+          <h2>실물 키워드 카드 30장 (00~05 메타 퍼즐 교구 - 선택사항)</h2>
+          <span>디지털 사건 수첩 수집 보드 운용 시 인쇄 생략 가능 (Optional / 인쇄 부담 0%) | 규격: A4 220g 켄트지</span>
         </div>
         <div class="card-grid-3x2">
           <div class="cut-card">
