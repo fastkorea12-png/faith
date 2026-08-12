@@ -12,10 +12,48 @@ const lockForm = document.querySelector("#lockForm");
 const adminPassword = document.querySelector("#adminPassword");
 const lockMessage = document.querySelector("#lockMessage");
 const adminGameGrid = document.querySelector("#adminGameGrid");
+const resetAllButton = document.querySelector("#resetAllAdmin");
+const resetAllMessage = document.querySelector("#resetAllMessage");
 const expectedPassword = window.HOMEWARD_CONFIG?.dashboardPassword || "2010102017";
+
+// 관리자가 리허설/점검용으로 게임을 열 때는 항상 이 고정된 팀 이름으로
+// 사건 수첩에 진입한다. 실제 참가자 팀과 이름이 섞이지 않아 대시보드에서
+// 바로 구분되고, 아래 "전체 초기화" 버튼으로 한 번에 지울 수 있다.
+const ADMIN_TEAM_NAME = "관리자 테스트팀";
+const ADMIN_TEAM_PASSWORD = "admin0000";
 
 restoreLock();
 renderAdminGames();
+primeAdminTeam();
+
+adminGameGrid.addEventListener("click", (event) => {
+  if (event.target.closest("a")) primeAdminTeam();
+});
+
+function primeAdminTeam() {
+  try {
+    const progress = JSON.parse(localStorage.getItem("homeward-case-progress") || "{}");
+    progress.teamName = ADMIN_TEAM_NAME;
+    progress.teamPassword = ADMIN_TEAM_PASSWORD;
+    localStorage.setItem("homeward-case-progress", JSON.stringify(progress));
+  } catch (e) {
+    console.error("Admin team priming error:", e);
+  }
+}
+
+resetAllButton?.addEventListener("click", () => {
+  if (!window.confirm(`"${ADMIN_TEAM_NAME}"의 00~05 전체 진행 상태를 초기화할까요?`)) return;
+  adminStages.forEach((stage) => {
+    localStorage.removeItem(`homeward-game-${stage.id}`);
+    localStorage.removeItem(`homeward-solved-${stage.id}`);
+    localStorage.removeItem(`homeward-keyword-${stage.id}`);
+  });
+  localStorage.setItem(
+    "homeward-case-progress",
+    JSON.stringify({ teamName: ADMIN_TEAM_NAME, teamPassword: ADMIN_TEAM_PASSWORD, activeStageId: "case", completed: {}, codes: {}, notes: {} }),
+  );
+  if (resetAllMessage) resetAllMessage.textContent = `"${ADMIN_TEAM_NAME}" 전체 초기화 완료.`;
+});
 
 lockForm.addEventListener("submit", (event) => {
   event.preventDefault();

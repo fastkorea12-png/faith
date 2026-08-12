@@ -354,6 +354,24 @@ function unlock() {
   codePanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
+// unlock()이 남기는 모든 흔적을 되돌린다. 스테이지 자체 상태(homeward-game-*)만
+// 지우면 homeward-solved-*, homeward-keyword-*, homeward-case-progress에는
+// 완료 기록이 그대로 남아 "초기화했는데 여전히 완료로 보인다"는 문제가 생긴다.
+function resetStageProgress(id) {
+  localStorage.removeItem(`homeward-game-${id}`);
+  localStorage.removeItem(`homeward-solved-${id}`);
+  localStorage.removeItem(`homeward-keyword-${id}`);
+  try {
+    const progress = JSON.parse(localStorage.getItem("homeward-case-progress") || "{}");
+    if (progress.completed) delete progress.completed[id];
+    if (progress.codes) delete progress.codes[id];
+    localStorage.setItem("homeward-case-progress", JSON.stringify(progress));
+  } catch (e) {
+    console.error("Reset progress error:", e);
+  }
+  window.location.reload();
+}
+
 function renderCasePuzzle() {
   const surface = getSurface();
   const state = loadPuzzleState("case", { selected: [], revealed: [], teamSlot: null, contradictionsConfirmed: false, solved: false });
@@ -380,6 +398,7 @@ function renderCasePuzzle() {
   function draw() {
     surface.innerHTML = `
       <p class="instruction">본관 로비에 숨겨진 알파벳 카드 A~E를 찾아, 카드에 적힌 4자리 암호로 각 기록을 복원하십시오. 다섯 기록을 모두 복원해야 사건 메모와의 대조를 시작할 수 있습니다.</p>
+      ${adminPreview ? `<button class="secondary-button admin-reset" id="resetCase" type="button">관리자: 이 스테이지 초기화</button>` : ""}
       <div class="reception-puzzle">
         <section class="reception-record">
           <span>현장 사건 메모</span>
@@ -552,6 +571,8 @@ function renderCasePuzzle() {
       }
       triggerFeedbackShake(feedback, "아직 정체성이 맞지 않습니다. 도착하지 않았고, 목적지도 미기록인 채 길 위에 있는 사람을 떠올려 보십시오.");
     });
+
+    document.querySelector("#resetCase")?.addEventListener("click", () => resetStageProgress("case"));
   }
 
   draw();
@@ -578,12 +599,15 @@ function renderFieldPuzzle() {
         </section>
         <p class="feedback" id="feedback">쉬는 자리는 필요하지만, 목적지가 되면 길을 멈추게 합니다.</p>
         <a class="primary-button" href="activity.html?stage=bag">활동 페이지로 돌아가기</a>
+        ${adminPreview ? `<button class="secondary-button admin-reset" id="resetField" type="button">관리자: 이 스테이지 초기화</button>` : ""}
       `;
+      document.querySelector("#resetField")?.addEventListener("click", () => resetStageProgress("bag"));
       return;
     }
 
     surface.innerHTML = `
       <p class="instruction">현장에 떨어진 메모 한 장을 발견했습니다. 순서를 알려 주는 목록이 아니라, 문장 속에서 스스로 장소의 순서를 읽어내야 합니다.</p>
+      ${adminPreview ? `<button class="secondary-button admin-reset" id="resetField" type="button">관리자: 이 스테이지 초기화</button>` : ""}
       ${memoHtml}
       <div class="lock-result">
         <strong>다음 행동</strong>
@@ -609,6 +633,8 @@ function renderFieldPuzzle() {
       triggerFeedbackShake(document.querySelector("#feedback"), "그 코드는 아직 아닙니다. 실제 키박스를 열어 안에서 완료 코드를 확인하십시오.");
       input.value = "";
     });
+
+    document.querySelector("#resetField")?.addEventListener("click", () => resetStageProgress("bag"));
   }
 
   draw();
@@ -674,7 +700,7 @@ function renderPhonePuzzleV2() {
     screen.querySelectorAll("[data-original]").forEach(b => b.addEventListener("click", () => { state.original = b.dataset.original; persist(); draw(); if (state.original !== "promise") triggerFeedbackShake(document.querySelector("#feedback"), "많이 찍힌 기록이 원본이라는 뜻은 아닙니다. 사진의 상태 도장을 확대하세요."); }));
     document.querySelector("#restoreMemo")?.addEventListener("click", () => { state.solved = true; persist(); draw(); unlock(); });
   }
-  document.querySelector("#resetStage")?.addEventListener("click", () => { localStorage.removeItem("homeward-game-name"); window.location.reload(); });
+  document.querySelector("#resetStage")?.addEventListener("click", () => resetStageProgress("name"));
   draw();
   if (state.solved) unlock();
 }
@@ -827,10 +853,7 @@ function renderInventoryPuzzleV2() {
     });
   }
 
-  document.querySelector("#resetLedger")?.addEventListener("click", () => {
-    localStorage.removeItem("homeward-game-ledger");
-    window.location.reload();
-  });
+  document.querySelector("#resetLedger")?.addEventListener("click", () => resetStageProgress("ledger"));
 
   draw();
   if (state.solved) unlock();
@@ -900,7 +923,7 @@ function renderLoopPuzzleV2() {
     }));
     document.querySelector("#resetDirection")?.addEventListener("click", () => { state.directionInput = []; persist(); draw(); });
   }
-  document.querySelector("#resetRoad")?.addEventListener("click", () => { localStorage.removeItem("homeward-game-road"); window.location.reload(); });
+  document.querySelector("#resetRoad")?.addEventListener("click", () => resetStageProgress("road"));
   draw(); if (state.solved) unlock();
 }
 
@@ -943,6 +966,7 @@ function renderHomePuzzle() {
           <button class="primary-button" id="opened" type="button">실제 최종 상자를 열었다</button>
         </section>
         <p class="feedback" id="feedback">상자를 열고 안의 완료 코드를 활동 페이지 수첩에 입력하십시오.</p>
+        ${adminPreview ? `<button class="secondary-button admin-reset" id="resetHome" type="button">관리자: 이 스테이지 초기화</button>` : ""}
       `;
       document.querySelector("#opened").addEventListener("click", () => {
         state.phase = "complete";
@@ -951,6 +975,7 @@ function renderHomePuzzle() {
         draw();
         unlock();
       });
+      document.querySelector("#resetHome")?.addEventListener("click", () => resetStageProgress("home"));
       return;
     }
 
@@ -962,7 +987,9 @@ function renderHomePuzzle() {
         <p class="feedback" id="feedback" style="color: var(--leaf); font-weight: 900; margin-top: 16px;">
           🎉 최종 사건파일이 종결되었습니다! 수첩(활동 페이지)으로 돌아가 최종 완료 코드 <strong>HOMEWARD-05</strong>를 입력하십시오.
         </p>
+        ${adminPreview ? `<button class="secondary-button admin-reset" id="resetHome" type="button">관리자: 이 스테이지 초기화</button>` : ""}
       `;
+      document.querySelector("#resetHome")?.addEventListener("click", () => resetStageProgress("home"));
       return;
     }
 
@@ -974,6 +1001,7 @@ function renderHomePuzzle() {
 
     surface.innerHTML = `
       <p class="instruction">수첩에 모은 5개 디지털 키워드를 순서대로 확인하고 조합하여 마지막 귀향 선언문을 완성하십시오.</p>
+      ${adminPreview ? `<button class="secondary-button admin-reset" id="resetHome" type="button">관리자: 이 스테이지 초기화</button>` : ""}
       <div class="keyword-auto-fill-strip" style="margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
         <span style="font-weight: 900; color: var(--forest); font-size: 14px;">보관된 키워드 뱃지:</span>
         ${answers
@@ -1041,6 +1069,8 @@ function renderHomePuzzle() {
       persist();
       draw();
     });
+
+    document.querySelector("#resetHome")?.addEventListener("click", () => resetStageProgress("home"));
   }
 
   draw();
