@@ -560,7 +560,7 @@ function renderCasePuzzle() {
 
 function renderFieldPuzzle() {
   const surface = getSurface();
-  const state = loadPuzzleState("bag", { verified: false, opened: false, solved: false });
+  const state = loadPuzzleState("bag", { solved: false });
   const persist = () => savePuzzleState("bag", state);
   const memoHtml = `
     <div class="field-memo">
@@ -570,7 +570,7 @@ function renderFieldPuzzle() {
   `;
 
   function draw() {
-    if (state.opened) {
+    if (state.solved) {
       surface.innerHTML = `
         <section class="lock-result">
           <strong>키박스 개방 완료</strong>
@@ -582,35 +582,15 @@ function renderFieldPuzzle() {
       return;
     }
 
-    if (state.verified) {
-      surface.innerHTML = `
-        ${memoHtml}
-        <div class="lock-result">
-          <strong>번호 확인됨</strong>
-          <p>메모의 순서대로 읽은 번호가 맞습니다. 같은 번호로 실제 키박스 다이얼을 맞춰 여십시오.</p>
-          <button class="primary-button" id="openedField" type="button">실제 키박스를 열었다</button>
-        </div>
-        <p class="feedback" id="feedback">쉬는 자리는 필요하지만, 목적지가 되면 길을 멈추게 합니다.</p>
-      `;
-      document.querySelector("#openedField").addEventListener("click", () => {
-        state.opened = true;
-        state.solved = true;
-        persist();
-        draw();
-        unlock();
-      });
-      return;
-    }
-
     surface.innerHTML = `
       <p class="instruction">현장에 떨어진 메모 한 장을 발견했습니다. 순서를 알려 주는 목록이 아니라, 문장 속에서 스스로 장소의 순서를 읽어내야 합니다.</p>
       ${memoHtml}
       <div class="lock-result">
-        <strong>번호 확인</strong>
-        <p>메모에 등장한 순서대로 현장 표식의 숫자를 읽어 네 자리 번호를 완성한 뒤, 아래에 입력해 확인하십시오. 맞으면 실제 키박스를 여는 단계로 넘어갑니다.</p>
+        <strong>다음 행동</strong>
+        <p>메모에 등장한 순서대로 현장 표식의 숫자를 읽어 네 자리 번호를 완성하고, 실제 키박스를 여십시오. 상자 안에서 발견한 완료 코드를 아래에 입력하십시오.</p>
         <form id="fieldCodeForm" class="code-entry">
-          <input id="fieldCodeInput" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="0000" />
-          <button class="primary-button" type="submit">번호 확인</button>
+          <input id="fieldCodeInput" autocomplete="off" placeholder="상자 안 완료 코드" />
+          <button class="primary-button" type="submit">코드 확인</button>
         </form>
       </div>
       <p class="feedback" id="feedback">쉬는 자리는 필요하지만, 목적지가 되면 길을 멈추게 합니다.</p>
@@ -619,14 +599,14 @@ function renderFieldPuzzle() {
     document.querySelector("#fieldCodeForm").addEventListener("submit", (event) => {
       event.preventDefault();
       const input = document.querySelector("#fieldCodeInput");
-      const value = input.value.trim();
-      if (value === "2741") {
-        state.verified = true;
+      if (normalize(input.value) === normalize("TENT-01")) {
+        state.solved = true;
         persist();
         draw();
+        unlock();
         return;
       }
-      triggerFeedbackShake(document.querySelector("#feedback"), "그 번호는 아직 맞지 않습니다. 메모를 다시 읽고 장소가 언급된 순서를 확인하십시오.");
+      triggerFeedbackShake(document.querySelector("#feedback"), "그 코드는 아직 아닙니다. 실제 키박스를 열어 안에서 완료 코드를 확인하십시오.");
       input.value = "";
     });
   }
