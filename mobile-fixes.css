@@ -183,7 +183,4 @@ table {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
-  .host-quick-link {
-    opacity: 0.9;
-  }
 }
