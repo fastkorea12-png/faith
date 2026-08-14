@@ -83,7 +83,8 @@ table {
   .input-with-button,
   .answer-form,
   .confession-card label,
-  .header-action-row {
+  .header-action-row,
+  .record-locked .passcode-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) !important;
   }
@@ -94,6 +95,8 @@ table {
   .answer-form button,
   .onboarding-form input,
   .onboarding-form button,
+  .record-locked .passcode-row input,
+  .record-locked .passcode-row button,
   .back-notebook-btn,
   .primary-button,
   .secondary-button {
