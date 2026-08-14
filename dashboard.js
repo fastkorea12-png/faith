@@ -152,10 +152,30 @@ resetTimer.addEventListener("click", () => {
   renderTimer();
 });
 
-resetDashboard.addEventListener("click", () => {
+resetDashboard.addEventListener("click", async () => {
   if (!window.confirm("팀 진행 현황과 타이머를 모두 초기화할까요?")) return;
+  resetDashboard.disabled = true;
+  opsMessage.textContent = "Google Sheets와 이 기기의 진행 기록을 초기화하는 중입니다.";
+  try {
+    const result = await window.HomewardSync?.send("resetDashboard", {});
+    if (!result?.ok || result.offline) throw new Error("Remote reset failed");
+  } catch {
+    opsMessage.textContent = "서버 초기화 요청에 실패했습니다. 네트워크를 확인하고 다시 시도하십시오.";
+    resetDashboard.disabled = false;
+    return;
+  }
   localStorage.removeItem(storageKey);
-  window.location.reload();
+  state.teams = [];
+  state.timer = { remaining: totalSeconds, running: false, endsAt: null };
+  clearInterval(timer);
+  timer = null;
+  render();
+  opsMessage.textContent = "초기화 요청을 보냈습니다. 잠시 후 서버 상태를 다시 확인합니다.";
+  window.setTimeout(async () => {
+    await loadRemoteDashboard();
+    resetDashboard.disabled = false;
+    if (state.teams.length === 0) opsMessage.textContent = "팀 진행 현황과 타이머를 모두 초기화했습니다.";
+  }, 1800);
 });
 
 exportData.addEventListener("click", async () => {

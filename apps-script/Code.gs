@@ -40,10 +40,22 @@ function doPost(e) {
     if (body.action === 'saveProgress') {
       return jsonResponse(saveProgress(body.payload || {}));
     }
+    if (body.action === 'resetDashboard') {
+      return jsonResponse(resetDashboardData());
+    }
     return jsonResponse({ ok: false, error: 'Unknown action' });
   } catch (error) {
     return jsonResponse({ ok: false, error: String(error) });
   }
+}
+
+function resetDashboardData() {
+  var sheet = getProgressSheet();
+  var lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.deleteRows(2, lastRow - 1);
+  }
+  return { ok: true, deletedRows: Math.max(0, lastRow - 1) };
 }
 
 function include(filename) {
