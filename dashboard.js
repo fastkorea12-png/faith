@@ -6,9 +6,9 @@ const stages = [
     title: "조작된 사건파일",
     code: "PILGRIM-00",
     minutes: 18,
-    hint1: "입력은 하나라고 알려 주고, 사건 메모의 '아직 길 위에 있는 팀' 문장을 보게 합니다.",
-    hint2: "정답은 나그네입니다. H-11-13은 성공 후 의미 확인용 기록입니다.",
-    hostNote: "본관 접수대에 참가자용 사건 안내문 1장을 붙이고, 팀 이름을 실종자 명단 칸에 직접 적게 합니다.",
+    hint1: "로비에 숨겨진 알파벳 카드 A~E를 먼저 모두 찾게 합니다. 카드의 4자리 숫자가 같은 알파벳 기록의 암호입니다.",
+    hint2: "다섯 기록을 모두 복원했다면, 사건 메모의 '아직 길 위에 있는 팀' 문장과 어긋나는 기록 3건을 대조하게 합니다.",
+    hostNote: "본관 로비 곳곳(소파, 책장, 게시판 뒷면 등)에 팀별 알파벳 카드 A~E(각 팀 전용 4자리 암호, print-materials.html 매트릭스 참고) 5장을 숨겨 둡니다. 정답은 절대 직접 말하지 않습니다.",
   },
   {
     id: "bag",
@@ -17,9 +17,9 @@ const stages = [
     title: "너무 오래 머문 자리",
     code: "TENT-01",
     minutes: 18,
-    hint1: "그늘, 벤치, 돌, 길목 순서로 숫자 표식을 읽게 합니다.",
-    hint2: "자물쇠 번호는 2741입니다. 봉투 안에 장막 카드와 TENT-01 코드를 넣습니다.",
-    hostNote: "야외 표식 4개와 4자리 자물쇠 봉투를 준비합니다. 우천 시 본관 로비 주변으로 옮길 수 있게 예비 위치를 정합니다.",
+    hint1: "발견한 메모를 목록이 아니라 이야기로 다시 천천히 읽게 합니다. 장소가 등장하는 순서가 곧 표식을 읽는 순서입니다.",
+    hint2: "메모 속 순서는 그늘 → 벤치 → 돌베개 → 길목입니다. 이 순서로 표식을 읽으면 키박스 번호 2741이 나옵니다.",
+    hostNote: "야외 표식 4개와 4자리 다이얼 키박스를 준비합니다. 우천 시 본관 로비 주변으로 옮길 수 있게 예비 위치를 정합니다.",
   },
   {
     id: "name",
@@ -29,18 +29,18 @@ const stages = [
     code: "PROMISE-02",
     minutes: 18,
     hint1: "잠금화면 알림 2개를 보게 합니다. 약속한 날은 문 앞 안내문에 있고, 비밀번호 형식은 MMDD입니다.",
-    hint2: "휴대폰 잠금번호는 0316입니다.",
+    hint2: "문 앞 안내문의 '약속 카드 수령일'을 MMDD로 바꿔 입력하게 합니다. 사진 다섯 장은 모두 확대해야 원본 도장을 비교할 수 있습니다.",
     hostNote: "실제 숙박객 동선과 분리하고 숙소 문 앞 안내문만 사용합니다. 웹에서는 가상 휴대폰을 열고 PROMISE-02 코드를 확인합니다.",
   },
   {
     id: "ledger",
     step: "03",
-    place: "주방/기타",
+    place: "창고 및 물자 보관소(청지기실)",
     title: "맡겨진 것을 바꾼 사람",
     code: "STEWARD-03",
     minutes: 18,
-    hint1: "현장 재고 카드 다섯 장을 찾아 장부와 실제 수량을 대조하게 합니다.",
-    hint2: "부족한 품목은 쌀, 빵, 소금이며 부족분은 4-3-2입니다.",
+    hint1: "현장 재고 카드 세트, 위치 변경 기록, 담당자 권한표를 대조하게 합니다. 수량을 계산하거나 세지 않습니다.",
+    hint2: "위치와 권한 대조를 통해 조작자를 가려냅니다. 3자리 자물쇠 번호는 432입니다.",
     hostNote: "위생 구역에 들어가지 않도록 별도 테이블에 장부와 재고 카드를 둡니다.",
   },
   {
@@ -69,6 +69,8 @@ const stages = [
 
 const storageKey = "homeward-host-dashboard";
 const totalSeconds = 150 * 60;
+const STUCK_WARNING_MINUTES = 15;
+const STUCK_CRITICAL_MINUTES = 25;
 const state = loadState();
 
 const teamForm = document.querySelector("#teamForm");
@@ -197,21 +199,58 @@ function renderTimer() {
   timerStatus.textContent = state.timer.running ? "진행 중" : remaining === totalSeconds ? "대기 중" : "일시정지";
 }
 
+function isTeamFinished(team) {
+  return stages.every((stage) => team.completed[stage.id]);
+}
+
+function stagnantMinutes(team) {
+  const ts = team.lastProgressAt || team.updatedAt;
+  if (!ts) return 0;
+  const elapsed = Date.now() - new Date(ts).getTime();
+  if (!Number.isFinite(elapsed) || elapsed < 0) return 0;
+  return Math.floor(elapsed / 60000);
+}
+
+function stuckLevel(team) {
+  if (isTeamFinished(team)) return "none";
+  const minutes = stagnantMinutes(team);
+  if (minutes >= STUCK_CRITICAL_MINUTES) return "critical";
+  if (minutes >= STUCK_WARNING_MINUTES) return "warning";
+  return "none";
+}
+
 function renderTeams() {
   if (state.teams.length === 0) {
     teamBoard.innerHTML = `<article class="team-card"><p>아직 등록된 팀이 없습니다. 위에서 팀을 추가하십시오.</p></article>`;
     return;
   }
 
-  teamBoard.innerHTML = state.teams
+  // 순회하며 관리하는 진행자가 한눈에 우선순위를 파악할 수 있도록,
+  // 가장 오래 정체된 팀이 맨 위로 오게 정렬한다(원본 state.teams 순서는 안 바꿈).
+  const levelWeight = { critical: 2, warning: 1, none: 0 };
+  const teamsForDisplay = [...state.teams].sort((a, b) => {
+    const weightDiff = levelWeight[stuckLevel(b)] - levelWeight[stuckLevel(a)];
+    if (weightDiff !== 0) return weightDiff;
+    return stagnantMinutes(b) - stagnantMinutes(a);
+  });
+
+  teamBoard.innerHTML = teamsForDisplay
     .map((team) => {
       const completedCount = stages.filter((stage) => team.completed[stage.id]).length;
       const percent = Math.round((completedCount / stages.length) * 100);
+      const level = stuckLevel(team);
+      const minutes = stagnantMinutes(team);
+      const stuckBadge =
+        level === "critical"
+          ? `<span class="stuck-badge critical">🚨 ${minutes}분째 정체</span>`
+          : level === "warning"
+          ? `<span class="stuck-badge warning">⚠ ${minutes}분째 정체</span>`
+          : "";
       return `
-        <article class="team-card" data-team="${team.id}">
+        <article class="team-card" data-team="${team.id}" data-stuck="${level}">
           <div class="team-head">
             <div>
-              <h3>${escapeHtml(team.name)}</h3>
+              <h3>${escapeHtml(team.name)} ${stuckBadge}</h3>
               <small>${completedCount} / ${stages.length} 완료 · 힌트 ${team.hints}회</small>
             </div>
             <button type="button" data-action="remove">삭제</button>
@@ -249,6 +288,7 @@ function renderTeams() {
       input.addEventListener("change", () => {
         team.completed[input.dataset.stage] = input.checked;
         team.current = nextCurrentStage(team);
+        if (input.checked) team.lastProgressAt = new Date().toISOString();
         touch(team);
       });
     });
@@ -299,6 +339,7 @@ async function loadRemoteDashboard() {
       current: team.activeStageId || nextRemoteStage(team.completedStages || []),
       note: team.note || "",
       updatedAt: team.updatedAt || "",
+      lastProgressAt: team.lastProgressAt || team.updatedAt || "",
       password: team.teamPassword || "",
     }));
     saveState();
@@ -336,6 +377,9 @@ function renderSummary() {
   document.querySelector("#avgProgress").textContent = `${avg}%`;
   document.querySelector("#hintCount").textContent = teams.reduce((sum, team) => sum + team.hints, 0);
   document.querySelector("#finishedCount").textContent = teams.filter((team) => stages.every((stage) => team.completed[stage.id])).length;
+  const stuckCount = teams.filter((team) => stuckLevel(team) !== "none").length;
+  document.querySelector("#stuckCount").textContent = stuckCount;
+  document.querySelector("#stuckStat")?.classList.toggle("has-stuck", stuckCount > 0);
 }
 
 function tickTimer() {

@@ -23,6 +23,34 @@
   line-height: 1.68;
 }
 
+.admin-reset-all {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-reset-all button {
+  min-height: 42px;
+  border: 1px solid var(--clay);
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: #fff;
+  color: var(--clay);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-reset-all button:hover {
+  background: rgba(155, 86, 61, 0.1);
+}
+
+.admin-reset-all span {
+  color: var(--forest);
+  font-weight: 800;
+  font-size: 14px;
+}
+
 .admin-game-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

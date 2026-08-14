@@ -6,6 +6,14 @@ function doGet(e) {
     return jsonResponse(getDashboardData());
   }
 
+  if (e && e.parameter && e.parameter.action === 'teamProgress') {
+    var progress = getTeamProgressData(e.parameter.teamName, e.parameter.teamPassword);
+    if (e.parameter.callback) {
+      return jsonpResponse(e.parameter.callback, progress);
+    }
+    return jsonResponse(progress);
+  }
+
   var page = 'Index';
   if (e && e.parameter && e.parameter.page === 'qr') page = 'Qr';
   if (e && e.parameter && e.parameter.page === 'activity') page = 'Activity';
@@ -40,25 +48,37 @@ function saveProgress(payload) {
   var rows = sheet.getDataRange().getValues();
   var key = String(payload.teamName || '') + '::' + String(payload.teamPassword || '');
   var rowIndex = -1;
+  var previousCompletedCount = -1;
+  var previousProgressAt = '';
 
   for (var i = 1; i < rows.length; i += 1) {
     if (String(rows[i][1]) + '::' + String(rows[i][2]) === key) {
       rowIndex = i + 1;
+      previousCompletedCount = Number(rows[i][5] || 0);
+      previousProgressAt = rows[i][10] || '';
       break;
     }
   }
 
+  var now = new Date();
+  var newCompletedCount = Number(payload.completedCount || 0);
+  // lastProgressAt만 따로 추적한다: "정체 시간"은 팀이 마지막으로 실제 스테이지를
+  // 완료한 시점부터 측정해야 의미가 있다. updatedAt은 메모 입력 등으로도 계속
+  // 갱신되므로, 그것만으로는 진짜 막힌 팀과 활발히 메모만 쓰는 팀을 구분할 수 없다.
+  var lastProgressAt = newCompletedCount > previousCompletedCount || rowIndex === -1 ? now : previousProgressAt;
+
   var values = [
-    new Date(),
+    now,
     payload.teamName || '',
     payload.teamPassword || '',
     payload.activeStageId || '',
     payload.activeStageTitle || '',
-    Number(payload.completedCount || 0),
+    newCompletedCount,
     Number(payload.totalStages || 6),
     JSON.stringify(payload.completedStages || []),
     JSON.stringify(payload.notes || {}),
     payload.eventType || '',
+    lastProgressAt,
   ];
 
   if (rowIndex === -1) {
@@ -68,6 +88,40 @@ function saveProgress(payload) {
   }
 
   return { ok: true };
+}
+
+function getTeamProgressData(teamName, teamPassword) {
+  var sheet = getProgressSheet();
+  var rows = sheet.getDataRange().getValues();
+  var key = String(teamName || '') + '::' + String(teamPassword || '');
+
+  for (var i = 1; i < rows.length; i += 1) {
+    if (String(rows[i][1]) + '::' + String(rows[i][2]) === key) {
+      var completedStages = [];
+      var notes = {};
+      try {
+        completedStages = JSON.parse(rows[i][7] || '[]');
+      } catch (error) {
+        completedStages = [];
+      }
+      try {
+        notes = JSON.parse(rows[i][8] || '{}');
+      } catch (error) {
+        notes = {};
+      }
+
+      return {
+        ok: true,
+        found: true,
+        updatedAt: rows[i][0],
+        activeStageId: rows[i][3],
+        completedStages: completedStages,
+        notes: notes,
+      };
+    }
+  }
+
+  return { ok: true, found: false, completedStages: [], notes: {} };
 }
 
 function getDashboardData() {
@@ -102,6 +156,7 @@ function getDashboardData() {
       notes: notes,
       note: notes[rows[i][3]] || '',
       eventType: rows[i][9],
+      lastProgressAt: rows[i][10] || rows[i][0],
     });
   }
 
@@ -119,6 +174,9 @@ function getProgressSheet() {
 
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(headers);
+  } else if (sheet.getLastColumn() < headers.length) {
+    // 기존 시트에 lastProgressAt 같은 새 컬럼이 추가된 경우 헤더 행만 보강한다.
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
   }
 
   return sheet;
@@ -146,6 +204,7 @@ function getHeaders() {
     'completedStages',
     'notes',
     'eventType',
+    'lastProgressAt',
   ];
 }
 

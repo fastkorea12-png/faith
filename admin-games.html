@@ -31,6 +31,7 @@
         </div>
         <nav aria-label="관리자 링크">
           <a href="dashboard.html">대시보드</a>
+          <a href="print-materials.html" target="_blank" style="background:#0284c7; color:white; font-weight:bold;">🯎 인쇄물 마스터 센터</a>
           <a href="qr.html">QR</a>
           <a href="activity.html">진행 페이지</a>
         </nav>
@@ -41,7 +42,13 @@
         <p>
           아래 버튼은 QR 토큰 없이도 게임을 열 수 있는 관리자 미리보기입니다.
           실제 참가자 동선에서는 각 현장에 숨겨진 QR을 스캔해야 게임이 열립니다.
+          여기서 "게임 열기"나 "활동 페이지"를 누르면 항상 <strong>"관리자 테스트팀"</strong> 이름으로 진입해,
+          실제 참가팀 데이터와 섞이지 않고 대시보드에서 바로 구분됩니다.
         </p>
+        <div class="admin-reset-all">
+          <button type="button" id="resetAllAdmin" class="secondary-button">관리자 테스트팀 전체 초기화 (00~05)</button>
+          <span id="resetAllMessage" aria-live="polite"></span>
+        </div>
       </section>
 
       <section class="admin-game-grid" id="adminGameGrid"></section>

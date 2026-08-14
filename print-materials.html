@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>본향 사건파일 — 5팀 인쇄물 마스터 출력 센터</title>
+    <style>
+      :root {
+        --ink: #111;
+        --paper: #fff;
+        --border: #333;
+        --dashed: #888;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        background: #f4f5f0;
+        color: var(--ink);
+      }
+
+      .no-print-bar {
+        background: #1e293b;
+        color: #f8fafc;
+        padding: 16px 24px;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .no-print-bar h1 {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      .no-print-bar p {
+        margin: 4px 0 0;
+        font-size: 13px;
+        color: #94a3b8;
+      }
+
+      .print-btn {
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 15px;
+        font-weight: bold;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .print-btn:hover {
+        background: #1d4ed8;
+      }
+
+      .stage-filter {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .stage-filter button {
+        background: #334155;
+        color: #cbd5e1;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+
+      .stage-filter button.active {
+        background: #38bdf8;
+        color: #0f172a;
+        font-weight: bold;
+      }
+
+      .sheet-container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+      }
+
+      /* Printable A4 Sheet */
+      .page-sheet {
+        background: white;
+        width: 210mm;
+        min-height: 297mm;
+        padding: 15mm;
+        margin: 0 auto 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        position: relative;
+        page-break-after: always;
+      }
+
+      .sheet-header {
+        border-bottom: 2px solid var(--ink);
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+
+      .sheet-header h2 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .sheet-header span {
+        font-size: 12px;
+        color: #555;
+      }
+
+      /* Cut Card Grids */
+      .card-grid-2x2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 12mm;
+        height: 240mm;
+      }
+
+      .card-grid-3x2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
+        gap: 8mm;
+        height: 240mm;
+      }
+
+      .cut-card {
+        border: 2px dashed var(--dashed);
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        background: #fff;
+      }
+
+      .cut-card .cut-mark {
+        position: absolute;
+        top: -12px;
+        right: 8px;
+        font-size: 10px;
+        color: #888;
+        background: #fff;
+        padding: 0 4px;
+      }
+
+      .card-title {
+        font-size: 16px;
+        font-weight: bold;
+        border-bottom: 1.5px solid var(--ink);
+        padding-bottom: 6px;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .card-body {
+        font-size: 13px;
+        line-height: 1.5;
+        flex-grow: 1;
+      }
+
+      .card-footer {
+        border-top: 1px solid #ddd;
+        padding-top: 6px;
+        margin-top: 8px;
+        font-size: 11px;
+        color: #666;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      /* Team Border Pattern Classes */
+      .pattern-teamA { border-style: solid !important; border-width: 2px; }
+      .pattern-teamB { border-style: dashed !important; border-width: 2px; }
+      .pattern-teamC { border-style: double !important; border-width: 4px; }
+      .pattern-teamD { border-style: dotted !important; border-width: 3px; }
+      .pattern-teamE { border-style: solid !important; border-width: 3px; outline: 1px dashed #444; }
+
+      /* Full Handout Form */
+      .handout-doc {
+        border: 2px solid var(--ink);
+        padding: 20px;
+        min-height: 250mm;
+      }
+
+      .handout-doc h3 {
+        text-align: center;
+        font-size: 22px;
+        margin-top: 0;
+        border-bottom: 2px double var(--ink);
+        padding-bottom: 12px;
+      }
+
+      .handout-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        border-bottom: 1px solid var(--ink);
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+        font-size: 13px;
+      }
+
+      .handout-content {
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .handout-box {
+        border: 1px solid var(--ink);
+        padding: 12px;
+        margin: 12px 0;
+        background: #fbfbfb;
+      }
+
+      .declaration-box {
+        border: 3px double var(--ink);
+        padding: 30px 20px;
+        text-align: center;
+        margin: 40px 0;
+        font-size: 18px;
+        line-height: 1.8;
+      }
+
+      .signature-row {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 60px;
+        font-size: 14px;
+      }
+
+      .signature-line {
+        border-bottom: 1px solid var(--ink);
+        width: 140px;
+        display: inline-block;
+      }
+
+      /* Print Specific CSS */
+      @media print {
+        .no-print-bar {
+          display: none !important;
+        }
+
+        body {
+          background: white !important;
+        }
+
+        .sheet-container {
+          max-width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+
+        .page-sheet {
+          box-shadow: none !important;
+          margin: 0 !important;
+          width: 100% !important;
+          height: 100vh !important;
+          page-break-after: always !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="no-print-bar">
+      <div style="flex: 1 1 100%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h1>본향 사건파일 — 5팀 실물 인쇄물 마스터 패키지</h1>
+          <p>A4 용지 개별 출력 및 재단용 인쇄 서식 (인쇄 시 설정: A4, 여백 없음 또는 최소)</p>
+        </div>
+        <button class="print-btn" onclick="window.print()">🯎 인쇄하기 (Ctrl+P / Cmd+P)</button>
+      </div>
+
+      <!-- 디지털 키워드 카드 수집 보드 운용 안내 배너 -->
+      <div style="width: 100%; background: #0f172a; border: 1px solid #38bdf8; border-radius: 8px; padding: 12px 18px; margin-top: 8px; font-size: 13px; color: #e2e8f0; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.15);">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <span style="background: #0284c7; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">시스템 안내</span>
+          <strong style="color: #38bdf8; font-size: 14px;">📱 디지털 키워드 카드 수집 보드 (Digital Keyword Collection System) 운용 안내:</strong>
+          <span>모바일 사건 수첩 UI 운용 시, 각 스테이지 완료에 따라 키워드 카드가 <strong>웹 사건 수첩 내에 자동 배부·수집</strong>됩니다. 실물 종이 키워드 카드(30장) 인쇄는 <strong>선택사항(Optional)</strong>이며, 인쇄 없이 <strong>인쇄 부담 0% (Zero-Print)</strong> 라이브 운용이 가능합니다.</span>
+        </div>
+      </div>
+
+      <div style="flex: 1 1 100%; display: flex; gap: 12px; align-items: center; margin-top: 4px;">
+        <div class="stage-filter" id="filterGroup">
+          <button class="active" onclick="filterStage('all', this)">전체 풀 패키지</button>
+          <button onclick="filterStage('essential', this)" style="background:#16a34a; color:white; font-weight:bold;">📱 모바일 퍼스트 필수 인쇄 (추천! 3종만 출력)</button>
+          <button onclick="filterStage('st00', this)">00 본관</button>
+          <button onclick="filterStage('st01', this)">01 야외</button>
+          <button onclick="filterStage('st02', this)">02 숙소</button>
+          <button onclick="filterStage('st03', this)">03 창고</button>
+          <button onclick="filterStage('st04', this)">04 길</button>
+          <button onclick="filterStage('st05', this)">05 예배당</button>
+          <button onclick="filterStage('keywords', this)">키워드 카드 30장 (선택사항)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet-container" id="sheetContainer">
+      <!-- 00 본관 사건 메모 서식 (5부 출력용) -->
+      <section class="page-sheet st00">
+        <div class="sheet-header">
+          <h2>00 본관 — 현장 사건 메모 (CASE H-11-13)</h2>
+          <span>수량: 5부 (A4 120g 일반지 / 팀당 1부)</span>
+        </div>
+        <div class="handout-doc">
+          <h3>사 금 건 봉 인 기 록 (CASE H-11-13)</h3>
+          <div class="handout-meta">
+            <div><b>접수 시각:</b> 11:13</div>
+            <div><b>조사팀 상태:</b> 미도착</div>
+            <div><b>현재 위치:</b> 본관 접수대</div>
+          </div>
+          <div class="handout-content">
+            <p><b>[경고 및 지침 메모]</b></p>
+            <div class="handout-box">
+              <p>1. 도착한 팀은 접수 명단에서 사라진다.</p>
+              <p>2. 아직 길 위에 있는 팀만 이름을 남긴다.</p>
+              <p>3. 기록자는 사건번호 앞의 <strong>H</strong>를 절대로 지우지 말라고 명령했다.</p>
+              <p>4. 11:13은 시간이 아니라, 기록을 여는 위치(성경 구절)다.</p>
+              <p>5. 본관 접수대는 목적지가 아니라, 접수 지점일 뿐이다.</p>
+            </div>
+            <p style="margin-top: 30px;"><b>[감식 지침]</b><br>접수대 봉투 내부의 5가지 접수 기록 중, 위 현장 사건 메모와 모순되는 <u>거짓 기록 3건</u>을 찾아 가려내십시오. 거짓 기록이 제거되면 조사팀의 진짜 정체성을 선언할 수 있습니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 00 본관 5개 팀별 독자 보물찾기 암호 카드 마스터 (5팀 × 5장 = 25장) -->
+      <section class="page-sheet st00 essential-sheet">
+        <div class="sheet-header">
+          <h2>00 본관 — 5개 팀별 독자 보물찾기 암호 카드 마스터 (팀 1~5 전용 A1~E5)</h2>
+          <span>규격: A4 220g 켄트지 (팀 색상별 점선 재단 후 로비 곳곳 숨김) | 5팀 교차 훔쳐보기 방지</span>
+        </div>
+        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:16px; font-size:13px; color:#334155;">
+          <strong>💡 5개 팀별 독자 암호표 (지휘자 보관용 매트릭스):</strong>
+          <table style="width:100%; border-collapse:collapse; margin-top:8px; font-size:12px; text-align:center;">
+            <thead>
+              <tr style="background:#e2e8f0; color:#0f172a;">
+                <th style="border:1px solid #cbd5e1; padding:6px;">구분</th>
+                <th style="border:1px solid #cbd5e1; padding:6px;">팀 1 (A팀) 암호</th>
+                <th style="border:1px solid #cbd5e1; padding:6px;">팀 2 (B팀) 암호</th>
+                <th style="border:1px solid #cbd5e1; padding:6px;">팀 3 (C팀) 암호</th>
+                <th style="border:1px solid #cbd5e1; padding:6px;">팀 4 (D팀) 암호</th>
+                <th style="border:1px solid #cbd5e1; padding:6px;">팀 5 (E팀) 암호</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="border:1px solid #cbd5e1; padding:5px; font-weight:bold; background:#f1f5f9;">기록 A</td><td>A1: 1113</td><td>A2: 1114</td><td>A3: 1115</td><td>A4: 1116</td><td>A5: 1117</td></tr>
+              <tr><td style="border:1px solid #cbd5e1; padding:5px; font-weight:bold; background:#f1f5f9;">기록 B</td><td>B1: 2026</td><td>B2: 2027</td><td>B3: 2028</td><td>B4: 2029</td><td>B5: 2030</td></tr>
+              <tr><td style="border:1px solid #cbd5e1; padding:5px; font-weight:bold; background:#f1f5f9;">기록 C</td><td>C1: 3154</td><td>C2: 3155</td><td>C3: 3156</td><td>C4: 3157</td><td>C5: 3158</td></tr>
+              <tr><td style="border:1px solid #cbd5e1; padding:5px; font-weight:bold; background:#f1f5f9;">기록 D</td><td>D1: 4891</td><td>D2: 4892</td><td>D3: 4893</td><td>D4: 4894</td><td>D5: 4895</td></tr>
+              <tr><td style="border:1px solid #cbd5e1; padding:5px; font-weight:bold; background:#f1f5f9;">기록 E</td><td>E1: 5207</td><td>E2: 5208</td><td>E3: 5209</td><td>E4: 5210</td><td>E5: 5211</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-grid-3x2">
+          <div class="cut-card">
+            <span class="cut-mark">✂️ 팀1 재단선</span>
+            <div class="card-title"><span>팀1 (A팀)</span><span style="color:#dc2626; font-weight:bold;">[기록 A~E 5장]</span></div>
+            <div class="card-body" style="font-size:12px; line-height:1.5;">
+              • <b>A1:</b> 1113 | <b>B1:</b> 2026<br>
+              • <b>C1:</b> 3154 | <b>D1:</b> 4891<br>
+              • <b>E1:</b> 5207
+            </div>
+            <div class="card-footer"><span>팀1 전용 보물 카드</span><span>웹에서 5개 번호 모두 인정</span></div>
+          </div>
+          <div class="cut-card">
+            <span class="cut-mark">✂️ 팀2 재단선</span>
+            <div class="card-title"><span>팀2 (B팀)</span><span style="color:#2563eb; font-weight:bold;">[기록 A~E 5장]</span></div>
+            <div class="card-body" style="font-size:12px; line-height:1.5;">
+              • <b>A2:</b> 1114 | <b>B2:</b> 2027<br>
+              • <b>C2:</b> 3155 | <b>D2:</b> 4892<br>
+              • <b>E2:</b> 5208
+            </div>
+            <div class="card-footer"><span>팀2 전용 보물 카드</span><span>웹에서 5개 번호 모두 인정</span></div>
+          </div>
+          <div class="cut-card">
+            <span class="cut-mark">✂️ 팀3 재단선</span>
+            <div class="card-title"><span>팀3 (C팀)</span><span style="color:#16a34a; font-weight:bold;">[기록 A~E 5장]</span></div>
+            <div class="card-body" style="font-size:12px; line-height:1.5;">
+              • <b>A3:</b> 1115 | <b>B3:</b> 2028<br>
+              • <b>C3:</b> 3156 | <b>D3:</b> 4893<br>
+              • <b>E3:</b> 5209
+            </div>
+            <div class="card-footer"><span>팀3 전용 보물 카드</span><span>웹에서 5개 번호 모두 인정</span></div>
+          </div>
+          <div class="cut-card">
+            <span class="cut-mark">✂️ 팀4 재단선</span>
+            <div class="card-title"><span>팀4 (D팀)</span><span style="color:#d97706; font-weight:bold;">[기록 A~E 5장]</span></div>
+            <div class="card-body" style="font-size:12px; line-height:1.5;">
+              • <b>A4:</b> 1116 | <b>B4:</b> 2029<br>
+              • <b>C4:</b> 3157 | <b>D4:</b> 4894<br>
+              • <b>E4:</b> 5210
+            </div>
+            <div class="card-footer"><span>팀4 전용 보물 카드</span><span>웹에서 5개 번호 모두 인정</span></div>
+          </div>
+          <div class="cut-card">
+            <span class="cut-mark">✂️ 팀5 재단선</span>
+            <div class="card-title"><span>팀5 (E팀)</span><span style="color:#9333ea; font-weight:bold;">[기록 A~E 5장]</span></div>
+            <div class="card-body" style="font-size:12px; line-height:1.5;">
+              • <b>A5:</b> 1117 | <b>B5:</b> 2030<br>
+              • <b>C5:</b> 3158 | <b>D5:</b> 4895<br>
+              • <b>E5:</b> 5211
+            </div>
+            <div class="card-footer"><span>팀5 전용 보물 카드</span><span>웹에서 5개 번호 모두 인정</span></div>
+          </div>
+          <div class="cut-card" style="background:#fafafa;">
+            <div class="card-title"><span>운영 규칙</span><span>[팀 간 훔쳐보기 방지]</span></div>
+            <div class="card-body" style="font-size:11px; line-height:1.4;">
+              1. 팀별 색상 카드를 로비에 분산 배치<br>
+              2. 다른 팀 카드를 봐도 자기 팀 폰에는 번호가 안 맞음<br>
+              3. 팀 전용 번호(A1~E5)로만 기록 복원 성공
+            </div>
+            <div class="card-footer"><span>00 5팀 독자 운영</span><span>완료코드: PILGRIM-00</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 01 야외 좌표 나침반 서식 (5부) -->
+      <section class="page-sheet st01">
+        <div class="sheet-header">
+          <h2>01 야외 — 좌표 나침반 서식 (Compass Chart)</h2>
+          <span>수량: 5부 (A4 120g 일반지 / 팀당 1부)</span>
+        </div>
+        <div class="handout-doc">
+          <h3>야 외 삼 각 측 량 좌 표 나 침 반</h3>
+          <div class="handout-meta">
+            <div><b>기준점:</b> 야외 중앙 쉼터</div>
+            <div><b>방위각 격자:</b> 360° 도심원</div>
+            <div><b>목적:</b> 4개 현장 표식 독해</div>
+          </div>
+          <div class="handout-content">
+            <div class="handout-box" style="text-align:center; padding: 25px;">
+              <p style="font-size: 20px; font-weight: bold; margin: 0 0 10px;">[ 방 위 각  조 준  지 표 ]</p>
+              <p>NW 315° (거리 15m) 느티나무 아래 ──► <b>표식 A [  ]</b></p>
+              <p>NE 045° (거리 25m) 목재 벤치 모퉁이 ──► <b>표식 B [  ]</b></p>
+              <p>SW 225° (거리 20m) 큰 바위 측면 ──► <b>표식 C [  ]</b></p>
+              <p>SE 135° (거리 30m) 길목 이정표 아래 ──► <b>표식 D [  ]</b></p>
+            </div>
+            <p style="margin-top: 30px;"><b>[삼각측량 조합 규칙]</b><br>웹 지침 순서대로 표식 A, B, C, D의 실물 숫자를 나란히 읽어 4자리 자물쇠 비밀번호(2741)를 완성하고, 야외 자물쇠 봉투 01을 열어 키워드 카드 '장막'과 완료 코드를 회수하십시오.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 01 야외 현장 표식 카드 (팀별 패턴 20장 중 예시) -->
+      <section class="page-sheet st01 essential-sheet">
+        <div class="sheet-header">
+          <h2>01 야외 — 현장 표식 카드 A~D (재단 및 코팅용)</h2>
+          <span>규격: A4 코팅지 (나무, 벤치, 바위, 이정표 부착)</span>
+        </div>
+        <div class="card-grid-2x2">
+          <div class="cut-card pattern-teamA">
+            <span class="cut-mark">표식 A (나무)</span>
+            <div class="card-title"><span>315° NW</span><span>느티나무</span></div>
+            <div class="card-body" style="text-align:center; font-size:48px; font-weight:900; margin:20px 0;">2</div>
+            <div class="card-footer"><span>이 그늘은 잠시 머무는 장막이다.</span><span>A팀 (실선)</span></div>
+          </div>
+          <div class="cut-card pattern-teamA">
+            <span class="cut-mark">표식 B (벤치)</span>
+            <div class="card-title"><span>045° NE</span><span>목재 벤치</span></div>
+            <div class="card-body" style="text-align:center; font-size:48px; font-weight:900; margin:20px 0;">7</div>
+            <div class="card-footer"><span>이 쉼터는 영원한 집이 아니다.</span><span>A팀 (실선)</span></div>
+          </div>
+          <div class="cut-card pattern-teamA">
+            <span class="cut-mark">표식 C (바위)</span>
+            <div class="card-title"><span>225° SW</span><span>큰 바위</span></div>
+            <div class="card-body" style="text-align:center; font-size:48px; font-weight:900; margin:20px 0;">4</div>
+            <div class="card-footer"><span>길 위의 나그네는 계속 이동한다.</span><span>A팀 (실선)</span></div>
+          </div>
+          <div class="cut-card pattern-teamA">
+            <span class="cut-mark">표식 D (이정표)</span>
+            <div class="card-title"><span>135° SE</span><span>길목 이정표</span></div>
+            <div class="card-body" style="text-align:center; font-size:48px; font-weight:900; margin:20px 0;">1</div>
+            <div class="card-footer"><span>진짜 본향은 아직 이르지 않았다.</span><span>A팀 (실선)</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 숙소 문 앞 안내문 서식 (5부) -->
+      <section class="page-sheet st02">
+        <div class="sheet-header">
+          <h2>02 숙소 — 숙소 문 앞 안내문 (5부)</h2>
+          <span>수량: 5부 (A4 220g 켄트지 / 숙소 입구 부착 및 제공)</span>
+        </div>
+        <div class="handout-doc">
+          <h3>숙 소 입 퇴 실  안 내 문</h3>
+          <div class="handout-meta">
+            <div><b>숙소 위치:</b> 201호</div>
+            <div><b>퇴실 안내:</b> 11:13</div>
+            <div><b>발행인:</b> 가짜 안식처 관리인</div>
+          </div>
+          <div class="handout-content">
+            <div class="handout-box">
+              <p><b>[임시 이름표 발급 기록]</b></p>
+              <p>• 임시 이름표 1호: <u>성공한 사람</u> (임시 도장 捺)</p>
+              <p>• 임시 이름표 2호: <u>인정받는 사람</u> (임시 도장 捺)</p>
+              <br/>
+              <p><b>[원 보관 증서 기록]</b></p>
+              <p>• 약속 카드 수령일: <strong>03/16</strong> (원본 직인 捺)</p>
+            </div>
+            <p style="margin-top: 30px;"><b>[포렌식 지침]</b><br>가상 휴대폰 알림 지침에 따라 이름표의 가짜 명성을 버리고, 원본 직인이 찍힌 <strong>약속 카드 수령일(03/16)</strong>을 4자리 MMDD 비밀번호(0316)로 바꿔 가상 휴대폰을 해제하십시오.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 창고 및 물자 보관소 선반 매트 및 권한표 (5부) -->
+      <section class="page-sheet st03">
+        <div class="sheet-header">
+          <h2>03 창고 — 담당별 권한표 및 선반 매트 (5부)</h2>
+          <span>수량: 5부 (A4 120g 일반지)</span>
+        </div>
+        <div class="handout-doc">
+          <h3>창 고 물 자  관 리  권 한 표</h3>
+          <div class="handout-meta">
+            <div><b>보관소:</b> 거룩한 물자 창고</div>
+            <div><b>대상 품목:</b> 밀, 기름, 소금, 콩, 건과일, 물</div>
+          </div>
+          <div class="handout-content">
+            <div class="handout-box">
+              <p><b>[원래 선반 배치도]</b><br>1번: 건과일 | 2번: 밀 | 3번: 기름 | 4번: 소금 | 5번: 콩 | 6번: 물</p>
+              <hr style="border-top:1px dashed #ccc;"/>
+              <p><b>[직무 권한 명시]</b></p>
+              <p>• <b>입출고 담당:</b> 물품 이동 시 원 위치 보존 의무 (임의 위치 변경 불가)</p>
+              <p>• <b>장부 담당:</b> 위치 및 사유 기록 의무 (임의 변경 권한 없음)</p>
+              <p>• <b>배급 담당:</b> '먼저 처리'를 이유로 위치 및 문장을 임의 교체함 <b>(★ 조작 범인)</b></p>
+            </div>
+            <p style="margin-top: 20px;"><b>[조작 품목 원래 선반 번호]</b><br>소금(4번) → 기름(3번) → 밀(2번) ──► 3자리 자물쇠 암호: <b>432</b></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 예배당 실물 귀향 선언문 서식 (5부) -->
+      <section class="page-sheet st05 essential-sheet">
+        <div class="sheet-header">
+          <h2>05 예배당 — 실물 귀향 선언문 서식 (5부)</h2>
+          <span>수량: 5부 (A4 220g 고급 켄트지 / 최종 상자 내부 봉입)</span>
+        </div>
+        <div class="handout-doc">
+          <h3>본 향  순 례 자  귀 향  선 언 문</h3>
+          <div class="declaration-box">
+            "우리 <b>[ <span class="signature-line" style="width:200px;"></span> ]</b> 팀은<br/>
+            장막을 집으로 착각했던 <b>나그네</b>였지만,<br/>
+            <b>약속</b>을 붙들고 <b>청지기</b>로 살아,<br/>
+            <b>더 나은 본향</b>을 향해 걷는 사람입니다."
+          </div>
+          <p style="text-align:center; font-size:13px; color:#555;">히브리서 11장 16절 — "그들이 이제는 더 나은 본향을 사모하니 곧 하늘에 있는 것이라... 한 성을 예비하셨느니라"</p>
+          <div class="signature-row">
+            <div>팀장 서명: <span class="signature-line"></span></div>
+            <div>팀원 서명: <span class="signature-line"></span></div>
+            <div>일자: 2026년   월   일</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 키워드 카드 30장 마스터 재단 Sheet (6종 x 5팀) -->
+      <section class="page-sheet keywords essential-sheet">
+        <div class="sheet-header">
+          <h2>실물 키워드 카드 30장 (00~05 메타 퍼즐 교구 - 선택사항)</h2>
+          <span>디지털 사건 수첩 수집 보드 운용 시 인쇄 생략 가능 (Optional / 인쇄 부담 0%) | 규격: A4 220g 켄트지</span>
+        </div>
+        <div class="card-grid-3x2">
+          <div class="cut-card">
+            <span class="cut-mark">00 본관</span>
+            <div class="card-title"><span>키워드 00</span><span>[나그네]</span></div>
+            <div class="card-body" style="text-align:center; font-size:28px; font-weight:bold; margin:15px 0;">나 그 네</div>
+            <div class="card-footer"><span>완료코드: PILGRIM-00</span><span>앞면 키워드</span></div>
+          </div>
+          <div class="cut-card">
+            <span class="cut-mark">01 야외</span>
+            <div class="card-title"><span>키워드 01</span><span>[장막]</span></div>
+            <div class="card-body" style="text-align:center; font-size:28px; font-weight:bold; margin:15px 0;">장 막</div>
+            <div class="card-footer"><span>완료코드: TENT-01</span><span>앞면 키워드</span></div>
+          </div>
+          <div class="cut-card">
+            <span class="cut-mark">02 숙소</span>
+            <div class="card-title"><span>키워드 02</span><span>[약속]</span></div>
+            <div class="card-body" style="text-align:center; font-size:28px; font-weight:bold; margin:15px 0;">약 속</div>
+            <div class="card-footer"><span>완료코드: PROMISE-02</span><span>앞면 키워드</span></div>
+          </div>
+          <div class="cut-card">
+            <span class="cut-mark">03 창고</span>
+            <div class="card-title"><span>키워드 03</span><span>[청지기]</span></div>
+            <div class="card-body" style="text-align:center; font-size:28px; font-weight:bold; margin:15px 0;">청 지 기</div>
+            <div class="card-footer"><span>완료코드: STEWARD-03</span><span>앞면 키워드</span></div>
+          </div>
+          <div class="cut-card">
+            <span class="cut-mark">04 길</span>
+            <div class="card-title"><span>키워드 04</span><span>[더 나은 본향]</span></div>
+            <div class="card-body" style="text-align:center; font-size:24px; font-weight:bold; margin:15px 0;">더 나은 본향</div>
+            <div class="card-footer"><span>완료코드: BETTER-04</span><span>앞면 키워드</span></div>
+          </div>
+          <div class="cut-card">
+            <span class="cut-mark">05 예배당</span>
+            <div class="card-title"><span>키워드 05</span><span>[예비된 성]</span></div>
+            <div class="card-body" style="text-align:center; font-size:28px; font-weight:bold; margin:15px 0;">예비된 성</div>
+            <div class="card-footer"><span>완료코드: HOMEWARD-05</span><span>앞면 키워드</span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      function filterStage(stageId, btn) {
+        document.querySelectorAll('.stage-filter button').forEach(b => b.classList.remove('active'));
+        if (btn) {
+          btn.classList.add('active');
+        } else if (window.event && window.event.target) {
+          window.event.target.classList.add('active');
+        }
+
+        const sheets = document.querySelectorAll('.page-sheet');
+        sheets.forEach(sheet => {
+          if (stageId === 'all') {
+            sheet.style.display = 'block';
+          } else if (stageId === 'essential') {
+            sheet.style.display = sheet.classList.contains('essential-sheet') ? 'block' : 'none';
+          } else {
+            sheet.style.display = sheet.classList.contains(stageId) ? 'block' : 'none';
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
