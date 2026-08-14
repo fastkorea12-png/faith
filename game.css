@@ -2384,6 +2384,88 @@ input {
     linear-gradient(rgba(252, 248, 238, 0.96), rgba(246, 238, 222, 0.98));
 }
 
+.onboarding-panel {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  border: 2px solid rgba(179, 130, 42, 0.42);
+  border-radius: 12px;
+  padding: clamp(22px, 5vw, 42px);
+  background:
+    radial-gradient(circle at 92% 8%, rgba(185, 138, 53, 0.12), transparent 34%),
+    var(--paper);
+  box-shadow: 0 20px 50px rgba(32, 35, 31, 0.12);
+}
+
+.onboarding-panel h2 {
+  margin: 0 0 16px;
+  color: var(--forest);
+  font-size: clamp(28px, 6vw, 44px);
+}
+
+.prologue-copy {
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+.onboarding-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+  border-top: 1px dashed var(--gold);
+  padding-top: 22px;
+}
+
+.onboarding-form label {
+  color: var(--forest);
+  font-weight: 900;
+}
+
+.onboarding-form input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 11px 13px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.onboarding-form .primary-button,
+.prologue-panel .primary-button {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.onboarding-status {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.prologue-panel blockquote {
+  margin: 20px 0;
+  border-left: 5px solid var(--gold);
+  padding: 16px 18px;
+  background: rgba(185, 138, 53, 0.1);
+  color: var(--forest);
+  font-size: 19px;
+  font-weight: 900;
+  line-height: 1.65;
+}
+
+.onboarding-team-chip {
+  display: inline-flex;
+  margin: 8px 0 14px;
+  border-radius: 999px;
+  padding: 8px 13px;
+  background: var(--forest);
+  color: #fff;
+  font-weight: 900;
+}
+
 .hint-header {
   display: flex;
   align-items: center;

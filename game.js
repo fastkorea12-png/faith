@@ -104,6 +104,9 @@ const qrToken = params.get("qr") || expectedQrToken;
 const isLocalEnv = window.location.protocol === "file:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const adminPreview = isLocalEnv || params.get("admin") === "1" || localStorage.getItem("homeward-admin-preview") === "true";
 const puzzle = puzzles[stageId] || puzzles.case;
+const registeredProgress = loadActivityProgress();
+const registeredTeamKey = teamSessionKey(registeredProgress.teamName, registeredProgress.teamPassword);
+const isTeamOnboarded = Boolean(registeredTeamKey) && localStorage.getItem("homeward-onboarded-team") === registeredTeamKey;
 function isActivityCompleted(id) {
   try {
     const saved = JSON.parse(localStorage.getItem("homeward-case-progress") || "{}");
@@ -350,6 +353,10 @@ if (qrToken !== expectedQrToken && !adminPreview) {
       <a class="primary-button" href="activity.html">활동 페이지로 돌아가기</a>
     </section>
   `;
+} else if (!isTeamOnboarded && !adminPreview) {
+  renderTeamOnboarding();
+} else if (stageId === "case" && !hasSeenPrologue(registeredTeamKey) && !adminPreview) {
+  renderCasePrologue(registeredTeamKey);
 } else if (stageId !== "case" && coreStageIds.includes(stageId) && !isCaseComplete && !adminPreview) {
   document.querySelector("#gameStep").textContent = puzzle.step + " / 잠김";
   document.querySelector("#gameTitle").textContent = "아직 열리지 않은 현장";
@@ -401,6 +408,147 @@ function renderShell() {
     </section>
     <section class="puzzle-surface" id="puzzleSurface"></section>
   `;
+}
+
+function renderTeamOnboarding() {
+  document.querySelector("#gameStep").textContent = "PROLOGUE / 팀 등록";
+  document.querySelector("#gameTitle").textContent = "본향 사건파일이 도착했습니다";
+  document.querySelector("#gameIntro").textContent = "첫 현장을 열기 전에 이번 조사팀의 이름과 전용 비밀번호를 등록하십시오.";
+  guideLink.href = "activity.html";
+  gameBoard.innerHTML = `
+    <section class="onboarding-panel">
+      <p class="eyebrow">Case 11-13 · Prologue</p>
+      <h2>도착하지 않은 사람들의 기록</h2>
+      <p class="prologue-copy">본관 접수대에서 주인을 알 수 없는 사건파일이 발견되었습니다. 파일에는 목적지에 도착했다는 기록과 아직 길 위에 있다는 기록이 동시에 남아 있습니다.</p>
+      <p class="prologue-copy">지금부터 여러분은 한 조사팀이 되어 여섯 현장을 추적합니다. 먼저 조 이름을 정하고, 다른 휴대폰에서도 같은 기록을 불러올 수 있도록 팀 비밀번호를 등록하십시오.</p>
+      <form class="onboarding-form" id="onboardingForm">
+        <label for="onboardingTeamName">조 이름</label>
+        <input id="onboardingTeamName" type="text" placeholder="예: 3조 나그네들" autocomplete="off" required />
+        <label for="onboardingTeamPassword">팀 비밀번호</label>
+        <input id="onboardingTeamPassword" type="password" placeholder="팀원끼리 기억할 비밀번호" autocomplete="off" required />
+        <button class="primary-button" type="submit">팀 등록하고 프롤로그 계속하기</button>
+        <p class="onboarding-status" id="onboardingStatus" aria-live="polite">새 팀은 이 기기의 이전 테스트 기록을 지우고 시작합니다. 기존 팀은 같은 이름과 비밀번호로 진행 기록을 이어갑니다.</p>
+      </form>
+    </section>
+  `;
+
+  document.querySelector("#onboardingForm").addEventListener("submit", registerTeamFromOnboarding);
+}
+
+async function registerTeamFromOnboarding(event) {
+  event.preventDefault();
+  const name = document.querySelector("#onboardingTeamName").value.trim();
+  const password = document.querySelector("#onboardingTeamPassword").value.trim();
+  const status = document.querySelector("#onboardingStatus");
+  const submit = event.currentTarget.querySelector("button[type='submit']");
+  if (!name || !password) {
+    status.textContent = "조 이름과 팀 비밀번호를 모두 입력하십시오.";
+    return;
+  }
+
+  submit.disabled = true;
+  status.textContent = "기존 팀 기록이 있는지 확인하는 중입니다.";
+  let remote = null;
+  try {
+    remote = await window.HomewardSync?.getTeamProgress(name, password);
+  } catch {
+    remote = null;
+  }
+
+  clearLocalTeamProgress();
+  const nextProgress = {
+    teamName: name,
+    teamPassword: password,
+    activeStageId: "case",
+    completed: {},
+    notes: {},
+    hintsCount: Number(remote?.hints || 0),
+  };
+
+  if (remote?.ok && remote.found) {
+    (remote.completedStages || []).forEach((id) => {
+      nextProgress.completed[id] = true;
+      localStorage.setItem(`homeward-solved-${id}`, "true");
+    });
+    nextProgress.notes = remote.notes || {};
+  }
+
+  localStorage.setItem("homeward-case-progress", JSON.stringify(nextProgress));
+  const nextTeamKey = teamSessionKey(name, password);
+  localStorage.setItem("homeward-onboarded-team", nextTeamKey);
+  localStorage.removeItem(prologueStorageKey(nextTeamKey));
+
+  if (!remote?.found) {
+    await window.HomewardSync?.send("saveProgress", {
+      eventType: "team_registered",
+      teamName: name,
+      teamPassword: password,
+      activeStageId: "case",
+      activeStageTitle: puzzles.case.title,
+      completedStages: [],
+      completedCount: 0,
+      totalStages: Object.keys(puzzles).length,
+      notes: {},
+      hintsCount: 0,
+    });
+  }
+
+  window.location.reload();
+}
+
+function renderCasePrologue(teamKey) {
+  document.querySelector("#gameStep").textContent = "PROLOGUE / 등록 완료";
+  document.querySelector("#gameTitle").textContent = `${registeredProgress.teamName} 조사 시작`;
+  document.querySelector("#gameIntro").textContent = "팀 등록을 마쳤습니다. 사건의 첫 모순을 확인하십시오.";
+  guideLink.href = "activity.html?stage=case";
+  gameBoard.innerHTML = `
+    <section class="onboarding-panel prologue-panel">
+      <p class="eyebrow">Investigation Briefing</p>
+      <h2>사건번호 H-11-13</h2>
+      <blockquote>“도착 확인 기록을 믿지 마십시오. 본관은 목적지가 아니라 출발 지점입니다.”</blockquote>
+      <p class="prologue-copy">로비에는 다섯 개의 접수 기록과 그것을 여는 알파벳 카드가 흩어져 있습니다. 팀원들과 역할을 나누어 기록을 복원하고, 사건 메모와 맞지 않는 기록을 찾아내십시오.</p>
+      <div class="onboarding-team-chip">등록 팀 · ${escapeHtml(registeredProgress.teamName)}</div>
+      <button class="primary-button" id="startCaseInvestigation" type="button">00 본관 사건파일 시작</button>
+    </section>
+  `;
+  document.querySelector("#startCaseInvestigation").addEventListener("click", () => {
+    localStorage.setItem(prologueStorageKey(teamKey), "true");
+    window.location.reload();
+  });
+}
+
+function clearLocalTeamProgress() {
+  localStorage.removeItem("homeward-case-progress");
+  localStorage.removeItem("homeward-hint-starts");
+  localStorage.removeItem("homeward-team-hints");
+  localStorage.removeItem("homeward-onboarded-team");
+  Object.keys(puzzles).forEach((id) => {
+    localStorage.removeItem(`homeward-game-${id}`);
+    localStorage.removeItem(`homeward-solved-${id}`);
+    localStorage.removeItem(`homeward-keyword-${id}`);
+  });
+}
+
+function teamSessionKey(name, password) {
+  if (!name || !password) return "";
+  return `${String(name).trim().toLowerCase()}::${String(password).trim()}`;
+}
+
+function prologueStorageKey(teamKey) {
+  return `homeward-prologue-seen-${teamKey}`;
+}
+
+function hasSeenPrologue(teamKey) {
+  return Boolean(teamKey) && localStorage.getItem(prologueStorageKey(teamKey)) === "true";
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function unlock() {
