@@ -38,7 +38,7 @@
         <section class="game-board notebook-page" id="gameBoard"></section>
 
         <!-- 무인 자율 힌트 시스템 3단계 (시선/대조/행동) -->
-        <section class="hint-system-panel notebook-page" id="hintSystemPanel">
+        <section class="hint-system-panel notebook-page" id="hintSystemPanel" hidden>
           <div class="hint-header">
             <div class="hint-title-group">
               <span class="eyebrow">AUTONOMOUS HINT SYSTEM</span>
@@ -46,7 +46,8 @@
             </div>
             <span class="hint-status-badge" id="hintStatusBadge">힌트 열람 0건</span>
           </div>
-          <p class="hint-subtext">조사 진행 막힘 방지를 위해 1단계(시선), 2단계(대조), 3단계(행동) 자율 힌트를 조회할 수 있습니다.</p>
+          <p class="hint-subtext">스테이지 입장 후 5분·10분·15분에 1단계(시선), 2단계(대조), 3단계(행동) 힌트가 자동으로 열립니다.</p>
+          <p class="hint-timer-status" id="hintTimerStatus" aria-live="polite">힌트 타이머를 준비하는 중입니다.</p>
 
           <div class="hint-steps-grid">
             <!-- 1단계: 시선 (Focus) -->

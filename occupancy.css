@@ -1,0 +1,90 @@
+:root {
+  color-scheme: light;
+  --bg: #edf0e8;
+  --paper: #fffdf6;
+  --ink: #20231f;
+  --muted: #687066;
+  --line: #d4d9cf;
+  --forest: #243a31;
+  --leaf: #6f8a5d;
+  --gold: #b98a35;
+  --danger: #8a3d31;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+button, a { min-height: 44px; font: inherit; }
+
+.occupancy-shell {
+  width: min(920px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 24px 0 60px;
+}
+
+.occupancy-header,
+.status-summary,
+.occupancy-card,
+.occupancy-guide {
+  border: 1px solid rgba(36, 58, 49, 0.16);
+  border-radius: 12px;
+  background: rgba(255, 253, 246, 0.97);
+  box-shadow: 0 16px 36px rgba(32, 35, 31, 0.08);
+}
+
+.occupancy-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  padding: clamp(22px, 5vw, 40px);
+}
+
+.eyebrow { margin: 0 0 8px; color: #9b563d; font-size: 13px; font-weight: 900; text-transform: uppercase; }
+.occupancy-header h1 { margin: 0 0 12px; color: var(--forest); font-size: clamp(36px, 8vw, 66px); line-height: 1; }
+.occupancy-header p { max-width: 650px; margin: 0; color: var(--muted); line-height: 1.65; }
+.occupancy-header a, #refreshButton { border: 0; border-radius: 8px; padding: 11px 14px; background: var(--forest); color: #fff; font-weight: 900; text-decoration: none; white-space: nowrap; cursor: pointer; }
+
+.status-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+  padding: 14px 16px;
+}
+
+.status-summary > div { display: flex; align-items: center; gap: 10px; }
+.live-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--leaf); box-shadow: 0 0 0 5px rgba(111, 138, 93, 0.16); }
+#refreshButton:disabled { opacity: 0.55; cursor: wait; }
+
+.occupancy-grid { display: grid; gap: 12px; margin-top: 14px; }
+.occupancy-card { display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; padding: 18px; border-left: 8px solid var(--line); }
+.occupancy-card[data-level="free"] { border-left-color: var(--leaf); }
+.occupancy-card[data-level="occupied"] { border-left-color: var(--gold); background: #fff8e8; }
+.occupancy-card[data-level="busy"] { border-left-color: var(--danger); background: #fff0ed; }
+.stage-number { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--forest); color: #fff; font-size: 21px; font-weight: 900; }
+.stage-copy h2 { margin: 0 0 4px; font-size: clamp(20px, 4vw, 27px); }
+.stage-copy p { margin: 0; color: var(--muted); }
+.status-badge { border-radius: 999px; padding: 8px 12px; background: var(--line); white-space: nowrap; }
+[data-level="free"] .status-badge { background: var(--leaf); color: #fff; }
+[data-level="occupied"] .status-badge { background: var(--gold); color: #20231f; }
+[data-level="busy"] .status-badge { background: var(--danger); color: #fff; }
+
+.occupancy-guide { margin-top: 22px; padding: 20px; }
+.occupancy-guide h2 { margin-top: 0; }
+.occupancy-guide li { margin: 9px 0; line-height: 1.5; }
+.occupancy-guide p { margin: 18px 0 0; color: var(--muted); }
+
+@media (max-width: 640px) {
+  .occupancy-header, .status-summary { display: grid; }
+  .occupancy-header a, #refreshButton { width: 100%; text-align: center; }
+  .occupancy-card { grid-template-columns: auto 1fr; }
+  .status-badge { grid-column: 1 / -1; text-align: center; }
+}

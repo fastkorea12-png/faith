@@ -1,4 +1,12 @@
 function doGet(e) {
+  if (e && e.parameter && e.parameter.action === 'occupancy') {
+    var occupancy = getOccupancyData();
+    if (e.parameter.callback) {
+      return jsonpResponse(e.parameter.callback, occupancy);
+    }
+    return jsonResponse(occupancy);
+  }
+
   if (e && e.parameter && e.parameter.action === 'dashboard') {
     if (e.parameter.callback) {
       return jsonpResponse(e.parameter.callback, getDashboardData());
@@ -79,6 +87,7 @@ function saveProgress(payload) {
     JSON.stringify(payload.notes || {}),
     payload.eventType || '',
     lastProgressAt,
+    Number(payload.hintsCount || 0),
   ];
 
   if (rowIndex === -1) {
@@ -117,6 +126,7 @@ function getTeamProgressData(teamName, teamPassword) {
         activeStageId: rows[i][3],
         completedStages: completedStages,
         notes: notes,
+        hints: Number(rows[i][11] || 0),
       };
     }
   }
@@ -144,10 +154,9 @@ function getDashboardData() {
     }
 
     teams.push({
-      id: String(rows[i][1]) + '-' + String(rows[i][2]),
+      id: 'team-' + i,
       updatedAt: rows[i][0],
       teamName: rows[i][1],
-      teamPassword: rows[i][2],
       activeStageId: rows[i][3],
       activeStageTitle: rows[i][4],
       completedCount: rows[i][5],
@@ -157,6 +166,7 @@ function getDashboardData() {
       note: notes[rows[i][3]] || '',
       eventType: rows[i][9],
       lastProgressAt: rows[i][10] || rows[i][0],
+      hints: Number(rows[i][11] || 0),
     });
   }
 
@@ -164,6 +174,43 @@ function getDashboardData() {
     ok: true,
     spreadsheetUrl: SpreadsheetApp.openById(getSpreadsheetId()).getUrl(),
     teams: teams,
+  };
+}
+
+function getOccupancyData() {
+  var stages = [
+    { id: 'case', step: '00', place: '본관 / 접수' },
+    { id: 'bag', step: '01', place: '야외 시설' },
+    { id: 'name', step: '02', place: '숙소' },
+    { id: 'ledger', step: '03', place: '창고 및 물자 보관소' },
+    { id: 'road', step: '04', place: '비아 돌로로사' },
+    { id: 'home', step: '05', place: '예배당' },
+  ];
+  var dashboard = getDashboardData();
+  var now = new Date().getTime();
+  var freshnessMs = 30 * 60 * 1000;
+
+  var occupancy = stages.map(function(stage) {
+    var users = dashboard.teams.filter(function(team) {
+      var updatedAt = new Date(team.updatedAt).getTime();
+      var isFresh = isFinite(updatedAt) && now - updatedAt <= freshnessMs;
+      var alreadyCompleted = team.completedStages.indexOf(stage.id) !== -1;
+      return isFresh && !alreadyCompleted && team.activeStageId === stage.id;
+    });
+    return {
+      id: stage.id,
+      step: stage.step,
+      place: stage.place,
+      count: users.length,
+      occupied: users.length > 0,
+    };
+  });
+
+  return {
+    ok: true,
+    updatedAt: new Date(),
+    refreshSeconds: 15,
+    occupancy: occupancy,
   };
 }
 
@@ -205,6 +252,7 @@ function getHeaders() {
     'notes',
     'eventType',
     'lastProgressAt',
+    'hintsCount',
   ];
 }
 

@@ -166,19 +166,45 @@ function updateHeaderKeywordBadge() {
 }
 
 function setupAutonomousHintSystem() {
+  const hintSystemPanel = document.querySelector("#hintSystemPanel");
   const hintStep1Content = document.querySelector("#hintStep1Content");
   const hintStep2Content = document.querySelector("#hintStep2Content");
   const hintStep3Content = document.querySelector("#hintStep3Content");
   const hintStatusBadge = document.querySelector("#hintStatusBadge");
+  const hintTimerStatus = document.querySelector("#hintTimerStatus");
 
   if (!puzzle.hints) return;
+  hintSystemPanel.hidden = false;
 
   if (hintStep1Content) hintStep1Content.textContent = puzzle.hints.focus;
   if (hintStep2Content) hintStep2Content.textContent = puzzle.hints.contrast;
   if (hintStep3Content) hintStep3Content.textContent = puzzle.hints.action;
 
-  const detailsElements = document.querySelectorAll(".hint-steps-grid details");
+  const detailsElements = [...document.querySelectorAll(".hint-steps-grid details")];
   const viewedSteps = new Set();
+  const testMode = adminPreview && params.get("hintTest") === "1";
+  const unlockMinutes = testMode ? [0, 0, 0] : [5, 10, 15];
+  const progress = loadActivityProgress();
+  const teamKey = String(progress.teamName || "local-team").trim().toLowerCase();
+  const starts = loadHintStarts();
+  const sessionKey = `${teamKey}::${stageId}`;
+  const startedAt = Number(starts[sessionKey]) || Date.now();
+  starts[sessionKey] = startedAt;
+  localStorage.setItem("homeward-hint-starts", JSON.stringify(starts));
+
+  detailsElements.forEach((details, idx) => {
+    details.open = false;
+    details.dataset.unlockMinutes = String(unlockMinutes[idx]);
+    details.dataset.locked = "true";
+    details.setAttribute("aria-disabled", "true");
+    const summary = details.querySelector("summary");
+    summary?.addEventListener("click", (event) => {
+      if (details.dataset.locked === "true") {
+        event.preventDefault();
+        updateHintAvailability();
+      }
+    });
+  });
 
   detailsElements.forEach((details, idx) => {
     details.addEventListener("toggle", () => {
@@ -200,6 +226,57 @@ function setupAutonomousHintSystem() {
       }
     });
   });
+
+  const hintTimer = window.setInterval(updateHintAvailability, 1000);
+  updateHintAvailability();
+
+  function updateHintAvailability() {
+    const elapsedMs = Math.max(0, Date.now() - startedAt);
+    const elapsedMinutes = elapsedMs / 60000;
+    let unlockedCount = 0;
+
+    detailsElements.forEach((details, idx) => {
+      const unlocked = elapsedMinutes >= unlockMinutes[idx];
+      details.dataset.locked = unlocked ? "false" : "true";
+      details.setAttribute("aria-disabled", unlocked ? "false" : "true");
+      details.classList.toggle("hint-locked", !unlocked);
+      details.classList.toggle("hint-unlocked", unlocked);
+      const strong = details.querySelector("summary strong");
+      if (strong) {
+        const names = ["시선 (Focus) - 관찰 포인트", "대조 (Contrast) - 규칙 & 모순 감식", "행동 (Action) - 정답 & 자물쇠 해금"];
+        strong.textContent = unlocked ? names[idx] : `${names[idx]} · ${unlockMinutes[idx]}분 후 공개`;
+      }
+      if (unlocked) unlockedCount += 1;
+    });
+
+    if (unlockedCount === detailsElements.length) {
+      hintTimerStatus.textContent = "세 단계 힌트가 모두 열렸습니다. 필요한 단계만 확인하십시오.";
+      window.clearInterval(hintTimer);
+      return;
+    }
+
+    const nextIndex = unlockedCount;
+    const remainingMs = Math.max(0, unlockMinutes[nextIndex] * 60000 - elapsedMs);
+    const minutes = Math.floor(remainingMs / 60000);
+    const seconds = Math.ceil((remainingMs % 60000) / 1000);
+    hintTimerStatus.textContent = `${unlockedCount} / 3단계 공개 · 다음 힌트까지 ${minutes}:${String(seconds).padStart(2, "0")}`;
+  }
+}
+
+function loadActivityProgress() {
+  try {
+    return JSON.parse(localStorage.getItem("homeward-case-progress") || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function loadHintStarts() {
+  try {
+    return JSON.parse(localStorage.getItem("homeward-hint-starts") || "{}");
+  } catch {
+    return {};
+  }
 }
 
 function fallbackCopyText(text, statusEl) {
@@ -259,7 +336,6 @@ function setupCopyRecordAction() {
 }
 
 updateHeaderKeywordBadge();
-setupAutonomousHintSystem();
 setupCopyRecordAction();
 
 if (qrToken !== expectedQrToken && !adminPreview) {
@@ -305,6 +381,7 @@ if (qrToken !== expectedQrToken && !adminPreview) {
   guideLink.href = `activity.html?stage=${stageId}`;
   completeLink.href = `activity.html?stage=${stageId}`;
   renderShell();
+  setupAutonomousHintSystem();
   puzzle.render();
   if (isStageSolved(stageId)) {
     unlock();
@@ -361,6 +438,15 @@ function resetStageProgress(id) {
   localStorage.removeItem(`homeward-game-${id}`);
   localStorage.removeItem(`homeward-solved-${id}`);
   localStorage.removeItem(`homeward-keyword-${id}`);
+  try {
+    const activityProgress = loadActivityProgress();
+    const teamKey = String(activityProgress.teamName || "local-team").trim().toLowerCase();
+    const starts = loadHintStarts();
+    delete starts[`${teamKey}::${id}`];
+    localStorage.setItem("homeward-hint-starts", JSON.stringify(starts));
+  } catch (e) {
+    console.error("Reset hint timer error:", e);
+  }
   try {
     const progress = JSON.parse(localStorage.getItem("homeward-case-progress") || "{}");
     if (progress.completed) delete progress.completed[id];

@@ -17,6 +17,11 @@
     return jsonp(`${config.apiUrl}?action=dashboard`);
   }
 
+  async function getOccupancy() {
+    if (!config.apiUrl) return { ok: false, offline: true };
+    return jsonp(`${config.apiUrl}?action=occupancy`);
+  }
+
   async function getTeamProgress(teamName, teamPassword) {
     if (!config.apiUrl || !teamName || !teamPassword) return { ok: false, offline: true };
     const query = new URLSearchParams({
@@ -57,6 +62,7 @@
     config,
     send,
     getDashboard,
+    getOccupancy,
     getTeamProgress,
   };
 })();

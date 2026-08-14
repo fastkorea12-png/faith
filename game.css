@@ -2417,6 +2417,38 @@ input {
   margin-bottom: 16px;
 }
 
+.hint-timer-status {
+  margin: 12px 0 0;
+  border: 1px solid rgba(185, 138, 53, 0.45);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: rgba(185, 138, 53, 0.1);
+  color: var(--forest);
+  font-weight: 900;
+}
+
+.hint-card.hint-locked {
+  opacity: 0.62;
+  filter: grayscale(0.35);
+}
+
+.hint-card.hint-locked .hint-summary {
+  cursor: not-allowed;
+}
+
+.hint-card.hint-locked .hint-toggle-icon {
+  visibility: hidden;
+}
+
+.hint-card.hint-unlocked {
+  animation: hint-unlock 0.45s ease-out;
+}
+
+@keyframes hint-unlock {
+  from { transform: translateY(4px); box-shadow: 0 0 0 rgba(185, 138, 53, 0); }
+  to { transform: translateY(0); box-shadow: 0 0 0 4px rgba(185, 138, 53, 0.12); }
+}
+
 .hint-steps-grid {
   display: grid;
   gap: 12px;

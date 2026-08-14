@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>본향 사건파일 | 현장 사용 현황</title>
+    <link rel="stylesheet" href="occupancy.css" />
+  </head>
+  <body>
+    <main class="occupancy-shell">
+      <header class="occupancy-header">
+        <div>
+          <p class="eyebrow">Live Field Status</p>
+          <h1>현장 사용 현황</h1>
+          <p>다른 팀이 사용 중인 현장을 피해 비어 있는 장소부터 조사하십시오. 정답과 진행 내용은 표시되지 않습니다.</p>
+        </div>
+        <a href="activity.html">사건 수첩으로 돌아가기</a>
+      </header>
+
+      <section class="status-summary" aria-live="polite">
+        <div>
+          <span class="live-dot" aria-hidden="true"></span>
+          <strong id="connectionStatus">현장 정보를 확인하는 중입니다.</strong>
+        </div>
+        <button type="button" id="refreshButton">지금 새로고침</button>
+      </section>
+
+      <section class="occupancy-grid" id="occupancyGrid" aria-label="스테이지별 사용 현황"></section>
+
+      <section class="occupancy-guide">
+        <h2>이렇게 이동하세요</h2>
+        <ul>
+          <li><strong>비어 있음</strong>: 바로 이동해도 좋습니다.</li>
+          <li><strong>사용 중</strong>: 다른 비어 있는 현장을 먼저 조사하십시오.</li>
+          <li><strong>혼잡</strong>: 두 팀 이상이 겹쳤습니다. 반드시 다른 현장을 선택하십시오.</li>
+        </ul>
+        <p id="updatedAt">마지막 갱신 시각을 불러오는 중입니다.</p>
+      </section>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="sync.js"></script>
+    <script src="occupancy.js"></script>
+  </body>
+</html>

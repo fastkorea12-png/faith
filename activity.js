@@ -265,6 +265,9 @@ function render() {
   stageList.querySelectorAll("button").forEach((button) => {
     button.addEventListener("click", () => {
       activeStageId = button.dataset.stage;
+      state.activeStageId = activeStageId;
+      saveState();
+      syncProgress("stage_changed");
       recorderMessage.textContent = "기록자: 선택한 현장의 사건기록을 불러왔습니다.";
       recorderMessage.dataset.status = "";
       render();
@@ -395,6 +398,7 @@ async function syncProgress(eventType) {
       completedStages,
       completedCount: completedStages.length,
       totalStages: stages.length,
+      hintsCount: Number(state.hintsCount || 0),
       notes: state.notes,
       updatedAt: new Date().toISOString(),
     });
@@ -454,4 +458,3 @@ async function pullTeamProgress() {
     saveStatus.textContent = "다른 기기 진행 상황을 불러오지 못했습니다. 네트워크를 확인하십시오.";
   }
 }
-
