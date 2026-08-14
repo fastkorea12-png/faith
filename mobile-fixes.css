@@ -1,0 +1,186 @@
+/* Shared mobile guardrails for every participant-facing page. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+main,
+section,
+article,
+header,
+nav,
+form,
+div,
+label {
+  min-width: 0;
+}
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
+}
+
+table {
+  max-width: 100%;
+}
+
+@media (max-width: 620px) {
+  body {
+    background-attachment: scroll;
+  }
+
+  .notebook-wrapper {
+    width: 100%;
+    margin: 0 auto 56px;
+  }
+
+  .app-shell,
+  .game-shell {
+    width: 100%;
+    padding: 8px;
+  }
+
+  .top-panel,
+  .game-header,
+  .game-board,
+  .hint-system-panel,
+  .code-panel,
+  .keyword-board-section,
+  .progress-panel,
+  .final-panel {
+    border-radius: 8px;
+    padding: 18px 14px;
+  }
+
+  .top-panel,
+  .case-brief,
+  .stage-layout,
+  .phone-board,
+  .loop-board,
+  .map-workbench,
+  .ledger-board,
+  .steward-table,
+  .reception-puzzle,
+  .inventory-ledger,
+  .inventory-board,
+  .finale-layout,
+  .onboarding-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .team-card div,
+  .input-with-button,
+  .answer-form,
+  .confession-card label,
+  .header-action-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .team-card input,
+  .team-card button,
+  .answer-form input,
+  .answer-form button,
+  .onboarding-form input,
+  .onboarding-form button,
+  .back-notebook-btn,
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+  }
+
+  .stage-card,
+  .occupancy-card,
+  .qr-card {
+    overflow: hidden;
+  }
+
+  .evidence-strip,
+  .header-badge-row,
+  .qr-links,
+  .hero-actions {
+    flex-wrap: wrap;
+  }
+
+  .ledger-board,
+  .inventory-table,
+  .route-table,
+  .evidence-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  h1 {
+    overflow-wrap: anywhere;
+    font-size: clamp(30px, 11vw, 44px);
+  }
+
+  h2,
+  h3,
+  p,
+  li,
+  a,
+  button,
+  label,
+  span,
+  strong {
+    overflow-wrap: anywhere;
+  }
+
+  .occupancy-shell,
+  .qr-page {
+    width: calc(100% - 16px);
+    margin-inline: auto;
+  }
+
+  .occupancy-header,
+  .status-summary,
+  .qr-header {
+    gap: 14px;
+    padding: 18px 14px;
+  }
+
+  .occupancy-card {
+    gap: 10px;
+    padding: 14px 12px;
+  }
+
+  .site-header {
+    padding: 12px 14px;
+  }
+
+  .site-header nav {
+    justify-content: flex-start;
+    gap: 8px 14px;
+  }
+}
+
+@media (max-width: 390px) {
+  .app-shell,
+  .game-shell {
+    padding-inline: 4px;
+  }
+
+  .phone-apps-four,
+  .choice-grid,
+  .record-grid,
+  .check-grid,
+  .role-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .host-quick-link {
+    opacity: 0.9;
+  }
+}
