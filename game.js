@@ -66,18 +66,18 @@ const puzzles = {
   road: {
     step: "04 / 비아 돌로로사",
     title: "돌아갈 수 있었던 길",
-    intro: "네 사람의 기억으로 루프를 통과하고, 길처럼 보인 방향을 기록으로 다시 읽으십시오.",
+    intro: "네 표식의 증언을 정확히 전달받아 대조하고, 흩어진 문장을 스스로 완성한 뒤 방향의 의미를 다시 읽으십시오.",
     code: "BETTER-04",
     keyword: "더 나은 본향",
     message: "다섯 번째 키워드 '더 나은 본향'을 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
-    evidence: ["기억 담당 A~D", "4개 루프", "문장 조각", "방향 홈", "웹 방향 자물쇠"],
-    objective: "분담한 현장 기억으로 네 갈림길을 통과하고 문장과 방향 기록의 의미를 복원한 뒤, 완성한 순서로 웹 방향 자물쇠를 해제합니다.",
+    evidence: ["표식 담당 A~D", "증언 대조", "문장 조각", "방향 홈", "웹 방향 자물쇠"],
+    objective: "분담해 관찰한 표식 증언을 서로 정확히 전달해 웹에서 대조하고, 회수한 문장 조각을 스스로 이치에 맞게 배치한 뒤 방향 기록의 의미를 읽어 웹 방향 자물쇠를 해제합니다.",
     hints: {
-      focus: "4개 루프 갈림길마다 기억 담당 A~D가 기록해 둔 현장 문장 조각에 집중하십시오.",
-      contrast: "익숙하고 편안해 보이는 선택(루프) 대신, 말씀을 기억하며 나아가는 '불편하지만 진실된 길'의 순서를 대조하십시오.",
-      action: "'문을 떠난다 → 기억한다 → 좁은 길 → 더 나은 본향' 순서로 길을 선택해 루프를 통과한 뒤, 문장 조각의 방향 홈을 읽어 화면의 방향 자물쇠를 순서대로 누르십시오.",
+      focus: "표식 담당 A~D가 각자 20초 동안 본 문구를 서로에게 정확한 표현 그대로 전달하십시오. 다른 표식의 증언을 고르면 통과되지 않습니다.",
+      contrast: "네 문장 조각이 자연스러운 하나의 문장이 되는 순서를 스스로 판단하십시오. 확인된 순서대로 다시 표식 카드를 살펴보십시오.",
+      action: "완성 문장은 '돌아갈 수 있었지만 / 그 길을 떠나 / 더 나은 본향을 / 사모하였다'입니다. 이 순서대로 각 표식 카드 가장자리의 방향 홈을 읽어 화면의 방향 자물쇠를 누르십시오(오른쪽 → 위 → 왼쪽 → 위).",
     },
-    render: renderLoopPuzzleV2,
+    render: renderTestimonyPuzzle,
   },
   home: {
     step: "05 / 예배당",
@@ -1176,11 +1176,16 @@ function renderInventoryPuzzleV2() {
     { name: "권한 확인 담당", task: "네 담당자 권한표 대조해 직권 오남용 판단" },
     { name: "반증·발표 담당", task: "사실·추론·결론 정리 및 최종 지목" },
   ];
+  // authorityList의 perm/forbid/quote는 이제 웹에 절대 표시하지 않는다 — 실물
+  // "담당별 권한표" 인쇄물에만 있다(stage-packets/stage-03.md 참고). code는
+  // 그 인쇄물에 역할마다 함께 인쇄되는 확인 코드로, 범인의 코드를 맞혀야만
+  // 지목이 통과된다. 웹 화면에 4개 역할 이름은 나오지만 코드는 어디에도
+  // 나열되지 않으므로, 실물 인쇄물을 보지 않고는 어떤 코드도 알 수 없다.
   const authorityList = [
-    { role: "보관 담당", perm: "봉인 전 선반 배치", forbid: "장부 문장 수정", quote: "“원본 안내도대로 여섯 자리를 채웠다.”" },
-    { role: "장부 담당", perm: "인계 완료 뒤 문장 확정", forbid: "혼자 위치 변경", quote: "“`확인 뒤 인계`가 원래 문장이다.”" },
-    { role: "열쇠 담당", perm: "두 사람 입회 때 창고 개방", forbid: "카드·장부 단독 변경", quote: "“봉인 뒤에는 혼자 문을 연 적이 없다.”" },
-    { role: "배급 담당", perm: "확정된 장부대로 전달", forbid: "위치·조건 임의 변경", quote: "“급한 품목은 먼저 처리해도 된다고 판단했다.”" },
+    { role: "보관 담당", perm: "봉인 전 선반 배치", forbid: "장부 문장 수정", quote: "“원본 안내도대로 여섯 자리를 채웠다.”", code: "24" },
+    { role: "장부 담당", perm: "인계 완료 뒤 문장 확정", forbid: "혼자 위치 변경", quote: "“`확인 뒤 인계`가 원래 문장이다.”", code: "37" },
+    { role: "열쇠 담당", perm: "두 사람 입회 때 창고 개방", forbid: "카드·장부 단독 변경", quote: "“봉인 뒤에는 혼자 문을 연 적이 없다.”", code: "45" },
+    { role: "배급 담당", perm: "확정된 장부대로 전달", forbid: "위치·조건 임의 변경", quote: "“급한 품목은 먼저 처리해도 된다고 판단했다.”", code: "58" },
   ];
 
   surface.innerHTML = `<p class="instruction">역할을 나누고 원본 위치·변경 문장·권한을 대조해 실제 상자의 번호를 복원하십시오.</p>${adminPreview ? `<button class="secondary-button admin-reset" id="resetLedger" type="button">관리자: 이 스테이지 초기화</button>` : ""}<section class="case-flow" id="ledgerFlow"></section><p class="feedback" id="feedback" aria-live="polite"></p>`;
@@ -1206,10 +1211,10 @@ function renderInventoryPuzzleV2() {
       flow.innerHTML = `${progress}<h3>봉인 전 원본 선반 안내도 (웹 화면 A)</h3><p class="eyebrow">보관 복원 담당 지침</p><ol class="shelf-clues"><li>물은 가장 아래 선반에 둔다 (선반 6).</li><li>콩은 물 바로 위에 둔다 (선반 5).</li><li>소금은 콩 바로 위에 둔다 (선반 4).</li><li>기름은 소금 바로 위에 둔다 (선반 3).</li><li>밀은 기름 바로 위에 둔다 (선반 2).</li><li>건과일은 가장 위 선반에 둔다 (선반 1).</li></ol><div class="shelf-stack"><strong>복원된 원래 선반 위치 (현장 매트 대조용)</strong>${[1, 2, 3, 4, 5, 6].map((n) => { const item = items.find((x) => x.shelf === n); return `<div><b>선반 ${n}</b><span>${item.mark} ${item.item}</span></div>`; }).join("")}</div><p class="phone-caption">보관 복원 담당자는 현장 매트의 선반 1~6에 카드를 올바르게 배치했는지 확인하십시오.</p><button class="primary-button" id="next" type="button">현장 매트 복원 완료</button>`;
     }
     if (state.step === "audit") {
-      flow.innerHTML = `${progress}<h3>변경 기록 6건 감식 (웹 화면 B)</h3><p>원래 선반, 원본 문장 ‘확인 뒤 인계’, 담당 권한이 모두 어긋난 <strong>세 건의 조작 기록</strong>을 고르십시오.</p><div class="authority-summary"><strong>담당별 권한표 요약</strong>${authorityList.map((a) => `<div><b>${a.role}:</b> ${a.perm} | <small>금지: ${a.forbid}</small> <em>${a.quote}</em></div>`).join("")}</div><div class="record-grid">${items.map((x) => `<button type="button" data-suspect="${x.id}" class="${state.suspects.includes(x.id) ? "selected" : ""}"><b>${x.mark} ${x.item}</b><span>발견 장소: ${x.found}</span><span>기록 문장: ${x.text}</span><small>기록자: ${x.author}</small></button>`).join("")}</div><button class="primary-button" id="audit" type="button">의심 기록 3건 확정 (${state.suspects.length}/3)</button>`;
+      flow.innerHTML = `${progress}<h3>변경 기록 6건 감식 (웹 화면 B)</h3><p>원래 선반, 원본 문장 ‘확인 뒤 인계’, 담당 권한이 모두 어긋난 <strong>세 건의 조작 기록</strong>을 고르십시오.</p><p class="phone-caption">담당별 권한(누가 무엇을 바꿀 수 있는지)은 이 화면에 없습니다 — 실물 ‘담당별 권한표’ 인쇄물을 확인하십시오.</p><div class="record-grid">${items.map((x) => `<button type="button" data-suspect="${x.id}" class="${state.suspects.includes(x.id) ? "selected" : ""}"><b>${x.mark} ${x.item}</b><span>발견 장소: ${x.found}</span><span>기록 문장: ${x.text}</span><small>기록자: ${x.author}</small></button>`).join("")}</div><button class="primary-button" id="audit" type="button">의심 기록 3건 확정 (${state.suspects.length}/3)</button>`;
     }
     if (state.step === "accuse") {
-      flow.innerHTML = `${progress}<h3>사건 결론 (웹 화면 C)</h3><p>맡겨진 위치와 인계 원칙을 자기 판단으로 바꾼 담당자는 누구인가?</p><p class="eyebrow">세 역할의 근거 확인 (필수)</p><div class="check-grid">${["복원 위치 확인", "기록 문장 확인", "권한표 확인"].map((x) => `<button type="button" data-check="${x}" class="${state.checks.includes(x) ? "selected" : ""}">✓ ${x}</button>`).join("")}</div><p class="eyebrow">용의자 지목</p><div class="choice-grid">${["보관 담당", "장부 담당", "열쇠 담당", "배급 담당"].map((x) => `<button type="button" data-culprit="${x}">${x}</button>`).join("")}</div>`;
+      flow.innerHTML = `${progress}<h3>사건 결론 (웹 화면 C)</h3><p>맡겨진 위치와 인계 원칙을 자기 판단으로 바꾼 담당자는 누구인가? 실물 ‘담당별 권한표’에서 위반한 담당자를 찾아, 그 옆에 인쇄된 확인 코드를 입력하십시오.</p><p class="eyebrow">네 역할 중 하나</p><div class="role-grid">${authorityList.map((a) => `<span>${a.role}</span>`).join("")}</div><form id="accuseForm" class="phone-answer-form"><label>위반한 담당자의 확인 코드 입력</label><input id="accuseInput" inputmode="numeric" autocomplete="off" placeholder="숫자" /><button type="submit" class="primary-button">지목 확정</button></form>`;
     }
     if (state.step === "unlock") {
       flow.innerHTML = `${progress}<h3>실제 자물쇠 개방 지시</h3><div class="lock-sequence-box"><div class="lock-sequence-item"><span class="mark">□</span><span class="item-name">소금</span><span class="shelf-num">선반 4</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">△</span><span class="item-name">기름</span><span class="shelf-num">선반 3</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">○</span><span class="item-name">밀</span><span class="shelf-num">선반 2</span></div></div><p>복원 매트의 <strong>원래 선반 번호</strong>를 인계 표식 순서(<strong>□ → △ → ○</strong>)대로 읽어 실제 3자리 자물쇠를 여십시오.</p><div class="physical-lock-note">웹에는 번호를 입력하지 않습니다. 상자를 열었으면 안의 결과 카드를 꺼내십시오.</div><button class="primary-button" id="opened" type="button">실제 상자를 열었다</button>`;
@@ -1267,27 +1272,18 @@ function renderInventoryPuzzleV2() {
       }
       advance("accuse");
     });
-    flow.querySelectorAll("[data-check]").forEach((b) =>
-      b.addEventListener("click", () => {
-        if (!state.checks.includes(b.dataset.check)) state.checks.push(b.dataset.check);
-        persist();
-        draw();
-      })
-    );
-    flow.querySelectorAll("[data-culprit]").forEach((b) =>
-      b.addEventListener("click", () => {
-        if (state.checks.length < 3) {
-          triggerFeedbackShake(feedback, "최소 세 역할이 위치·문장·권한 근거를 모두 확인해야 합니다.");
-          return;
-        }
-        if (b.dataset.culprit !== "배급 담당") {
-          triggerFeedbackShake(feedback, "그 담당자에게 위치와 인계 문장을 함께 바꿀 기회가 있었습니까? 권한표와 서명을 다시 대조하십시오.");
-          return;
-        }
-        state.culprit = b.dataset.culprit;
-        advance("unlock");
-      })
-    );
+    document.querySelector("#accuseForm")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = document.querySelector("#accuseInput");
+      const matched = authorityList.find((a) => normalize(input.value) === normalize(a.code));
+      if (!matched || matched.role !== "배급 담당") {
+        triggerFeedbackShake(feedback, "그 코드로는 결론이 확정되지 않습니다. 실물 권한표에서 위치·조건을 임의로 바꿀 수 없는 담당자를 다시 찾으십시오.");
+        input.value = "";
+        return;
+      }
+      state.culprit = matched.role;
+      advance("unlock");
+    });
     document.querySelector("#opened")?.addEventListener("click", () => {
       state.step = "complete";
       state.solved = true;
@@ -1303,27 +1299,70 @@ function renderInventoryPuzzleV2() {
   if (state.solved) unlock();
 }
 
-function renderLoopPuzzleV2() {
+function renderTestimonyPuzzle() {
   const surface = getSurface();
-  const state = loadPuzzleState("road", { phase: "briefing", index: 0, loops: 0, history: [], fragments: [], slots: [], interpretation: "", directionInput: [], solved: false });
+  const state = loadPuzzleState("road", {
+    phase: "briefing",
+    quoteOrder: [],
+    matched: [],
+    matchWrongStreak: 0,
+    matchLockedUntil: 0,
+    slots: [],
+    directionInput: [],
+    solved: false,
+  });
   // 방향 자물쇠는 실물 하드웨어(방향 자물쇠 봉투) 없이 웹에서 직접 입력한다.
-  // 04는 이미 루프 탐색·장면 카드·문장 조각 조합으로 현장 물리 활동이 충분해서,
+  // 04는 이미 증언 대조·문장 조합·현장 카드 대조로 물리 활동이 충분해서,
   // 마지막 방향 입력만 웹으로 옮겨도 스테이지의 물리성이 사라지지 않는다(02와 동일한 예외).
+  //
+  // 표식 카드에는 마크 + 증언 문구 + 방향 홈만 인쇄한다(문장 조각은 인쇄하지 않는다).
+  // 문장 조각은 웹에서 증언을 정확히 맞혀야만 보상으로 드러나므로, 카드를 안 읽고
+  // 다른 팀원 말만 듣고 웹에서 아무 선택지나 눌러서는 통과할 수 없다 — 오답 선택지도
+  // 전부 실제 다른 표식의 증언(허구의 유인책이 아니다)이라 정확한 전달이 필요하다.
   const correctDirection = ["오른쪽", "위", "왼쪽", "위"];
-  const fragments = [{ id: "return", text: "돌아갈 수 있었지만" }, { id: "leave", text: "그 길을 떠나" }, { id: "seek", text: "더 나은 본향을" }, { id: "long", text: "사모하였다" }];
-  const scenes = [
-    { mark: "A 문", memory: "열려 있다는 것과 들어가야 한다는 것은 다르다.", answer: "leave", choices: [["return", "익숙한 문으로 돌아간다"], ["leave", "문을 떠난다"]], fragment: "return", fail: "문은 열렸지만 길은 제자리입니다. A 담당자의 기억을 다시 들으세요." },
-    { mark: "B 눈", memory: "본 것은 답이 아니다. 사라진 뒤 말할 수 있어야 한다.", answer: "remember", choices: [["remember", "기억한다"], ["fast", "가장 빠른 길"]], fragment: "leave", fail: "빠르게 보았지만 남은 기록이 없습니다. B 담당자의 문장을 다시 들으세요." },
-    { mark: "C 발자국", memory: "사람 수가 아니라 하나뿐인 발자국을 따른다.", answer: "narrow", choices: [["crowd", "사람들이 많은 길"], ["narrow", "좁은 길"]], fragment: "seek", fail: "사람 수는 길의 증거가 아닙니다. C 담당자의 모양을 다시 들으세요." },
-    { mark: "D 별", memory: "돌아갈 수 있다는 말은 돌아가야 한다는 뜻이 아니다.", answer: "unseen", choices: [["old", "돌아갈 수 있었던 곳"], ["unseen", "아직 보이지 않는 곳을 택한다"]], fragment: "long", fail: "가능과 명령은 같은 뜻이 아닙니다. D 담당자의 기억을 다시 들으세요." },
+  const stations = [
+    { id: "gate", mark: "A · 문", quote: "열려 있다는 것과 들어가야 한다는 것은 다르다.", fragmentText: "돌아갈 수 있었지만" },
+    { id: "snow", mark: "B · 눈", quote: "본 것은 답이 아니다. 사라진 뒤 말할 수 있어야 한다.", fragmentText: "그 길을 떠나" },
+    { id: "footprint", mark: "C · 발자국", quote: "사람 수가 아니라 하나뿐인 발자국을 따른다.", fragmentText: "더 나은 본향을" },
+    { id: "star", mark: "D · 별", quote: "돌아갈 수 있다는 말은 돌아가야 한다는 뜻이 아니다.", fragmentText: "사모하였다" },
   ];
-  surface.innerHTML = `<p class="instruction">기억 담당의 증언으로 네 루프를 통과하고, 문장을 조합한 뒤 방향의 의미를 뒤집어 읽으십시오.</p>${adminPreview ? `<button class="secondary-button admin-reset" id="resetRoad" type="button">관리자: 이 스테이지 초기화</button>` : ""}<section class="case-flow" id="roadFlow"></section><p class="feedback" id="feedback" aria-live="polite"></p>`;
-  const flow = document.querySelector("#roadFlow"); const feedback = document.querySelector("#feedback"); const persist = () => savePuzzleState("road", state);
+  const correctSentenceOrder = stations.map((s) => s.id);
+  const persist = () => savePuzzleState("road", state);
+  if (!state.quoteOrder || state.quoteOrder.length !== 4) {
+    state.quoteOrder = shuffle(stations.map((s) => s.id));
+    persist();
+  }
+  surface.innerHTML = `<p class="instruction">네 표식을 나눠 맡아 증언을 정확히 전달하고, 흩어진 문장을 스스로 완성한 뒤 방향 자물쇠를 여십시오.</p>${adminPreview ? `<button class="secondary-button admin-reset" id="resetRoad" type="button">관리자: 이 스테이지 초기화</button>` : ""}<section class="case-flow" id="roadFlow"></section><p class="feedback" id="feedback" aria-live="polite"></p>`;
+  const flow = document.querySelector("#roadFlow");
+  const feedback = document.querySelector("#feedback");
+  let lockTimer = null;
+
   function draw() {
-    if (state.phase === "briefing") flow.innerHTML = `<h3>기억 담당 브리핑</h3><p>A 문 · B 눈 · C 발자국 · D 별 담당을 나누십시오. 각자 20초 동안 촬영·필기 없이 관찰하고 합류한 뒤, 담당자가 기억을 말한 다음 선택합니다.</p><div class="role-grid">${scenes.map(s => `<span>${s.mark}</span>`).join("")}</div><button class="primary-button" id="startLoops">네 담당 준비 완료</button>`;
-    if (state.phase === "loops") { const scene = scenes[state.index]; flow.innerHTML = `<div class="loop-board"><section class="loop-scene"><span class="loop-count">Loop ${state.loops} · ${scene.mark}</span><h3>${state.index + 1}번째 갈림길</h3><p class="memory-call">담당자가 기억한 문장을 팀에 먼저 말하십시오.</p><p>${scene.memory}</p><div class="choice-grid">${scene.choices.map(([v,l]) => `<button data-road-choice="${v}">${l}</button>`).join("")}</div></section><aside class="loop-log"><strong>반복 기록</strong>${state.history.length ? state.history.map(x => `<p>${x}</p>`).join("") : "<p>아직 기록 없음</p>"}<div class="direction-strip">회수 조각 ${state.fragments.length}/4</div></aside></div>`; }
-    if (state.phase === "assemble") { const pool = ["seek","return","long","leave"].filter(id => !state.slots.includes(id)); flow.innerHTML = `<section class="sentence-lock"><h3>흩어진 문장</h3><p>방향은 아직 가려져 있습니다. 자연스러운 한 문장을 만드십시오.</p><div class="sentence-slots">${fragments.map((_,i) => { const f = fragments.find(x => x.id === state.slots[i]); return `<button data-slot="${i}" class="${f ? "filled" : ""}">${f ? f.text : i + 1}</button>`; }).join("")}</div><div class="sentence-pool">${pool.map(id => `<button data-fragment="${id}">${fragments.find(x => x.id === id).text}</button>`).join("")}</div><button class="primary-button" id="checkSentence">문장 확인</button></section>`; }
-    if (state.phase === "interpret") flow.innerHTML = `<section class="sentence-lock"><h3>마지막 기록의 의미</h3><p>“표식은 목적지를 가리키지 않는다. 지나온 선택을 기록한다.” 화살표는 무엇입니까?</p><div class="choice-grid"><button data-meaning="road">지금 가야 할 길</button><button data-meaning="record">지나온 선택의 기록</button></div></section>`;
+    clearTimeout(lockTimer);
+    if (state.phase === "briefing") {
+      flow.innerHTML = `<h3>표식 담당 브리핑</h3><p>A 문 · B 눈 · C 발자국 · D 별 담당을 나누십시오. 각자 20초 동안 촬영·필기 없이 자기 표식의 문구만 관찰하고, 다른 표식은 보지 마십시오. 합류한 뒤 서로 문구를 정확히 전달받아, 웹에서 어느 표식의 증언인지 지목합니다.</p><div class="role-grid">${stations.map((s) => `<span>${s.mark}</span>`).join("")}</div><button class="primary-button" id="startMatch" type="button">네 담당 준비 완료</button>`;
+    }
+    if (state.phase === "match") {
+      const remaining = Math.max(0, Math.ceil((state.matchLockedUntil - Date.now()) / 1000));
+      const unmatched = stations.filter((s) => !state.matched.includes(s.id));
+      flow.innerHTML = `
+        <h3>표식 증언 대조 (${state.matched.length}/4)</h3>
+        <p>담당자에게 정확히 전달받은 문구가 어느 표식의 것인지 고르십시오. 다른 표식의 증언을 고르면 통과되지 않습니다.</p>
+        ${state.matched.length ? `<div class="lock-result"><strong>확인된 표식</strong><p>${stations.filter((s) => state.matched.includes(s.id)).map((s) => `${s.mark}: "${s.fragmentText}"`).join(" · ")}</p></div>` : ""}
+        ${remaining > 0
+          ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
+          : unmatched.map((s) => `<section class="sentence-lock"><h3>${s.mark}</h3><p>이 표식이 실제로 들은 증언을 고르십시오.</p><div class="choice-grid">${state.quoteOrder.map((ownerId) => `<button type="button" data-station="${s.id}" data-owner="${ownerId}">${stations.find((st) => st.id === ownerId).quote}</button>`).join("")}</div></section>`).join("")
+        }
+      `;
+      if (remaining > 0) lockTimer = setTimeout(draw, 1000);
+    }
+    if (state.phase === "assemble") {
+      const pool = state.matched.filter((id) => !state.slots.includes(id));
+      flow.innerHTML = `<section class="sentence-lock"><h3>흩어진 문장</h3><p>네 표식에서 확인한 문장 조각을 자연스러운 한 문장이 되도록 순서대로 배치하십시오.</p><div class="sentence-slots">${[0, 1, 2, 3].map((i) => { const id = state.slots[i]; const st = stations.find((s) => s.id === id); return `<button type="button" data-slot="${i}" class="${st ? "filled" : ""}">${st ? st.fragmentText : i + 1}</button>`; }).join("")}</div><div class="sentence-pool">${pool.map((id) => `<button type="button" data-fragment="${id}">${stations.find((s) => s.id === id).fragmentText}</button>`).join("")}</div><button class="primary-button" id="checkSentence" type="button">문장 확인</button></section>`;
+    }
+    if (state.phase === "reveal") {
+      flow.innerHTML = `<section class="sentence-lock"><h3>마지막 표식의 뜻</h3><p>"표식은 목적지를 가리키지 않는다. 지나온 선택을 기록한다."</p><p>화살표는 앞으로 갈 길이 아니라 이미 지나온 선택의 기록입니다. 완성한 문장 순서대로 표식 카드 가장자리의 방향 홈을 다시 확인하십시오.</p><button class="primary-button" id="toDirection" type="button">방향 자물쇠로 이동</button></section>`;
+    }
     if (state.phase === "direction") {
       const dirLabels = [
         ["오른쪽", "→"],
@@ -1331,19 +1370,49 @@ function renderLoopPuzzleV2() {
         ["왼쪽", "←"],
         ["아래", "↓"],
       ];
-      flow.innerHTML = `<section class="direction-lock"><p class="eyebrow">Direction Lock</p><h3>방향 자물쇠</h3><p>완성한 문장 순서대로 현장 카드 가장자리의 방향 홈을 읽고, 같은 순서로 아래 방향을 눌러 자물쇠를 여십시오.</p><div class="direction-slots">${[0, 1, 2, 3].map((i) => `<span class="direction-slot ${state.directionInput[i] ? "filled" : ""}">${state.directionInput[i] || i + 1}</span>`).join("")}</div><div class="direction-pad">${dirLabels.map(([label, arrow]) => `<button type="button" data-direction="${label}" ${state.directionInput.length >= 4 ? "disabled" : ""}>${arrow}<small>${label}</small></button>`).join("")}</div><button class="secondary-button" id="resetDirection" type="button">다시 입력</button></section>`;
+      flow.innerHTML = `<section class="direction-lock"><p class="eyebrow">Direction Lock</p><h3>방향 자물쇠</h3><p>완성한 문장 순서대로 각 표식 카드 가장자리의 방향 홈을 읽고, 같은 순서로 아래 방향을 눌러 자물쇠를 여십시오.</p><div class="direction-slots">${[0, 1, 2, 3].map((i) => `<span class="direction-slot ${state.directionInput[i] ? "filled" : ""}">${state.directionInput[i] || i + 1}</span>`).join("")}</div><div class="direction-pad">${dirLabels.map(([label, arrow]) => `<button type="button" data-direction="${label}" ${state.directionInput.length >= 4 ? "disabled" : ""}>${arrow}<small>${label}</small></button>`).join("")}</div><button class="secondary-button" id="resetDirection" type="button">다시 입력</button></section>`;
     }
     if (state.phase === "complete") flow.innerHTML = `<section class="sentence-lock"><h3>방향 자물쇠 해제 완료</h3><p>완료 코드 <strong>BETTER-04</strong>를 확인했습니다. 활동 페이지에 입력하십시오.</p><a class="primary-button" href="activity.html?stage=road">활동 페이지로 이동</a></section>`;
     bind();
   }
+
   function bind() {
-    document.querySelector("#startLoops")?.addEventListener("click", () => { state.phase = "loops"; persist(); draw(); });
-    flow.querySelectorAll("[data-road-choice]").forEach(b => b.addEventListener("click", () => { const scene = scenes[state.index]; if (b.dataset.roadChoice !== scene.answer) { state.loops += 1; state.history.push(`${scene.mark}: ${b.textContent.trim()} → 처음으로 돌아옴`); state.index = 0; persist(); draw(); const fb = document.querySelector("#feedback"); triggerFeedbackShake(fb, scene.fail); return; } if (!state.fragments.includes(scene.fragment)) state.fragments.push(scene.fragment); state.history.push(`${scene.mark}: 선택 통과 · 조각 회수`); state.index += 1; if (state.index === 4) state.phase = "assemble"; persist(); draw(); }));
-    flow.querySelectorAll("[data-fragment]").forEach(b => b.addEventListener("click", () => { if (state.slots.length < 4) state.slots.push(b.dataset.fragment); persist(); draw(); }));
-    flow.querySelectorAll("[data-slot]").forEach(b => b.addEventListener("click", () => { state.slots.splice(Number(b.dataset.slot), 1); persist(); draw(); }));
-    document.querySelector("#checkSentence")?.addEventListener("click", () => { if (!fragments.every((f,i) => state.slots[i] === f.id)) { triggerFeedbackShake(feedback, "무엇을 떠나 무엇을 사모했는지 한 문장으로 다시 읽으십시오."); return; } state.phase = "interpret"; persist(); draw(); });
-    flow.querySelectorAll("[data-meaning]").forEach(b => b.addEventListener("click", () => { if (b.dataset.meaning !== "record") { triggerFeedbackShake(feedback, "화살표가 목적지라면 반복 기록은 필요 없었을 겁니다. D 문구를 다시 확인하십시오."); return; } state.interpretation = "record"; state.phase = "direction"; persist(); draw(); }));
-    flow.querySelectorAll("[data-direction]").forEach(b => b.addEventListener("click", () => {
+    document.querySelector("#startMatch")?.addEventListener("click", () => { state.phase = "match"; persist(); draw(); });
+    flow.querySelectorAll("[data-station]").forEach((b) => b.addEventListener("click", () => {
+      const stationId = b.dataset.station;
+      const ownerId = b.dataset.owner;
+      if (ownerId !== stationId) {
+        state.matchWrongStreak = (state.matchWrongStreak || 0) + 1;
+        if (state.matchWrongStreak >= 3) {
+          state.matchLockedUntil = Date.now() + 8000;
+          state.matchWrongStreak = 0;
+          persist();
+          draw();
+          return;
+        }
+        persist();
+        triggerFeedbackShake(feedback, "그 증언은 다른 표식의 것입니다. 담당자에게 문구를 다시 정확히 전달받으십시오.");
+        return;
+      }
+      state.matchWrongStreak = 0;
+      if (!state.matched.includes(stationId)) state.matched = [...state.matched, stationId];
+      if (state.matched.length === 4) state.phase = "assemble";
+      persist();
+      draw();
+    }));
+    flow.querySelectorAll("[data-fragment]").forEach((b) => b.addEventListener("click", () => { if (state.slots.length < 4) state.slots.push(b.dataset.fragment); persist(); draw(); }));
+    flow.querySelectorAll("[data-slot]").forEach((b) => b.addEventListener("click", () => { state.slots.splice(Number(b.dataset.slot), 1); persist(); draw(); }));
+    document.querySelector("#checkSentence")?.addEventListener("click", () => {
+      if (!correctSentenceOrder.every((id, i) => state.slots[i] === id)) {
+        triggerFeedbackShake(feedback, "무엇을 떠나 무엇을 사모했는지, 자연스러운 한 문장으로 다시 읽어 보십시오.");
+        return;
+      }
+      state.phase = "reveal";
+      persist();
+      draw();
+    });
+    document.querySelector("#toDirection")?.addEventListener("click", () => { state.phase = "direction"; persist(); draw(); });
+    flow.querySelectorAll("[data-direction]").forEach((b) => b.addEventListener("click", () => {
       if (state.directionInput.length >= 4) return;
       state.directionInput = [...state.directionInput, b.dataset.direction];
       if (state.directionInput.length === 4) {
@@ -1366,9 +1435,11 @@ function renderLoopPuzzleV2() {
       draw();
     }));
     document.querySelector("#resetDirection")?.addEventListener("click", () => { state.directionInput = []; persist(); draw(); });
+    document.querySelector("#resetRoad")?.addEventListener("click", () => resetStageProgress("road"));
   }
-  document.querySelector("#resetRoad")?.addEventListener("click", () => resetStageProgress("road"));
-  draw(); if (state.solved) unlock();
+
+  draw();
+  if (state.solved) unlock();
 }
 
 function renderHomePuzzle() {
