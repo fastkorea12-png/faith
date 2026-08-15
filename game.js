@@ -43,7 +43,7 @@ const puzzles = {
     hints: {
       focus: "휴대폰 잠금화면의 상단 알림 2개와 숙소 문 앞 안내문에 적힌 날짜 표시를 주시하십시오.",
       contrast: "알림 속 약속된 날짜와 문 앞 안내문의 월/일(MMDD) 형식을 대조하고, 잠금 해제 후 화면에 뜨는 다음 사진의 이름을 벽에서 실물로 찾아 그 사진에 적힌 검색어 태그를 확인하십시오.",
-      action: "휴대폰 잠금 비밀번호 '0316'을 입력해 연 뒤, 벽면 사진 인정받는 사람(검색어 '박수') → 이달의 새 가족(검색어 '환영') → 퇴실 안내 사본(검색어 '체크아웃') 순서로 찾아 각 검색어를 검색 기록에서 찾은 검색결과 숫자(52 → 19 → 36)를 입력하고, 도장 문구 '수정 없음'으로 원본을 확정한 뒤 검색 기록 마지막 줄 '약속을 지키는 사람'으로 메모를 복원하십시오.",
+      action: "휴대폰 잠금 비밀번호 '0316'을 입력해 연 뒤, 벽면 사진 성공한 사람(검색어 '우승') → 인정받는 사람(검색어 '박수') → 이달의 새 가족(검색어 '환영') → 퇴실 안내 사본(검색어 '체크아웃') 순서로 찾아 각 검색어를 검색 기록에서 찾은 검색결과 숫자(64 → 52 → 19 → 36)를 입력하고, 도장 문구 '수정 없음'으로 원본을 확정한 뒤 검색 기록 마지막 줄 '약속을 지키는 사람'으로 메모를 복원하십시오.",
     },
     render: renderPhonePuzzleV2,
   },
@@ -896,36 +896,39 @@ function renderPhonePuzzleV2() {
     attempts: 0,
   });
   // 사진 5장은 실물로도 인쇄해 현장에 걸어둔다(§GPT 목업 이미지, assets/stage-02/).
-  // 웹 갤러리는 한 번에 다 안 보여주고 한 장씩만 순서대로 연다. 사진 자체에는
-  // 잠금해제 숫자를 넣지 않는다 — 참가자는 검색 기록에서 그 사진과 주제가
-  // 맞는 항목을 찾아, 그 옆에 뜨는 "검색결과 N건"의 N을 코드로 입력한다.
-  // keyword는 화면에 표시되지 않는다 — 실물 인쇄본에만 태그로 인쇄되는
-  // 검색어라, 현장에서 그 사진을 직접 찾아야만 알 수 있다.
+  // 웹 갤러리는 한 번에 다 안 보여주고 한 장씩만 순서대로 연다. 첫 장(성공한
+  // 사람)도 예외 없이 코드로 열어야 한다 — 자동으로 확보되는 사진이 있으면
+  // 그 사진만 웹 화면 확대로 코드가 새어 나갈 수 있기 때문이다. 사진 자체에는
+  // 잠금해제 숫자를 넣지 않는다. keyword는 화면에 표시되지 않는다 — 실물
+  // 인쇄본에만 태그로 인쇄되는 검색어라, 현장에서 그 사진을 직접 찾아야만
+  // 알 수 있고, 그 단어를 검색 기록에서 찾으면 옆에 뜨는 "검색결과 N건"의
+  // N이 코드다.
   const photos = [
-    { id: "success", title: "성공한 사람", img: "assets/stage-02/photo-success.jpg", stamp: "임시 발급 · 반납 대상", real: false },
+    { id: "success", title: "성공한 사람", img: "assets/stage-02/photo-success.jpg", stamp: "임시 발급 · 반납 대상", real: false, code: "64", keyword: "우승" },
     { id: "approval", title: "인정받는 사람", img: "assets/stage-02/photo-approval.jpg", stamp: "임시 발급 · 반납 대상", real: false, code: "52", keyword: "박수" },
     { id: "welcome", title: "이달의 새 가족", img: "assets/stage-02/photo-welcome.jpg", stamp: "임시 발급 · 행사용", real: false, code: "19", keyword: "환영" },
     { id: "checkout", title: "퇴실 안내 사본", img: "assets/stage-02/photo-checkout.jpg", stamp: "사본 · 재발급", real: false, code: "36", keyword: "체크아웃" },
     { id: "promise", title: "약속 카드 03/16", img: "assets/stage-02/photo-promise.jpg", stamp: "원본 · 수정 없음", real: true, code: "07" },
   ];
   // 원래 기획(GAME_DEVELOPMENT_PLAN.md)엔 있었지만 구현에서 빠졌던 "검색 기록" 앱.
-  // 서사 텍스트뿐 아니라 사진 잠금해제 코드(52/19/36/07)도 여기 숨긴다.
-  // 단, 코드를 찾는 열쇠(검색어)는 웹이 아니라 실물 인쇄 사진에만 작은 태그로
-  // 인쇄된다(stage-packets/stage-02.md 참고) — 그래서 참가자는 반드시 벽에
-  // 걸린 실물 사진을 찾아가 태그를 확인해야만 이 목록에서 맞는 항목을 짚어낼
-  // 수 있다. 검색어(박수/환영/체크아웃)를 모르면 8개 항목 중 정답을 특정할
-  // 방법이 없도록, 실제 코드 항목의 문구도 사진 제목을 그대로 베끼지 않는다.
+  // 휴대폰 주인이 실제로 검색했을 법한 사적인 문장으로 쓴다 — "~할까?"처럼
+  // 정답을 설명하는 힌트체가 아니라, 불안하고 두서없는 혼잣말에 가깝게.
+  // 사진 잠금해제 코드(64/52/19/36/07)도 이 목록 안에 숨겨져 있지만, 코드를
+  // 찾는 열쇠(검색어)는 웹이 아니라 실물 인쇄 사진에만 작은 태그로 인쇄된다
+  // (stage-packets/stage-02.md 참고) — 그래서 참가자는 반드시 벽에 걸린 실물
+  // 사진을 찾아가 태그를 확인해야만 이 목록에서 맞는 항목을 짚어낼 수 있다.
   const searchHistory = [
-    { query: "성공한 사람 특징", time: "3일 전", results: 141 },
-    { query: "사람들 앞에서 박수 받을 때가 제일 좋다", time: "2일 전", results: 52 },
-    { query: "임시 명찰은 행사 끝나면 반납해야 한다던데", time: "2일 전", results: 6 },
-    { query: "낯선 곳에서 환영받는다는 게 뭘까", time: "어제", results: 19 },
-    { query: "본향이 무슨 뜻", time: "어제", results: 203 },
-    { query: "체크아웃 시간을 놓치면 생기는 일", time: "오늘", results: 36 },
-    { query: "약속 카드는 왜 반납 대상이 아닐까", time: "오늘", results: 4 },
+    { query: "우승하면 다 괜찮아지려나", time: "4일 전", results: 64 },
+    { query: "임시 명찰 반납 언제까지 해야 되지", time: "3일 전", results: 141 },
+    { query: "박수쳐줄 때만 내가 나 같음", time: "3일 전", results: 52 },
+    { query: "본향이 무슨 뜻", time: "2일 전", results: 203 },
+    { query: "환영받는 기분 왜 이렇게 빨리 식지", time: "2일 전", results: 19 },
+    { query: "이 카드만 왜 반납 안 해도 되는 걸까", time: "어제", results: 6 },
+    { query: "체크아웃 시간 놓치면 어떻게 되지", time: "어제", results: 36 },
+    { query: "나 진짜 뭐 하고 사는 건지 모르겠다", time: "오늘", results: 4 },
     { query: "약속을 지키는 사람", time: "오늘", results: "07" },
   ];
-  surface.innerHTML = `<p class="instruction">알림 → 현장 암호 → 벽면 사진에서 검색어 확인 → 검색 기록에서 코드 추리 → 원본 판별 → 메모 복원 순서로 확인하십시오.</p><div class="phone-board"><section class="phone-device"><div class="phone-island"></div><div class="phone-topbar"><span>11:13</span><span>숙소 Wi-Fi</span></div><div id="phoneFlow"></div><div class="phone-homebar"></div></section><section class="phone-investigation"><div class="deduction-steps"><strong>포렌식 진행</strong><ol><li>엄마와 룸메이트 알림을 각각 펼친다.</li><li>문 앞의 약속한 날을 MMDD로 입력한다.</li><li>화면에 뜨는 다음 사진의 이름을 보고 벽에서 그 실물 사진을 찾아, 적힌 검색어 태그를 확인한다.</li><li>그 검색어가 들어간 항목을 검색 기록에서 찾아 검색결과 숫자를 입력해 한 장씩 연다.</li><li>다섯 장을 다 열면 원본 도장 문구를 입력하고, 메모 마지막 줄을 복원한다.</li></ol></div>${adminPreview ? `<div class="fragment-board admin-preview-only"><p class="eyebrow">관리자 미리보기</p><h3>현장 기록 후보</h3><p>약속 카드 수령일 03/16 · 임시 이름표 2장 · 퇴실 안내 11:13 · 사진 5장 실물 인쇄본을 벽에 순서 무관하게 게시. 인쇄본에만 작은 검색어 태그(인정받는 사람=박수, 이달의 새 가족=환영, 퇴실 안내 사본=체크아웃)를 추가 인쇄해, 그 단어로 검색 기록에서 코드를 찾게 한다(사진 파일 자체엔 태그 없음, 웹에도 노출 안 됨)</p><button class="secondary-button" id="resetStage" type="button">이 스테이지 초기화</button></div>` : ""}</section></div><p class="feedback" id="feedback" aria-live="polite"></p>`;
+  surface.innerHTML = `<p class="instruction">알림 → 현장 암호 → 벽면 사진에서 검색어 확인 → 검색 기록에서 코드 추리 → 원본 판별 → 메모 복원 순서로 확인하십시오.</p><div class="phone-board"><section class="phone-device"><div class="phone-island"></div><div class="phone-topbar"><span>11:13</span><span>숙소 Wi-Fi</span></div><div id="phoneFlow"></div><div class="phone-homebar"></div></section><section class="phone-investigation"><div class="deduction-steps"><strong>포렌식 진행</strong><ol><li>엄마와 룸메이트 알림을 각각 펼친다.</li><li>문 앞의 약속한 날을 MMDD로 입력한다.</li><li>화면에 뜨는 다음 사진의 이름을 보고 벽에서 그 실물 사진을 찾아, 적힌 검색어 태그를 확인한다.</li><li>그 검색어가 들어간 항목을 검색 기록에서 찾아 검색결과 숫자를 입력해 한 장씩 연다.</li><li>다섯 장을 다 열면 원본 도장 문구를 입력하고, 메모 마지막 줄을 복원한다.</li></ol></div>${adminPreview ? `<div class="fragment-board admin-preview-only"><p class="eyebrow">관리자 미리보기</p><h3>현장 기록 후보</h3><p>약속 카드 수령일 03/16 · 임시 이름표 2장 · 퇴실 안내 11:13 · 사진 5장 실물 인쇄본을 벽에 순서 무관하게 게시. 인쇄본에만 작은 검색어 태그(성공한 사람=우승, 인정받는 사람=박수, 이달의 새 가족=환영, 퇴실 안내 사본=체크아웃)를 추가 인쇄해, 그 단어로 검색 기록에서 코드를 찾게 한다(사진 파일 자체엔 태그 없음, 웹에도 노출 안 됨)</p><button class="secondary-button" id="resetStage" type="button">이 스테이지 초기화</button></div>` : ""}</section></div><p class="feedback" id="feedback" aria-live="polite"></p>`;
   const screen = document.querySelector("#phoneFlow");
   const feedback = document.querySelector("#feedback");
   const persist = () => savePuzzleState("name", state);
@@ -1013,7 +1016,6 @@ function renderPhonePuzzleV2() {
       if (value === "0316") {
         state.unlocked = true;
         state.wrongStreak = 0;
-        if (state.photos.length === 0) state.photos.push(photos[0].id);
         persist();
         draw();
         return;
