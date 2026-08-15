@@ -1161,15 +1161,15 @@ function renderInventoryPuzzleV2() {
     solved: false,
   });
   const items = [
-    { id: "wheat", mark: "○", item: "밀", found: "조리대", shelf: 2, text: "먼저 처리 — 조리대로 이동", author: "배급 담당", altered: true },
+    { id: "wheat", mark: "○", item: "밀", found: "보관소 입구", shelf: 2, text: "먼저 처리 — 보관소 입구로 이동", author: "배급 담당", altered: true },
     { id: "oil", mark: "△", item: "기름", found: "출입구", shelf: 3, text: "먼저 처리 — 출입구로 이동", author: "배급 담당", altered: true },
-    { id: "salt", mark: "□", item: "소금", found: "조리대", shelf: 4, text: "먼저 처리 — 조리대로 이동", author: "배급 담당", altered: true },
+    { id: "salt", mark: "□", item: "소금", found: "보관소 입구", shelf: 4, text: "먼저 처리 — 보관소 입구로 이동", author: "배급 담당", altered: true },
     { id: "bean", mark: "◇", item: "콩", found: "선반 5", shelf: 5, text: "확인 뒤 인계 — 원래 자리 유지", author: "장부 담당", altered: false },
     { id: "fruit", mark: "☆", item: "건과일", found: "선반 1", shelf: 1, text: "확인 뒤 인계 — 원래 자리 유지", author: "보관 담당", altered: false },
     { id: "water", mark: "+", item: "물", found: "선반 6", shelf: 6, text: "확인 뒤 인계 — 원래 자리 유지", author: "열쇠 담당", altered: false },
   ];
   const roleList = [
-    { name: "수색 담당 A", task: "조리대와 홀수 선반의 재고 카드 3장 회수" },
+    { name: "수색 담당 A", task: "보관소 입구와 홀수 선반의 재고 카드 3장 회수" },
     { name: "수색 담당 B", task: "출입구와 짝수 선반의 재고 카드 3장 회수" },
     { name: "보관 복원 담당", task: "원본 선반 안내도 지침으로 카드 6장 위치 복원" },
     { name: "기록 감식 담당", task: "웹 변경 기록 6건 감식 및 반복 문구 포착" },
@@ -1200,7 +1200,7 @@ function renderInventoryPuzzleV2() {
       flow.innerHTML = `${progress}<h3>03 식량 장부 사건 브리핑</h3><p>수색 A/B, 보관 복원, 기록 감식, 권한 확인, 반증·발표 역할을 나누십시오. 최소 세 역할이 결론 전에 근거를 확인해야 합니다.</p><div class="role-grid">${roleList.map((r) => `<button type="button" data-role="${r.name}" class="role-card ${state.roles.includes(r.name) ? "selected" : ""}"><strong>${r.name}</strong><small>${r.task}</small></button>`).join("")}</div><button class="primary-button" id="next" type="button">역할 배정 완료 (${state.roles.length}/6)</button>`;
     }
     if (state.step === "search") {
-      flow.innerHTML = `${progress}<h3>재고 카드 6장 회수</h3><p>조리대, 출입구, 선반 주변에서 찾은 흑백 재고 카드를 체크하십시오. 발견 위치는 원래 자리가 아닐 수 있습니다.</p><div class="check-grid">${items.map((x) => `<button type="button" data-found="${x.id}" class="${state.found.includes(x.id) ? "selected" : ""}"><b>${x.mark} ${x.item}</b><small>발견 장소: ${x.found}</small></button>`).join("")}</div><button class="primary-button" id="next" ${state.found.length === 6 ? "" : "disabled"}>6장 인계 (${state.found.length}/6)</button>`;
+      flow.innerHTML = `${progress}<h3>재고 카드 6장 회수</h3><p>보관소 입구, 출입구, 선반 주변에서 찾은 흑백 재고 카드를 체크하십시오. 발견 위치는 원래 자리가 아닐 수 있습니다.</p><div class="check-grid">${items.map((x) => `<button type="button" data-found="${x.id}" class="${state.found.includes(x.id) ? "selected" : ""}"><b>${x.mark} ${x.item}</b><small>발견 장소: ${x.found}</small></button>`).join("")}</div><button class="primary-button" id="next" ${state.found.length === 6 ? "" : "disabled"}>6장 인계 (${state.found.length}/6)</button>`;
     }
     if (state.step === "restore") {
       flow.innerHTML = `${progress}<h3>봉인 전 원본 선반 안내도 (웹 화면 A)</h3><p class="eyebrow">보관 복원 담당 지침</p><ol class="shelf-clues"><li>물은 가장 아래 선반에 둔다 (선반 6).</li><li>콩은 물 바로 위에 둔다 (선반 5).</li><li>소금은 콩 바로 위에 둔다 (선반 4).</li><li>기름은 소금 바로 위에 둔다 (선반 3).</li><li>밀은 기름 바로 위에 둔다 (선반 2).</li><li>건과일은 가장 위 선반에 둔다 (선반 1).</li></ol><div class="shelf-stack"><strong>복원된 원래 선반 위치 (현장 매트 대조용)</strong>${[1, 2, 3, 4, 5, 6].map((n) => { const item = items.find((x) => x.shelf === n); return `<div><b>선반 ${n}</b><span>${item.mark} ${item.item}</span></div>`; }).join("")}</div><p class="phone-caption">보관 복원 담당자는 현장 매트의 선반 1~6에 카드를 올바르게 배치했는지 확인하십시오.</p><button class="primary-button" id="next" type="button">현장 매트 복원 완료</button>`;
