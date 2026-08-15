@@ -961,34 +961,37 @@ input {
   display: grid;
   flex-shrink: 0;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  padding: 10px 12px 4px;
+  gap: 6px;
+  padding: 6px 10px;
   margin-top: auto;
   border-top: 1px solid rgba(255, 253, 246, 0.14);
 }
 
 .phone-apps button {
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 5px;
-  justify-items: center;
-  min-height: 60px;
+  min-height: 38px;
   border: 0;
-  border-radius: 16px;
+  border-radius: 10px;
   background: rgba(255, 253, 246, 0.1);
   color: #fffdf6;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
   cursor: pointer;
 }
 
 .phone-apps button span {
   display: grid;
-  width: 28px;
-  height: 28px;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
   place-items: center;
-  border-radius: 9px;
+  border-radius: 6px;
   background: var(--gold);
   color: var(--ink);
+  font-size: 10px;
 }
 
 .phone-apps button.selected {
@@ -2111,6 +2114,22 @@ input {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.photo-evidence-grid-5 {
+  display: flex;
+  flex-wrap: nowrap;
+  grid-template-columns: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  gap: 10px;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.photo-evidence-grid-5 > * {
+  flex: 0 0 122px;
+  scroll-snap-align: start;
 }
 
 .photo-evidence-grid button,
