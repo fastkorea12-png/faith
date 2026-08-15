@@ -701,6 +701,8 @@ input {
 
 .phone-device {
   position: relative;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   aspect-ratio: 9 / 19.5;
   width: 100%;
@@ -730,11 +732,20 @@ input {
 
 .phone-topbar {
   display: flex;
+  flex-shrink: 0;
   justify-content: space-between;
   padding: 17px 18px 2px;
   color: rgba(255, 253, 246, 0.78);
   font-size: 13px;
   font-weight: 900;
+}
+
+#phoneFlow {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .phone-lockscreen {
@@ -759,6 +770,7 @@ input {
 }
 
 .phone-screen {
+  flex-shrink: 0;
   min-height: 0;
   height: 230px;
   overflow: auto;
@@ -947,9 +959,12 @@ input {
 
 .phone-apps {
   display: grid;
+  flex-shrink: 0;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
-  padding: 0 12px 10px;
+  padding: 10px 12px 4px;
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 253, 246, 0.14);
 }
 
 .phone-apps button {
@@ -1030,6 +1045,7 @@ input {
 }
 
 .phone-homebar {
+  flex-shrink: 0;
   width: 116px;
   height: 5px;
   margin: 0 auto 10px;
@@ -1992,6 +2008,29 @@ input {
   color: var(--ink);
   font-weight: 900;
   text-align: center;
+}
+
+.lightbox-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 253, 246, 0.78);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.lightbox-arrow {
+  border: 1px solid rgba(255, 253, 246, 0.3);
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: rgba(255, 253, 246, 0.1);
+  color: #fffdf6;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.lightbox-counter {
+  white-space: nowrap;
 }
 
 .photo-stamp {
