@@ -911,21 +911,24 @@ function renderPhonePuzzleV2() {
     { id: "promise", title: "약속 카드 03/16", img: "assets/stage-02/photo-promise.jpg", stamp: "원본 · 수정 없음", real: true, code: "07" },
   ];
   // 원래 기획(GAME_DEVELOPMENT_PLAN.md)엔 있었지만 구현에서 빠졌던 "검색 기록" 앱.
-  // 휴대폰 주인이 실제로 검색했을 법한 사적인 문장으로 쓴다 — "~할까?"처럼
-  // 정답을 설명하는 힌트체가 아니라, 불안하고 두서없는 혼잣말에 가깝게.
+  // 정답을 설명하는 힌트체가 아니라, 나흘에 걸쳐 무너져가는 이 사람의 속마음을
+  // 그대로 옮긴 일기/메모에 가깝게 쓴다: 우승 강박 → 빌린 정체성에 대한 불안
+  // → 인정받을 때만 사는 것 같은 마음 → 소속감의 유효기간 → 이곳을 떠나야
+  // 한다는 두려움 → 자신에 대한 회의, 그리고 마지막 줄에서 '약속을 지키는
+  // 사람'이라는 조용한 답에 이르는 흐름.
   // 사진 잠금해제 코드(64/52/19/36/07)도 이 목록 안에 숨겨져 있지만, 코드를
   // 찾는 열쇠(검색어)는 웹이 아니라 실물 인쇄 사진에만 작은 태그로 인쇄된다
   // (stage-packets/stage-02.md 참고) — 그래서 참가자는 반드시 벽에 걸린 실물
   // 사진을 찾아가 태그를 확인해야만 이 목록에서 맞는 항목을 짚어낼 수 있다.
   const searchHistory = [
-    { query: "우승하면 다 괜찮아지려나", time: "4일 전", results: 64 },
-    { query: "임시 명찰 반납 언제까지 해야 되지", time: "3일 전", results: 141 },
-    { query: "박수쳐줄 때만 내가 나 같음", time: "3일 전", results: 52 },
-    { query: "본향이 무슨 뜻", time: "2일 전", results: 203 },
-    { query: "환영받는 기분 왜 이렇게 빨리 식지", time: "2일 전", results: 19 },
-    { query: "이 카드만 왜 반납 안 해도 되는 걸까", time: "어제", results: 6 },
-    { query: "체크아웃 시간 놓치면 어떻게 되지", time: "어제", results: 36 },
-    { query: "나 진짜 뭐 하고 사는 건지 모르겠다", time: "오늘", results: 4 },
+    { query: "이번에도 우승 못 하면 나는 뭐가 되는 걸까", time: "4일 전", results: 64 },
+    { query: "이름표는 행사 끝나면 반납하라던데, 그다음엔 내가 뭐가 되지", time: "3일 전", results: 141 },
+    { query: "다들 박수 쳐줄 때만 내가 나로 느껴진다", time: "3일 전", results: 52 },
+    { query: "여기 말고 대체 어디가 본향이라는 걸까", time: "2일 전", results: 203 },
+    { query: "환영받는다는 게 이렇게 빨리 식는 감정이었나", time: "2일 전", results: 19 },
+    { query: "이 카드는 왜 반납 안 해도 된다는 걸까, 나머지는 다 반납해야 하는데", time: "어제", results: 6 },
+    { query: "체크아웃 시간까지 남은 게 왜 이렇게 무섭지", time: "어제", results: 36 },
+    { query: "나는 대체 뭘 좇고 있었던 걸까", time: "오늘", results: 4 },
     { query: "약속을 지키는 사람", time: "오늘", results: "07" },
   ];
   surface.innerHTML = `<p class="instruction">알림 → 현장 암호 → 벽면 사진에서 검색어 확인 → 검색 기록에서 코드 추리 → 원본 판별 → 메모 복원 순서로 확인하십시오.</p><div class="phone-board"><section class="phone-device"><div class="phone-island"></div><div class="phone-topbar"><span>11:13</span><span>숙소 Wi-Fi</span></div><div id="phoneFlow"></div><div class="phone-homebar"></div></section><section class="phone-investigation"><div class="deduction-steps"><strong>포렌식 진행</strong><ol><li>엄마와 룸메이트 알림을 각각 펼친다.</li><li>문 앞의 약속한 날을 MMDD로 입력한다.</li><li>화면에 뜨는 다음 사진의 이름을 보고 벽에서 그 실물 사진을 찾아, 적힌 검색어 태그를 확인한다.</li><li>그 검색어가 들어간 항목을 검색 기록에서 찾아 검색결과 숫자를 입력해 한 장씩 연다.</li><li>다섯 장을 다 열면 원본 도장 문구를 입력하고, 메모 마지막 줄을 복원한다.</li></ol></div>${adminPreview ? `<div class="fragment-board admin-preview-only"><p class="eyebrow">관리자 미리보기</p><h3>현장 기록 후보</h3><p>약속 카드 수령일 03/16 · 임시 이름표 2장 · 퇴실 안내 11:13 · 사진 5장 실물 인쇄본을 벽에 순서 무관하게 게시. 인쇄본에만 작은 검색어 태그(성공한 사람=우승, 인정받는 사람=박수, 이달의 새 가족=환영, 퇴실 안내 사본=체크아웃)를 추가 인쇄해, 그 단어로 검색 기록에서 코드를 찾게 한다(사진 파일 자체엔 태그 없음, 웹에도 노출 안 됨)</p><button class="secondary-button" id="resetStage" type="button">이 스테이지 초기화</button></div>` : ""}</section></div><p class="feedback" id="feedback" aria-live="polite"></p>`;
