@@ -301,7 +301,7 @@
       <div style="flex: 1 1 100%; display: flex; gap: 12px; align-items: center; margin-top: 4px;">
         <div class="stage-filter" id="filterGroup">
           <button class="active" onclick="filterStage('all', this)">전체 풀 패키지</button>
-          <button onclick="filterStage('essential', this)" style="background:#16a34a; color:white; font-weight:bold;">📱 모바일 퍼스트 필수 인쇄 (추천! 3종만 출력)</button>
+          <button onclick="filterStage('essential', this)" style="background:#16a34a; color:white; font-weight:bold;">📱 모바일 퍼스트 필수 인쇄 (추천! 핵심 교구만 출력)</button>
           <button onclick="filterStage('st00', this)">00 본관</button>
           <button onclick="filterStage('st01', this)">01 야외</button>
           <button onclick="filterStage('st02', this)">02 숙소</button>
@@ -519,11 +519,84 @@
         </div>
       </section>
 
-      <!-- 03 창고 및 물자 보관소 선반 매트 및 권한표 (5부) -->
-      <section class="page-sheet st03">
+      <!-- 03 창고 재고 카드 6장 (조합 숫자 인쇄 — 1단계 필수) -->
+      <section class="page-sheet st03 essential-sheet">
         <div class="sheet-header">
-          <h2>03 창고 — 담당별 권한표 및 선반 매트 (5부)</h2>
-          <span>수량: 5부 (A4 120g 일반지)</span>
+          <h2>03 창고 — 재고 카드 6종 (재단 및 코팅용)</h2>
+          <span>규격: A4 코팅지 (6분할 재단) | 팀당 1세트 · 5팀 총 30장 | 보관소 곳곳에 은닉</span>
+        </div>
+        <div class="card-grid-3x2">
+          <div class="cut-card">
+            <span class="cut-mark">재고 카드</span>
+            <div class="card-title"><span>인계 표식: ○</span><span>품목: 밀</span></div>
+            <div class="card-body" style="text-align:center; font-size:44px; font-weight:bold; margin:10px 0;">4</div>
+            <div class="card-footer"><span>물자 창고 재고표</span><span>팀 라벨: ___</span></div>
+          </div>
+          <div class="cut-card">
+            <span class="cut-mark">재고 카드</span>
+            <div class="card-title"><span>인계 표식: △</span><span>품목: 기름</span></div>
+            <div class="card-body" style="text-align:center; font-size:44px; font-weight:bold; margin:10px 0;">1</div>
+            <div class="card-footer"><span>물자 창고 재고표</span><span>팀 라벨: ___</span></div>
+          </div>
+          <div class="cut-card">
+            <span class="cut-mark">재고 카드</span>
+            <div class="card-title"><span>인계 표식: □</span><span>품목: 소금</span></div>
+            <div class="card-body" style="text-align:center; font-size:44px; font-weight:bold; margin:10px 0;">6</div>
+            <div class="card-footer"><span>물자 창고 재고표</span><span>팀 라벨: ___</span></div>
+          </div>
+          <div class="cut-card">
+            <span class="cut-mark">재고 카드</span>
+            <div class="card-title"><span>인계 표식: ◇</span><span>품목: 콩</span></div>
+            <div class="card-body" style="text-align:center; font-size:44px; font-weight:bold; margin:10px 0;">2</div>
+            <div class="card-footer"><span>물자 창고 재고표</span><span>팀 라벨: ___</span></div>
+          </div>
+          <div class="cut-card">
+            <span class="cut-mark">재고 카드</span>
+            <div class="card-title"><span>인계 표식: ☆</span><span>품목: 건과일</span></div>
+            <div class="card-body" style="text-align:center; font-size:44px; font-weight:bold; margin:10px 0;">5</div>
+            <div class="card-footer"><span>물자 창고 재고표</span><span>팀 라벨: ___</span></div>
+          </div>
+          <div class="cut-card">
+            <span class="cut-mark">재고 카드</span>
+            <div class="card-title"><span>인계 표식: +</span><span>품목: 물</span></div>
+            <div class="card-body" style="text-align:center; font-size:44px; font-weight:bold; margin:10px 0;">3</div>
+            <div class="card-footer"><span>물자 창고 재고표</span><span>팀 라벨: ___</span></div>
+          </div>
+        </div>
+        <p style="margin-top:10px; font-size:12px; color:#555;">※ 팀별로 테두리 패턴(실선·점선·이중선·사선·물결선)을 다르게 적용해 5팀 카드가 섞이지 않게 한다. 숫자는 팀 공통이다.</p>
+      </section>
+
+      <!-- 03 창고 복원 선반 매트 (A4, 빈 칸만 — 정답 미인쇄) -->
+      <section class="page-sheet st03 essential-sheet">
+        <div class="sheet-header">
+          <h2>03 창고 — 복원 선반 매트 (팀별 테이블 비치용)</h2>
+          <span>규격: A4 220g 켄트지 | 팀당 1장 · 5팀 총 5장 | 회수한 재고 카드를 올려놓는 판</span>
+        </div>
+        <div class="handout-doc">
+          <h3>물 자  보 관 소  복 원  선 반</h3>
+          <div class="handout-meta">
+            <div><b>선반 1:</b> 가장 위 칸</div>
+            <div><b>선반 6:</b> 가장 아래 칸</div>
+          </div>
+          <div class="handout-content">
+            <div style="display:grid; grid-template-columns:1fr; gap:6px;">
+              <div style="border:2px dashed #999; border-radius:6px; padding:14px 10px; background:#fff; min-height:44px;"><b>선반 1</b> <span style="color:#aaa; font-size:12px;">(가장 위)</span></div>
+              <div style="border:2px dashed #999; border-radius:6px; padding:14px 10px; background:#fff; min-height:44px;"><b>선반 2</b></div>
+              <div style="border:2px dashed #999; border-radius:6px; padding:14px 10px; background:#fff; min-height:44px;"><b>선반 3</b></div>
+              <div style="border:2px dashed #999; border-radius:6px; padding:14px 10px; background:#fff; min-height:44px;"><b>선반 4</b></div>
+              <div style="border:2px dashed #999; border-radius:6px; padding:14px 10px; background:#fff; min-height:44px;"><b>선반 5</b></div>
+              <div style="border:2px dashed #999; border-radius:6px; padding:14px 10px; background:#fff; min-height:44px;"><b>선반 6</b> <span style="color:#aaa; font-size:12px;">(가장 아래)</span></div>
+            </div>
+            <p style="margin-top:14px; font-size:13px;">웹 화면의 <b>봉인 전 원본 보관 지침 여섯 조건</b>을 모두 만족하도록 재고 카드 6장을 위 칸에 배치하십시오. 조건을 모두 만족하는 배치는 단 하나뿐입니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 창고 담당별 권한표 (5부) -->
+      <section class="page-sheet st03 essential-sheet">
+        <div class="sheet-header">
+          <h2>03 창고 — 담당별 권한표 (5부)</h2>
+          <span>수량: 5부 (A4 120g 일반지) | 확인 코드는 웹에 없으므로 반드시 인쇄할 것</span>
         </div>
         <div class="handout-doc">
           <h3>창 고 물 자  관 리  권 한 표</h3>
@@ -533,14 +606,47 @@
           </div>
           <div class="handout-content">
             <div class="handout-box">
-              <p><b>[원래 선반 배치도]</b><br>1번: 건과일 | 2번: 밀 | 3번: 기름 | 4번: 소금 | 5번: 콩 | 6번: 물</p>
-              <hr style="border-top:1px dashed #ccc;"/>
-              <p><b>[직무 권한 명시]</b></p>
-              <p>• <b>입출고 담당:</b> 물품 이동 시 원 위치 보존 의무 (임의 위치 변경 불가)</p>
-              <p>• <b>장부 담당:</b> 위치 및 사유 기록 의무 (임의 변경 권한 없음)</p>
-              <p>• <b>배급 담당:</b> '먼저 처리'를 이유로 위치 및 문장을 임의 교체함 <b>(★ 조작 범인)</b></p>
+              <p><b>[직무별 권한 및 금지 사항]</b></p>
+              <table style="width:100%; border-collapse:collapse; font-size:13px; margin-top:8px;">
+                <tr style="background:#f1f5f9;">
+                  <th style="border:1px solid #cbd5e1; padding:6px;">담당</th>
+                  <th style="border:1px solid #cbd5e1; padding:6px;">권한</th>
+                  <th style="border:1px solid #cbd5e1; padding:6px;">금지 사항</th>
+                  <th style="border:1px solid #cbd5e1; padding:6px;">확인 코드</th>
+                </tr>
+                <tr>
+                  <td style="border:1px solid #cbd5e1; padding:6px; font-weight:bold;">보관 담당</td>
+                  <td style="border:1px solid #cbd5e1; padding:6px;">봉인 전 선반 배치</td>
+                  <td style="border:1px solid #cbd5e1; padding:6px;">장부 문장 수정</td>
+                  <td style="border:1px solid #cbd5e1; padding:6px; text-align:center; font-weight:bold;">24</td>
+                </tr>
+                <tr>
+                  <td style="border:1px solid #cbd5e1; padding:6px; font-weight:bold;">장부 담당</td>
+                  <td style="border:1px solid #cbd5e1; padding:6px;">인계 완료 뒤 문장 확정</td>
+                  <td style="border:1px solid #cbd5e1; padding:6px;">혼자 위치 변경</td>
+                  <td style="border:1px solid #cbd5e1; padding:6px; text-align:center; font-weight:bold;">37</td>
+                </tr>
+                <tr>
+                  <td style="border:1px solid #cbd5e1; padding:6px; font-weight:bold;">열쇠 담당</td>
+                  <td style="border:1px solid #cbd5e1; padding:6px;">두 사람 입회 때 창고 개방</td>
+                  <td style="border:1px solid #cbd5e1; padding:6px;">카드·장부 단독 변경</td>
+                  <td style="border:1px solid #cbd5e1; padding:6px; text-align:center; font-weight:bold;">45</td>
+                </tr>
+                <tr>
+                  <td style="border:1px solid #cbd5e1; padding:6px; font-weight:bold;">배급 담당</td>
+                  <td style="border:1px solid #cbd5e1; padding:6px;">확정된 장부대로 전달</td>
+                  <td style="border:1px solid #cbd5e1; padding:6px;">위치·조건 임의 변경</td>
+                  <td style="border:1px solid #cbd5e1; padding:6px; text-align:center; font-weight:bold;">58</td>
+                </tr>
+              </table>
+              <hr style="border-top:1px dashed #ccc; margin-top:12px;"/>
+              <p><b>[담당자 진술]</b></p>
+              <p>• <b>보관 담당:</b> “원본 안내도대로 여섯 자리를 채웠다.”</p>
+              <p>• <b>장부 담당:</b> “‘확인 뒤 인계’가 원래 문장이다.”</p>
+              <p>• <b>열쇠 담당:</b> “봉인 뒤에는 혼자 문을 연 적이 없다.”</p>
+              <p>• <b>배급 담당:</b> “급한 품목은 먼저 처리해도 된다고 판단했다.”</p>
             </div>
-            <p style="margin-top: 20px;"><b>[조작 품목 원래 선반 번호]</b><br>소금(4번) → 기름(3번) → 밀(2번) ──► 3자리 자물쇠 암호: <b>432</b></p>
+            <p style="margin-top: 20px;"><b>[확인 절차]</b><br>웹 화면의 변경 기록 6건과 위 권한표를 대조하십시오. 자기 권한을 넘어 <b>물자의 위치와 인계 조건을 임의로 바꾼 담당자</b>를 가려낸 뒤, 그 담당자의 <b>확인 코드</b>를 웹에 입력하면 인계 표식 순서가 공개됩니다.</p>
           </div>
         </div>
       </section>
@@ -554,7 +660,7 @@
         <div class="card-grid-2x2">
           <div class="cut-card">
             <span class="cut-mark">표식 A (문)</span>
-            <div class="card-title"><span>기호: 문 [Door]</span><span>궤적: 1차 ▶(우) · 2차 ▲(상)</span></div>
+            <div class="card-title"><span>기호: 문 [Door]</span><span>궤적: ▶ 그리고 ▲</span></div>
             <div class="card-body" style="text-align:left; font-size:14px; line-height:1.5; margin:12px 0; padding:0 8px;">
               <b>[갈림길 일지 A]</b><br/>
               뒤편의 넓은 문은 익숙하고 편안했지만 다시 제자리로 돌아가는 문이었다. 순례자는 과거의 문을 닫고 좁은 오르막길로 발걸음을 돌렸다.<br/>
@@ -564,7 +670,7 @@
           </div>
           <div class="cut-card">
             <span class="cut-mark">표식 B (눈)</span>
-            <div class="card-title"><span>기호: 눈 [Eye]</span><span>궤적: 3차 ◀(좌) · 4차 ▲(상)</span></div>
+            <div class="card-title"><span>기호: 눈 [Eye]</span><span>궤적: ◀ 그리고 ▲</span></div>
             <div class="card-body" style="text-align:left; font-size:14px; line-height:1.5; margin:12px 0; padding:0 8px;">
               <b>[갈림길 일지 B]</b><br/>
               눈앞에 화려한 도성이 나타나 머물라 유혹했다. 그러나 눈에 보이는 것은 영원하지 않다. 순례자는 시선을 돌려 보이지 않는 지평선을 바라보았다.<br/>
@@ -574,7 +680,7 @@
           </div>
           <div class="cut-card">
             <span class="cut-mark">표식 C (발자국)</span>
-            <div class="card-title"><span>기호: 발자국 [Footprint]</span><span>궤적: 5차 ▶(우) · 6차 ▲(상)</span></div>
+            <div class="card-title"><span>기호: 발자국 [Footprint]</span><span>궤적: ▶ 그리고 ▲</span></div>
             <div class="card-body" style="text-align:left; font-size:14px; line-height:1.5; margin:12px 0; padding:0 8px;">
               <b>[갈림길 일지 C]</b><br/>
               되돌아가는 무수한 사람들의 발자국이 넓은 길을 만들었다. 그러나 순례자는 다수의 발자국을 떠나, 좁은 골짜기로 홀로 앞서간 하나의 발자국을 따랐다.<br/>
@@ -584,7 +690,7 @@
           </div>
           <div class="cut-card">
             <span class="cut-mark">표식 D (별)</span>
-            <div class="card-title"><span>기호: 별 [Star]</span><span>궤적: 7차 ◀(좌) · 8차 ▲(상)</span></div>
+            <div class="card-title"><span>기호: 별 [Star]</span><span>궤적: ◀ 그리고 ▲</span></div>
             <div class="card-body" style="text-align:left; font-size:14px; line-height:1.5; margin:12px 0; padding:0 8px;">
               <b>[갈림길 일지 D]</b><br/>
               되돌아갈 기회가 있었으나 뒤를 돌아보지 않았다. 순례자는 세상의 모든 이정표를 내려놓고, 하늘의 샛별이 비추는 예비된 한 성을 바라보았다.<br/>
@@ -612,19 +718,20 @@
             <div class="handout-box" style="padding:15px; margin-bottom:15px;">
               <p style="font-weight:bold; color:#182820; margin-bottom:8px;">[ 1. 신앙의 여정 문장 조각 배치 슬롯 ]</p>
               <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; text-align:center;">
-                <div style="border:2px dashed #999; border-radius:6px; padding:12px 4px; background:#fff;"><b>[ 1단계 슬롯 ]</b><br/><small style="color:#666;">(A 문 카드)</small><br/><span style="color:#8a4b18; font-size:12px;">돌아갈 수 있었지만</span></div>
-                <div style="border:2px dashed #999; border-radius:6px; padding:12px 4px; background:#fff;"><b>[ 2단계 슬롯 ]</b><br/><small style="color:#666;">(B 눈 카드)</small><br/><span style="color:#8a4b18; font-size:12px;">그 길을 떠나</span></div>
-                <div style="border:2px dashed #999; border-radius:6px; padding:12px 4px; background:#fff;"><b>[ 3단계 슬롯 ]</b><br/><small style="color:#666;">(C 발자국 카드)</small><br/><span style="color:#8a4b18; font-size:12px;">더 나은 본향을</span></div>
-                <div style="border:2px dashed #999; border-radius:6px; padding:12px 4px; background:#fff;"><b>[ 4단계 슬롯 ]</b><br/><small style="color:#666;">(D 별 카드)</small><br/><span style="color:#8a4b18; font-size:12px;">사모하였다</span></div>
+                <div style="border:2px dashed #999; border-radius:6px; padding:26px 4px; background:#fff; min-height:90px;"><b>[ 1단계 슬롯 ]</b></div>
+                <div style="border:2px dashed #999; border-radius:6px; padding:26px 4px; background:#fff; min-height:90px;"><b>[ 2단계 슬롯 ]</b></div>
+                <div style="border:2px dashed #999; border-radius:6px; padding:26px 4px; background:#fff; min-height:90px;"><b>[ 3단계 슬롯 ]</b></div>
+                <div style="border:2px dashed #999; border-radius:6px; padding:26px 4px; background:#fff; min-height:90px;"><b>[ 4단계 슬롯 ]</b></div>
               </div>
+              <p style="font-size:12px; color:#555; margin:10px 0 0;">웹에서 회수한 네 개의 문장 조각이 하나의 순례 서사가 되도록 카드를 놓으십시오. 어느 카드가 몇 단계인지는 문장을 완성해 보아야 알 수 있습니다.</p>
             </div>
 
             <div class="handout-box" style="padding:15px; background:#f5f7f2; border:1px solid #c4d0c0;">
-              <p style="font-weight:bold; color:#182820; margin-bottom:8px;">[ 2. 8구간 순례 궤적 격자 가이드 (Path Grid) ]</p>
+              <p style="font-weight:bold; color:#182820; margin-bottom:8px;">[ 2. 8구간 순례 궤적 읽는 법 (Path Grid) ]</p>
               <p style="font-size:13px; line-height:1.6; margin:0;">
-                문장 순서(A $\rightarrow$ B $\rightarrow$ C $\rightarrow$ D)대로 4장의 카드를 위 슬롯에 맞물려 놓으면, 카드의 1·2차 화살표가 이어져 8구간의 궤적이 완성됩니다:<br/>
-                <b>A(1차: ▶ 우 $\rightarrow$ 2차: ▲ 상) $\rightarrow$ B(3차: ◀ 좌 $\rightarrow$ 4차: ▲ 상) $\rightarrow$ C(5차: ▶ 우 $\rightarrow$ 6차: ▲ 상) $\rightarrow$ D(7차: ◀ 좌 $\rightarrow$ 8차: ▲ 상)</b><br/>
-                <span style="color:#2a503a; font-weight:800; display:block; margin-top:8px;">★ 8자리 방향 자물쇠 정답: 오른쪽(▶) $\rightarrow$ 위(▲) $\rightarrow$ 왼쪽(◀) $\rightarrow$ 위(▲) $\rightarrow$ 오른쪽(▶) $\rightarrow$ 위(▲) $\rightarrow$ 왼쪽(◀) $\rightarrow$ 위(▲)</span>
+                1단계 슬롯부터 4단계 슬롯까지 차례로 지나가며, 각 카드에 인쇄된 <b>두 개의 화살표를 왼쪽부터 순서대로</b> 읽으십시오. 카드 4장 × 화살표 2개 = 총 <b>8구간의 궤적</b>이 이어집니다.<br/>
+                <span style="display:block; margin-top:8px;">읽어낸 8개의 방향을 웹 화면의 원형 다이얼에 같은 순서로 눌러 자물쇠를 여십시오.</span>
+                <span style="color:#8a4b18; font-weight:800; display:block; margin-top:8px;">※ 순례자는 돌아가지 않았습니다. 궤적에 ▼(아래)는 한 번도 나오지 않습니다.</span>
               </p>
             </div>
           </div>
@@ -652,11 +759,47 @@
               <p>3. 회수한 문장 조각을 중앙 테이블의 <b>여정 지도 매트</b>에 올바른 순례의 서사 순서로 완성하십시오.</p>
               <p>4. 여정 지도 매트에 4장의 카드를 연결하여 8구간의 궤적을 확인하고, <b>웹 8자리 방향 자물쇠 다이얼</b>을 열어 완료 코드(BETTER-04)를 획득하십시오.</p>
             </div>
-            <p style="margin-top: 20px;"><b>[진행자 정답표 (참가자 비공개)]</b><br/>
-            • 4개 결단 증언: A(문)=열려 있다는 것과 들어가야 한다는 것은 다르다 / B(눈)=본 것은 답이 아니다. 사라진 뒤 말할 수 있어야 한다 / C(발자국)=사람 수가 아니라 하나뿐인 발자국을 따른다 / D(별)=돌아갈 수 있다는 말은 돌아가야 한다는 뜻이 아니다<br/>
-            • 완성 문장: 돌아갈 수 있었지만(A) $\rightarrow$ 그 길을 떠나(B) $\rightarrow$ 더 나은 본향을(C) $\rightarrow$ 사모하였다(D)<br/>
-            • <b>8자리 방향 자물쇠 암호: 오른쪽(▶) $\rightarrow$ 위(▲) $\rightarrow$ 왼쪽(◀) $\rightarrow$ 위(▲) $\rightarrow$ 오른쪽(▶) $\rightarrow$ 위(▲) $\rightarrow$ 왼쪽(◀) $\rightarrow$ 위(▲)</b><br/>
-            • 완료 코드: <b>BETTER-04</b> / 키워드: <b>더 나은 본향</b></p>
+            <p style="margin-top: 20px; font-size:13px; color:#555;">※ 정답표는 이 안내판에 없습니다. 진행자는 별도의 「04 길 — 진행자 전용 정답표」 시트를 소지하십시오.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 길 진행자 전용 정답표 (참가자 동선에 절대 부착 금지) -->
+      <section class="page-sheet st04">
+        <div class="sheet-header">
+          <h2>04 길 — 진행자 전용 정답표 ⚠️ 참가자 비공개</h2>
+          <span>수량: 1부 (진행자 소지용) | 방 안·출입문에 부착 금지</span>
+        </div>
+        <div class="handout-doc">
+          <h3 style="color:#a33;">⚠️ 진 행 자  전 용 — 참 가 자 에 게  보 이 지  마 십 시 오</h3>
+          <div class="handout-meta">
+            <div><b>스테이지:</b> 04 길</div>
+            <div><b>완료 코드:</b> BETTER-04</div>
+            <div><b>키워드:</b> 더 나은 본향</div>
+          </div>
+          <div class="handout-content">
+            <div class="handout-box">
+              <p><b>[1단계 — 4개 결단 증언 정답]</b></p>
+              <p>• A(문) = 열려 있다는 것과 들어가야 한다는 것은 다르다.</p>
+              <p>• B(눈) = 본 것은 답이 아니다. 사라진 뒤 말할 수 있어야 한다.</p>
+              <p>• C(발자국) = 사람 수가 아니라 하나뿐인 발자국을 따른다.</p>
+              <p>• D(별) = 돌아갈 수 있다는 말은 돌아가야 한다는 뜻이 아니다.</p>
+            </div>
+            <div class="handout-box">
+              <p><b>[2단계 — 완성 문장 순서]</b></p>
+              <p>돌아갈 수 있었지만(A) → 그 길을 떠나(B) → 더 나은 본향을(C) → 사모하였다(D)</p>
+            </div>
+            <div class="handout-box">
+              <p><b>[3단계 — 카드별 궤적 및 최종 암호]</b></p>
+              <p>A(→, ↑) → B(←, ↑) → C(→, ↑) → D(←, ↑)</p>
+              <p style="margin-top:8px; font-size:16px;"><b>8자리 방향 자물쇠: 오른쪽 → 위 → 왼쪽 → 위 → 오른쪽 → 위 → 왼쪽 → 위</b></p>
+            </div>
+            <div class="handout-box" style="background:#fff8f0;">
+              <p><b>[3단계 힌트 가이드]</b></p>
+              <p>• <b>시선:</b> 네 구역의 일지를 읽고 순례자가 내린 참된 결단을 웹에서 대조하게 합니다.</p>
+              <p>• <b>대조:</b> 회수한 문장 조각으로 하나의 순례 서사를 완성하게 합니다.</p>
+              <p>• <b>행동:</b> 완성 문장 순서대로 카드를 놓고, 각 카드의 화살표 2개를 왼쪽부터 차례로 읽게 합니다.</p>
+            </div>
           </div>
         </div>
       </section>
