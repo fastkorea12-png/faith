@@ -82,12 +82,12 @@ const puzzles = {
   home: {
     step: "05 / 예배당",
     title: "예비된 성",
-    intro: "다섯 장소를 지나온 팀이 마지막으로 예배당 앞에 섰다. 손에 남은 것은 다섯 낱말과, 아직 이름이 비어 있는 한 문장뿐이다.",
+    intro: "다섯 장소를 지나온 팀이 마지막으로 예배당 앞에 섰다. 손에 남은 것은 지나온 증거물들과, 단상 위에 4자리 자물쇠로 잠긴 실물 최종 상자뿐이다.",
     code: "HOMEWARD-05",
     keyword: "예비된 성",
     message: "최종 사건파일이 열렸습니다. 활동 페이지에 마지막 코드를 입력하십시오.",
-    evidence: ["키워드 5개", "귀향 선언문", "팀 이름", "예배당 말씀판", "4자리 자물쇠"],
-    objective: "이 여정에서 모은 다섯 낱말은 흩어진 단서가 아니라 한 문장이었습니다. 팀의 이름을 그 문장 앞에 세우고, 여러분이 어디를 향해 걸어왔는지 스스로 고백하십시오.",
+    evidence: ["01~04 증거물", "귀향 선언문", "팀 이름", "예배당 말씀판", "4자리 자물쇠"],
+    objective: "다섯 낱말로 귀향 선언문을 완성하고, 지나온 네 장소(01~04) 증거물 뒷면의 숨겨진 숫자를 조합하여 실물 최종 상자의 4자리 자물쇠를 해제하십시오.",
     hints: {
       focus: "회수한 다섯 낱말(나그네, 장막, 약속, 청지기, 더 나은 본향)을 웹 선언문의 빈칸에 순서대로 놓아 문장을 완성하십시오.",
       contrast: "선언문이 완성되면, 여러분이 손에 쥐고 온 네 개 증거물(01 키워드 카드, 02 퇴실 안내문, 03 복원 지침, 04 여정 매트)의 뒷면에 적힌 숫자를 확인하십시오.",
@@ -1672,22 +1672,55 @@ function renderHomePuzzle() {
       surface.innerHTML = `
         <section class="direction-lock physical-only">
           <p class="eyebrow">Physical Lock Verification</p>
-          <h3>지나온 네 장소의 마지막 흔적</h3>
-          <div class="declaration-preview-box" style="margin: 16px 0; padding: 18px; border: 2px solid var(--gold); border-radius: 8px; background: rgba(185,138,53,0.1); color: var(--forest); font-weight: 900; font-size: 18px; line-height: 1.6;">
+          <h3>🔐 4자리 자물쇠 암호 해제 (실물 최종 상자)</h3>
+          
+          <div class="declaration-preview-box" style="margin: 16px 0; padding: 18px; border: 2px solid var(--gold); border-radius: 8px; background: rgba(185,138,53,0.1); color: var(--forest); font-weight: 900; font-size: 17px; line-height: 1.6;">
             ✨ ${declarationText(state.teamName || "우리 팀")}
           </div>
-          <p class="story-beat">순례자는 지나온 자리에 흔적을 남겼습니다. 여러분이 손에 쥐고 온 <strong>네 개의 증거물(01~04)의 뒷면</strong>을 확인하십시오.</p>
-          <div class="clue-box" style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:14px; margin:12px 0; font-size:14px; line-height:1.8;">
-            <div>• <strong>01 야외</strong> 키워드 카드 뒷면의 작은 숫자</div>
-            <div>• <strong>02 숙소</strong> 퇴실 안내문 뒷면의 숫자</div>
-            <div>• <strong>03 창고</strong> 긴급물자 복원 지침(선반 매트) 뒷면의 숫자</div>
-            <div>• <strong>04 길</strong> 순례자의 여정 지도 매트 뒷면의 숫자</div>
+
+          <p class="story-beat">
+            단상 위의 <strong>실물 최종 상자</strong>는 <strong>4자리 번호 자물쇠</strong>로 잠겨 있습니다.<br/>
+            순례자는 지나온 자리에 흔적을 남겼습니다. 여러분이 손에 쥐고 온 <strong>네 개 증거물(01~04)의 뒷면</strong>을 확인하십시오.
+          </p>
+
+          <!-- 4자리 자물쇠 슬롯 시각화 박스 -->
+          <div style="background: #182820; border: 2px solid var(--gold); border-radius: 12px; padding: 18px; margin: 18px 0; color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.15);">
+            <div style="text-align: center; font-size: 13px; color: var(--gold); font-weight: bold; margin-bottom: 12px; letter-spacing: 1px;">
+              [ 4자리 물리 자물쇠 조합 순서 ]
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center;">
+              <div style="background: rgba(255,255,255,0.08); border: 1px solid #4a6755; border-radius: 8px; padding: 10px 4px;">
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">1st Digit</div>
+                <div style="font-size: 13px; font-weight: bold; color: #38bdf8;">01 야외</div>
+                <div style="font-size: 11px; color: #cbd5e1; margin-top: 4px;">키워드 뒷면</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); border: 1px solid #4a6755; border-radius: 8px; padding: 10px 4px;">
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">2nd Digit</div>
+                <div style="font-size: 13px; font-weight: bold; color: #38bdf8;">02 숙소</div>
+                <div style="font-size: 11px; color: #cbd5e1; margin-top: 4px;">안내문 뒷면</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); border: 1px solid #4a6755; border-radius: 8px; padding: 10px 4px;">
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">3rd Digit</div>
+                <div style="font-size: 13px; font-weight: bold; color: #38bdf8;">03 창고</div>
+                <div style="font-size: 11px; color: #cbd5e1; margin-top: 4px;">복원지침 뒷면</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); border: 1px solid #4a6755; border-radius: 8px; padding: 10px 4px;">
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">4th Digit</div>
+                <div style="font-size: 13px; font-weight: bold; color: #38bdf8;">04 길</div>
+                <div style="font-size: 11px; color: #cbd5e1; margin-top: 4px;">여정매트 뒷면</div>
+              </div>
+            </div>
+            <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed #3a5344; font-size: 12px; color: #e2e8f0; text-align: center;">
+              💡 네 숫자를 차례로 조합한 <strong>4자리 번호</strong>로 단상 위 <strong>실물 최종 상자</strong>의 자물쇠를 여십시오.<br/>(예배당 <strong>말씀판</strong>의 히브리서 11장 16절이 그 답을 증언합니다)
+            </div>
           </div>
-          <p>네 장소의 숫자를 순서대로 조합한 <strong>네 자리 번호</strong>로 단상 위의 실물 최종 상자를 여십시오. 예배당 <strong>말씀판</strong>의 히브리서 11장 16절이 그 답을 증언합니다.</p>
-          <p class="physical-lock-note">상자를 열었다면 내부의 <strong>말씀 카드</strong>에 적힌 완료 코드를 입력하고, <strong>진행자에게 귀향 선언문을 수령</strong>하십시오.</p>
+
+          <p class="physical-lock-note" style="margin-top: 16px;">
+            상자를 열었다면 내부 <strong>말씀 카드</strong>에 적힌 완료 코드를 입력하고, <strong>진행자에게 귀향 선언문을 수령</strong>하십시오.
+          </p>
           <form id="homeCodeForm" class="code-entry"><input id="homeCodeInput" autocomplete="off" placeholder="상자 안 말씀 카드 완료 코드" /><button class="primary-button" type="submit">코드 확인</button></form>
         </section>
-        <p class="feedback" id="feedback">증거물 뒷면의 네 숫자로 최종 상자를 열고, 말씀 카드의 완료 코드를 입력하십시오.</p>
+        <p class="feedback" id="feedback">증거물 뒷면의 4자리 숫자로 최종 상자를 열고, 말씀 카드의 완료 코드를 입력하십시오.</p>
         ${adminPreview ? `<button class="secondary-button admin-reset" id="resetHome" type="button">관리자: 이 스테이지 초기화</button>` : ""}
       `;
       document.querySelector("#homeCodeForm").addEventListener("submit", (event) => {
