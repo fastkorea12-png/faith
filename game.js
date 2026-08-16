@@ -1176,6 +1176,13 @@ function renderInventoryPuzzleV2() {
   // 2단계는 정답을 알려주지 않는 제약 조건 퍼즐이다. 아래 여섯 조건을 모두
   // 만족하는 배치는 (위→아래) 건과일·밀·기름·소금·콩·물 하나뿐이고, 여섯 조건은
   // 전부 필요하다(하나라도 빼면 해가 2~6개로 늘어난다 — 브루트포스로 검증함).
+  //
+  // 이 여섯 문장은 웹에 렌더링하지 않는다 — 실물 "복원 선반 매트" 인쇄물의
+  // 선반 칸 아래에 함께 인쇄된다(stage-packets/stage-03.md 인쇄 사양 참고).
+  // 팀이 매트에 카드를 놓으면서 같은 종이에서 조건을 읽게 하려는 것이고,
+  // 동시에 추리 재료를 화면 밖으로 내보내 폰만으로는 진행할 수 없게 한다.
+  // 배열은 인쇄물 제작 시 문구 원본으로만 남겨 둔다(authorityList와 동일한 취급).
+  //
   // 웹은 팀이 만든 배치를 검증하지 않는다. 매트가 틀리면 5단계에서 자물쇠 번호가
   // 어긋나 실물 자물쇠가 대신 검증하므로, 화면에는 정답을 어떤 형태로도 남기지
   // 않는다(예전엔 힌트 괄호·정답표·5단계 선반 번호까지 3중으로 노출돼 있었다).
@@ -1224,7 +1231,7 @@ function renderInventoryPuzzleV2() {
       if (remaining > 0) lockTimer = setTimeout(draw, 1000);
     }
     if (state.step === "restore") {
-      flow.innerHTML = `${progress}<h3>봉인 전 원본 보관 지침 (웹 화면 A)</h3><p class="eyebrow">보관 복원 담당 지침</p><p>선반 <strong>1이 가장 위</strong>, <strong>6이 가장 아래</strong>입니다. 아래 여섯 조건을 모두 만족하는 배치는 단 하나뿐입니다. 조건을 맞춰 현장 매트의 여섯 칸을 채우십시오.</p><ol class="shelf-clues">${shelfClues.map((c) => `<li>${c}</li>`).join("")}</ol><p class="phone-caption">웹은 배치를 확인해 주지 않습니다. 여러분이 복원한 매트가 뒤에서 자물쇠 번호의 근거가 됩니다.</p><button class="primary-button" id="next" type="button">현장 매트 복원 완료</button>`;
+      flow.innerHTML = `${progress}<h3>봉인 전 원본 보관 지침</h3><section class="lock-result"><p>"봉인 전 여섯 자리는 지침대로 채워져 있었다. 지침서는 창고에 그대로 남아 있으니, 그것을 읽고 자리를 되돌려라."</p><p>회수한 재고 카드 여섯 장을 <strong>복원 선반 매트</strong> 위에 올리십시오. 매트 아래쪽에 <strong>봉인 전 보관 지침 여섯 조건</strong>이 인쇄되어 있습니다. 여섯 조건을 모두 만족하는 배치는 단 하나뿐입니다.</p></section><p class="phone-caption">지침은 이 화면에 없습니다 — 매트에 인쇄된 여섯 조건을 읽고 채우십시오. 웹은 배치를 확인해 주지 않으며, 여러분이 복원한 매트가 뒤에서 자물쇠 번호의 근거가 됩니다.</p><button class="primary-button" id="next" type="button">현장 매트 복원 완료</button>`;
     }
     if (state.step === "audit") {
       flow.innerHTML = `${progress}<h3>변경 기록 6건 감식 (웹 화면 B)</h3><p>원래 선반, 원본 문장 ‘확인 뒤 인계’, 담당 권한이 모두 어긋난 <strong>세 건의 조작 기록</strong>을 고르십시오.</p><p class="phone-caption">담당별 권한(누가 무엇을 바꿀 수 있는지)은 이 화면에 없습니다 — 실물 ‘담당별 권한표’ 인쇄물을 확인하십시오.</p><div class="record-grid">${items.map((x) => `<button type="button" data-suspect="${x.id}" class="${state.suspects.includes(x.id) ? "selected" : ""}"><b>${x.mark} ${x.item}</b><span>발견 장소: ${x.found}</span><span>기록 문장: ${x.text}</span><small>기록자: ${x.author}</small></button>`).join("")}</div><button class="primary-button" id="audit" type="button">의심 기록 3건 확정 (${state.suspects.length}/3)</button>`;
