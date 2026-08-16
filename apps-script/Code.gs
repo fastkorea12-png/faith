@@ -43,10 +43,42 @@ function doPost(e) {
     if (body.action === 'resetDashboard') {
       return jsonResponse(resetDashboardData());
     }
+    if (body.action === 'deleteTeam') {
+      return jsonResponse(deleteTeamData(body.payload || {}));
+    }
     return jsonResponse({ ok: false, error: 'Unknown action' });
   } catch (error) {
     return jsonResponse({ ok: false, error: String(error) });
   }
+}
+
+// 진행자가 기록을 지워도 참가자 폰의 localStorage는 그대로 남아, 폰이 다음
+// saveProgress를 보내는 순간 지운 팀이 시트에 되살아났다. 그래서 "언제 지웠는지"를
+// 서버에 남기고, 폰이 그 시각을 자기가 마지막으로 본 값과 비교해 자기 기록을
+// 비우도록 한다. 전체 초기화는 GLOBAL 키, 개별 삭제는 팀 키에 시각을 적는다.
+var RESET_PROP_KEY = 'homeward-reset-epochs';
+
+function readResetEpochs() {
+  try {
+    return JSON.parse(PropertiesService.getScriptProperties().getProperty(RESET_PROP_KEY) || '{}');
+  } catch (error) {
+    return {};
+  }
+}
+
+function markReset(key) {
+  var epochs = readResetEpochs();
+  epochs[key] = new Date().toISOString();
+  PropertiesService.getScriptProperties().setProperty(RESET_PROP_KEY, JSON.stringify(epochs));
+  return epochs[key];
+}
+
+// 이 팀에 적용되는 삭제 시각: 전체 초기화와 개별 삭제 중 더 나중 것.
+function resetEpochFor(teamKey) {
+  var epochs = readResetEpochs();
+  var global = epochs.GLOBAL || '';
+  var mine = teamKey ? epochs[teamKey] || '' : '';
+  return mine > global ? mine : global;
 }
 
 function resetDashboardData() {
@@ -55,7 +87,32 @@ function resetDashboardData() {
   if (lastRow > 1) {
     sheet.deleteRows(2, lastRow - 1);
   }
-  return { ok: true, deletedRows: Math.max(0, lastRow - 1) };
+  var resetAt = markReset('GLOBAL');
+  return { ok: true, deletedRows: Math.max(0, lastRow - 1), resetAt: resetAt };
+}
+
+function deleteTeamData(payload) {
+  var teamName = String(payload.teamName || '');
+  var teamPassword = String(payload.teamPassword || '');
+  if (!teamName) return { ok: false, error: 'teamName required' };
+
+  var sheet = getProgressSheet();
+  var rows = sheet.getDataRange().getValues();
+  var key = teamName + '::' + teamPassword;
+  var deleted = 0;
+
+  // 아래에서 위로 지워야 행 번호가 밀리지 않는다.
+  for (var i = rows.length - 1; i >= 1; i -= 1) {
+    var rowKey = String(rows[i][1]) + '::' + String(rows[i][2]);
+    var matches = teamPassword ? rowKey === key : String(rows[i][1]) === teamName;
+    if (matches) {
+      sheet.deleteRow(i + 1);
+      deleted += 1;
+    }
+  }
+
+  var resetAt = markReset(key);
+  return { ok: true, deletedRows: deleted, resetAt: resetAt };
 }
 
 function include(filename) {
@@ -115,6 +172,7 @@ function getTeamProgressData(teamName, teamPassword) {
   var sheet = getProgressSheet();
   var rows = sheet.getDataRange().getValues();
   var key = String(teamName || '') + '::' + String(teamPassword || '');
+  var resetAt = resetEpochFor(key);
 
   for (var i = 1; i < rows.length; i += 1) {
     if (String(rows[i][1]) + '::' + String(rows[i][2]) === key) {
@@ -139,11 +197,12 @@ function getTeamProgressData(teamName, teamPassword) {
         completedStages: completedStages,
         notes: notes,
         hints: Number(rows[i][11] || 0),
+        resetAt: resetAt,
       };
     }
   }
 
-  return { ok: true, found: false, completedStages: [], notes: {} };
+  return { ok: true, found: false, completedStages: [], notes: {}, resetAt: resetAt };
 }
 
 function getDashboardData() {

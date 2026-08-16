@@ -208,12 +208,19 @@ teamNote.addEventListener("input", () => {
 // homeward- 접두사를 전부 훑고, 진행 기록이 아닌 진행자용 키만 남긴다 —
 // 새 키가 추가돼도 초기화에서 다시 누락되지 않는다.
 const HOST_ONLY_KEYS = new Set(["homeward-dashboard-unlocked", "homeward-admin-preview", "homeward-host-dashboard"]);
+// 진행자가 마지막으로 초기화한 시각. 이 키만은 초기화에서 지우지 않는다 —
+// 지우면 같은 초기화 신호를 매번 새것으로 오인해 계속 다시 비우게 된다.
+const RESET_SEEN_KEY = "homeward-reset-seen";
+
+function clearParticipantProgress() {
+  Object.keys(localStorage)
+    .filter((key) => key.startsWith("homeward-") && key !== RESET_SEEN_KEY && !HOST_ONLY_KEYS.has(key))
+    .forEach((key) => localStorage.removeItem(key));
+}
 
 resetButton.addEventListener("click", () => {
   if (confirm("정말로 사건기록 및 수집된 디지털 키워드를 초기화하시겠습니까?")) {
-    Object.keys(localStorage)
-      .filter((key) => key.startsWith("homeward-") && !HOST_ONLY_KEYS.has(key))
-      .forEach((key) => localStorage.removeItem(key));
+    clearParticipantProgress();
     window.location.href = "activity.html";
   }
 });
@@ -434,6 +441,20 @@ async function pullTeamProgress() {
       saveStatus.textContent = "오프라인 상태입니다. 이 기기에 기록된 진행 상황만 표시됩니다.";
       return;
     }
+
+    // 진행자가 대시보드에서 기록을 지우면 서버가 그 시각(resetAt)을 돌려준다.
+    // 이 기기가 마지막으로 본 시각보다 나중이면, 폰에 남은 진행을 비우고 새
+    // 시각을 기억한다. 이걸 안 하면 폰이 다음 saveProgress를 보내는 순간 지운
+    // 팀이 시트에 그대로 되살아난다. 서버가 아무 신호도 안 주면(구버전 배포·
+    // 오프라인) 아무것도 지우지 않으므로 기존 동작 그대로다.
+    if (result.resetAt && result.resetAt > (localStorage.getItem(RESET_SEEN_KEY) || "")) {
+      localStorage.setItem(RESET_SEEN_KEY, result.resetAt);
+      clearParticipantProgress();
+      saveStatus.textContent = "진행자가 기록을 초기화했습니다. 이 기기의 진행 상황도 함께 비웠습니다.";
+      window.setTimeout(() => window.location.reload(), 1200);
+      return;
+    }
+
     if (!result.found) return;
 
     let addedAny = false;

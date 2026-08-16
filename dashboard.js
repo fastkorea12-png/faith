@@ -330,10 +330,26 @@ function renderTeams() {
       saveState();
       renderSummary();
     });
-    card.querySelector("[data-action='remove']").addEventListener("click", () => {
+    // 예전에는 이 버튼이 화면 목록에서만 팀을 빼서, 5초 뒤 폴링이 서버 데이터로
+    // 덮어쓰면 지운 팀이 그대로 되살아났다. 이제 서버에도 삭제를 보내고, 서버가
+    // 남긴 삭제 시각을 참가자 폰이 읽어 자기 기록도 비운다.
+    card.querySelector("[data-action='remove']").addEventListener("click", async () => {
+      if (!window.confirm(`${team.name} 팀의 기록을 삭제할까요? 해당 팀 기기의 진행 상황도 함께 비워집니다.`)) return;
+      opsMessage.textContent = `${team.name} 팀 기록을 삭제하는 중입니다.`;
+      try {
+        const result = await window.HomewardSync?.send("deleteTeam", {
+          teamName: team.name,
+          teamPassword: team.password || "",
+        });
+        if (!result?.ok || result.offline) throw new Error("Remote delete failed");
+      } catch {
+        opsMessage.textContent = "서버 삭제 요청에 실패했습니다. 네트워크를 확인하고 다시 시도하십시오.";
+        return;
+      }
       state.teams = state.teams.filter((item) => item.id !== team.id);
       saveState();
       render();
+      opsMessage.textContent = `${team.name} 팀 기록을 삭제했습니다. 해당 기기는 다음 동기화 때 초기화됩니다.`;
     });
   });
 }
