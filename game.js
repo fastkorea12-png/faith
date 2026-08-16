@@ -648,10 +648,15 @@ function renderCasePuzzle() {
   const allRevealed = () => records.every((r) => state.revealed.includes(r.id));
   const persist = () => savePuzzleState("case", state);
 
+  if (state.revealed.length === 0 && state.teamSlot !== null) {
+    state.teamSlot = null;
+    persist();
+  }
+
   function draw() {
     surface.innerHTML = `
       <p class="instruction">본관 로비에 숨겨진 알파벳 카드 A~E를 찾아, 카드에 적힌 4자리 암호로 각 기록을 복원하십시오. 다섯 기록을 모두 복원해야 사건 메모와의 대조를 시작할 수 있습니다.</p>
-      ${adminPreview ? `<button class="secondary-button admin-reset" id="resetCase" type="button">관리자: 이 스테이지 초기화</button>` : ""}
+      ${adminPreview ? `<button class="secondary-button admin-reset" id="resetCase" type="button">관리자: 이 스테이지 초기화</button>` : `<div style="text-align:right; margin-bottom:8px;"><button class="text-link" id="resetCase" type="button" style="background:none; border:none; color:rgba(255,253,246,0.6); font-size:12px; text-decoration:underline; cursor:pointer;">처음부터 다시 입력</button></div>`}
       <div class="reception-puzzle">
         <section class="reception-record">
           <span>현장 사건 메모</span>
@@ -754,6 +759,7 @@ function renderCasePuzzle() {
         if (inlineFeedback) {
           inlineFeedback.textContent = message;
           inlineFeedback.className = `card-inline-feedback active ${isWarning ? "warn" : "error"}`;
+          inlineFeedback.style.display = "block";
         }
         triggerFeedbackShake(feedback, message);
       }
