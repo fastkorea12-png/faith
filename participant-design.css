@@ -1,0 +1,378 @@
+/*
+ * Participant UI — mobile-first visual system
+ * One screen, one decision. Field readability wins over decoration.
+ */
+:root {
+  --ui-bg: #ebe7dc;
+  --ui-surface: #fffdf7;
+  --ui-surface-muted: #f4f0e5;
+  --ui-ink: #18231d;
+  --ui-muted: #59635c;
+  --ui-forest: #20372c;
+  --ui-leaf: #5f7952;
+  --ui-gold: #b88a32;
+  --ui-clay: #914d37;
+  --ui-line: rgba(32, 55, 44, 0.17);
+  --ui-shadow: 0 10px 28px rgba(25, 37, 30, 0.09);
+  --ui-radius: 18px;
+}
+
+html {
+  background: var(--ui-bg);
+}
+
+body {
+  color: var(--ui-ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+a,
+input,
+select,
+textarea,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+[role="button"],
+.primary-button,
+.secondary-button,
+.back-notebook-btn,
+.home-action {
+  min-height: 48px;
+}
+
+input,
+select,
+textarea {
+  min-height: 48px;
+  border: 1px solid rgba(32, 55, 44, 0.28);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ui-ink);
+  font-size: 16px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+  outline: 3px solid rgba(184, 138, 50, 0.55);
+  outline-offset: 3px;
+}
+
+/* Shared participant surfaces */
+.top-panel,
+.keyword-board-section,
+.progress-panel,
+.stage-card,
+.final-panel,
+.game-header,
+.game-board,
+.hint-system-panel,
+.code-panel,
+.occupancy-header,
+.status-summary,
+.occupancy-card,
+.occupancy-guide {
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius);
+  box-shadow: var(--ui-shadow);
+}
+
+.eyebrow,
+.eyebrow-tag,
+.stage-kicker,
+.keyword-counter,
+.keyword-counter-badge {
+  letter-spacing: 0.04em;
+}
+
+.primary-button,
+.answer-form button,
+.team-card button,
+.copy-record-btn,
+#refreshButton {
+  border-radius: 12px;
+  background: var(--ui-forest);
+  color: #fff;
+  font-weight: 900;
+  box-shadow: 0 5px 14px rgba(32, 55, 44, 0.18);
+}
+
+.secondary-button,
+.back-notebook-btn,
+.home-action,
+.complete-link-btn {
+  border-radius: 12px;
+}
+
+/* Activity notebook: status first, detail second. */
+.progress-panel {
+  background: var(--ui-forest);
+  color: #fff;
+}
+
+.progress-panel strong,
+.progress-panel span {
+  color: #fff;
+}
+
+.stage-card h2,
+.game-header h1 {
+  letter-spacing: -0.035em;
+}
+
+.mission-box,
+.answer-form,
+.note-panel,
+.recorder {
+  border-radius: 14px;
+}
+
+.answer-form {
+  border: 2px solid rgba(32, 55, 44, 0.2);
+  background: var(--ui-surface);
+}
+
+/* Game: reduce chrome so the active puzzle remains dominant. */
+.game-header {
+  background: var(--ui-forest);
+  color: #fff;
+}
+
+.game-header h1,
+.game-header p,
+.game-header .lead-desc {
+  color: #fff;
+}
+
+.game-header .eyebrow-tag,
+.game-header .keyword-counter-badge {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.11);
+  color: #fff;
+}
+
+.game-header .back-notebook-btn {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+  color: #fff;
+}
+
+.game-board {
+  background: var(--ui-surface);
+}
+
+.instruction {
+  border-left: 4px solid var(--ui-gold);
+  border-radius: 0 12px 12px 0;
+  background: #f7f0db;
+  color: var(--ui-ink);
+}
+
+.feedback {
+  min-height: 0;
+  border-radius: 12px;
+}
+
+.hint-system-panel {
+  background: var(--ui-surface-muted);
+}
+
+.hint-card {
+  border-radius: 14px;
+  box-shadow: none;
+  transform: none !important;
+}
+
+.code-panel {
+  border: 2px solid var(--ui-gold);
+  background: var(--ui-forest);
+  color: #fff;
+}
+
+.code-panel h2,
+.code-panel p,
+.code-panel .eyebrow {
+  color: #fff;
+}
+
+@media (max-width: 620px) {
+  body {
+    background: var(--ui-bg);
+  }
+
+  .binder-rings,
+  .tape-mark {
+    display: none;
+  }
+
+  .notebook-wrapper {
+    margin: 0;
+  }
+
+  .app-shell,
+  .game-shell {
+    display: grid;
+    gap: 12px;
+    padding: 8px;
+  }
+
+  .top-panel,
+  .game-header,
+  .game-board,
+  .hint-system-panel,
+  .code-panel,
+  .keyword-board-section,
+  .progress-panel,
+  .stage-card,
+  .final-panel {
+    margin: 0;
+    padding: 18px 16px;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(25, 37, 30, 0.07);
+  }
+
+  .top-panel {
+    gap: 16px;
+  }
+
+  .notebook-header-info h1,
+  .game-header h1 {
+    margin-bottom: 8px;
+    font-size: clamp(30px, 10vw, 40px);
+    line-height: 1.08;
+  }
+
+  .notebook-header-info .lead,
+  .game-header .lead-desc {
+    margin-bottom: 14px;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .home-action + .home-action {
+    margin-top: 8px;
+  }
+
+  .team-card {
+    padding: 16px;
+    transform: none;
+  }
+
+  .keyword-board-section .board-header,
+  .hint-header {
+    display: grid;
+    gap: 8px;
+  }
+
+  .keyword-counter,
+  .hint-status-badge {
+    width: fit-content;
+  }
+
+  .progress-panel {
+    position: sticky;
+    top: 6px;
+    z-index: 20;
+    padding: 12px 14px;
+  }
+
+  .progress-copy {
+    gap: 4px;
+  }
+
+  .stage-layout {
+    gap: 10px;
+  }
+
+  .stage-list {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 2px 8px;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+
+  .stage-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .stage-list button {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 76px;
+    min-height: 44px;
+    scroll-snap-align: start;
+  }
+
+  .mission-box,
+  .answer-form,
+  .note-panel {
+    padding: 15px;
+  }
+
+  .header-badge-row {
+    gap: 8px;
+  }
+
+  .header-action-row {
+    margin-top: 12px;
+  }
+
+  .game-board {
+    min-height: 46vh;
+  }
+
+  .instruction {
+    margin-bottom: 16px;
+    padding: 13px 14px;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .hint-system-panel {
+    margin-top: 0;
+  }
+
+  .hint-subtext {
+    font-size: 13px;
+  }
+
+  .hint-steps-grid {
+    gap: 8px;
+  }
+
+  .code-action-group {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .occupancy-shell {
+    padding-top: 8px;
+  }
+
+  .occupancy-header h1 {
+    font-size: clamp(34px, 11vw, 46px);
+  }
+}
+
+@media (min-width: 621px) {
+  .notebook-wrapper,
+  .occupancy-shell {
+    max-width: 1040px;
+  }
+
+  .app-shell,
+  .game-shell {
+    display: grid;
+    gap: 18px;
+  }
+}
