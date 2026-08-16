@@ -71,27 +71,27 @@ const puzzles = {
     keyword: "더 나은 본향",
     message: "다섯 번째 키워드 '더 나은 본향'을 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
     evidence: ["순례자 갈림길 일지 A~D", "증언 대조", "여정 지도 매트", "문장 조각", "8자리 방향 자물쇠"],
-    objective: "방 안 4개 지점의 순례자 일지를 탐색해 참된 결단을 대조하고, 여정 지도 매트에 문장 조각과 4장의 카드를 배치하여 8자리 방향 궤적을 해독합니다.",
+    objective: "방 안 4개 지점의 순례자 일지를 탐색해 참된 결단을 대조하고, 카드의 좌표를 여정 지도 매트 격자에 찍어 8구간 경로를 복원합니다.",
     hints: {
       focus: "방 안 4개 구역(문, 창가, 바닥, 선반)의 일지를 탐색하여 순례자가 본향을 향해 내린 참된 결단 증언을 웹에서 대조하십시오.",
       contrast: "확보한 4개 문장 조각을 여정 지도 매트에 순서대로 배치하여 '돌아갈 수 있었지만 그 길을 떠나 더 나은 본향을 사모하였다'를 완성하십시오.",
-      action: "완성 문장(A→B→C→D) 순서대로 4개 카드의 1·2차 방향 궤적을 지도 격자에 연결하면 총 8자리 암호가 도출됩니다 (오른쪽 → 위 → 왼쪽 → 위 → 오른쪽 → 위 → 왼쪽 → 위).",
+      action: "완성 문장(A→B→C→D) 순서대로 카드의 좌표를 매트 격자에 찍으십시오. K●에서 출발해 C★(예비된 성)에 도착하며, 그 경로의 방향이 답입니다 (위 → 오른쪽 → 아래 → 오른쪽 → 위 → 위 → 오른쪽 → 위).",
     },
     render: renderTestimonyPuzzle,
   },
   home: {
     step: "05 / 예배당",
     title: "예비된 성",
-    intro: "앞선 장소의 키워드를 모두 회수해 마지막 고백문을 완성하십시오.",
+    intro: "다섯 장소를 지나온 팀이 마지막으로 예배당 앞에 섰다. 손에 남은 것은 다섯 낱말과, 아직 이름이 비어 있는 한 문장뿐이다.",
     code: "HOMEWARD-05",
     keyword: "예비된 성",
     message: "최종 사건파일이 열렸습니다. 활동 페이지에 마지막 코드를 입력하십시오.",
-    evidence: ["키워드 5개", "색상 순서", "최종 선언문", "팀 이름"],
-    objective: "앞선 키워드를 순서대로 배치하고 팀 이름으로 귀향 선언문을 완성합니다.",
+    evidence: ["키워드 5개", "귀향 선언문", "팀 이름", "예배당 말씀판", "4자리 자물쇠"],
+    objective: "이 여정에서 모은 다섯 낱말은 흩어진 단서가 아니라 한 문장이었습니다. 팀의 이름을 그 문장 앞에 세우고, 여러분이 어디를 향해 걸어왔는지 스스로 고백하십시오.",
     hints: {
-      focus: "00~04 현장에서 회수한 5개의 디지털 키워드 카드(나그네, 장막, 약속, 청지기, 더 나은 본향)에 시선을 두십시오.",
-      contrast: "스테이지 순서대로 회수된 키워드의 의미와 귀향 선언문의 빈칸 위치를 대조하십시오.",
-      action: "5개 키워드를 순서대로 조합 및 배치하고 팀 이름을 작성하여 최종 귀향 선언을 완료하십시오.",
+      focus: "회수한 다섯 낱말(나그네, 장막, 약속, 청지기, 더 나은 본향)을 선언문의 빈칸에 하나씩 놓아 보십시오.",
+      contrast: "얻은 순서대로 밀어 넣으면 문장이 되지 않습니다 — 빈칸은 문장이 흐르는 순서를 따릅니다. 무엇을 집으로 착각했고, 무엇이었으며, 무엇을 붙들었는지 소리 내어 읽어 보십시오.",
+      action: "선언문 순서는 장막 → 나그네 → 약속 → 청지기 → 더 나은 본향입니다. 완성한 뒤, 예배당 말씀판에서 '더 나은 본향'이 적힌 구절(히브리서 11장 16절)을 찾아 장과 절을 이어 붙인 네 자리 1116으로 최종 상자를 여십시오.",
     },
     render: renderHomePuzzle,
   },
@@ -1485,15 +1485,23 @@ function renderTestimonyPuzzle() {
     directionLockedUntil: 0,
     solved: false,
   });
-  // 4개 표식 카드가 각각 2개씩의 1·2차 방향 궤적을 가지고 있어,
-  // 여정 지도 매트에서 완성 문장(A→B→C→D) 순서대로 연결하면 총 8자리 방향 자물쇠가 완성된다.
-  // A(문): 오른쪽→위 / B(눈): 왼쪽→위 / C(발자국): 오른쪽→위 / D(별): 왼쪽→위
-  const correctDirection = ["오른쪽", "위", "왼쪽", "위", "오른쪽", "위", "왼쪽", "위"];
+  // 방향은 카드에 화살표로 인쇄하지 않는다. 카드에는 좌표만 있고(예: K● → P● → P▲),
+  // 매트에만 격자가 있다 — 매트의 행 라벨이 W·T·C·M·P·K로 알파벳 순이 아니라서,
+  // 격자를 보지 않으면 "K에서 P로"가 위인지 아래인지 알 수 없다. 즉 카드 단독으로도
+  // 매트 단독으로도 방향이 나오지 않고, 둘을 겹쳐 경로를 찍어야만 드러난다.
+  // 앞 카드의 끝점이 다음 카드의 시작점이라, 문장 순서(A→B→C→D)가 틀리면 경로가 끊긴다.
+  //   A: K●→P●→P▲ (위, 오른쪽) / B: P▲→K▲→K■ (아래, 오른쪽)
+  //   C: K■→P■→M■ (위, 위)     / D: M■→M★→C★ (오른쪽, 위)  ※ C★ = 예비된 성
+  const correctDirection = ["위", "오른쪽", "아래", "오른쪽", "위", "위", "오른쪽", "위"];
+  // 증언 문구에는 표식 이름을 연상시키는 단어를 넣지 않는다. 예전 문구는
+  // 문→"열려", 눈→"본", 발자국→"발자국"으로 단어가 그대로 겹쳐서, 일지를 읽지
+  // 않고 화면만 보고도 4개를 다 배정할 수 있었다. 지금은 네 문장이 서로
+  // 구별되지 않으므로 현장 일지를 실제로 읽은 사람만 어느 지점 것인지 안다.
   const stations = [
-    { id: "gate", mark: "A · 문", quote: "열려 있다는 것과 들어가야 한다는 것은 다르다.", fragmentText: "돌아갈 수 있었지만", path: "오른쪽(→) → 위(↑)" },
-    { id: "snow", mark: "B · 눈", quote: "본 것은 답이 아니다. 사라진 뒤 말할 수 있어야 한다.", fragmentText: "그 길을 떠나", path: "왼쪽(←) → 위(↑)" },
-    { id: "footprint", mark: "C · 발자국", quote: "사람 수가 아니라 하나뿐인 발자국을 따른다.", fragmentText: "더 나은 본향을", path: "오른쪽(→) → 위(↑)" },
-    { id: "star", mark: "D · 별", quote: "돌아갈 수 있다는 말은 돌아가야 한다는 뜻이 아니다.", fragmentText: "사모하였다", path: "왼쪽(←) → 위(↑)" },
+    { id: "gate", mark: "A · 문", quote: "가능하다는 말이 곧 그리 하라는 뜻은 아니었다.", fragmentText: "돌아갈 수 있었지만", coords: "K● → P● → P▲" },
+    { id: "snow", mark: "B · 눈", quote: "머무르면 편했겠지만, 편한 것이 옳은 것은 아니었다.", fragmentText: "그 길을 떠나", coords: "P▲ → K▲ → K■" },
+    { id: "footprint", mark: "C · 발자국", quote: "다수가 택한 쪽이 언제나 옳지는 않았다.", fragmentText: "더 나은 본향을", coords: "K■ → P■ → M■" },
+    { id: "star", mark: "D · 별", quote: "아직 받지 못한 것을 믿고 걸어가기로 했다.", fragmentText: "사모하였다", coords: "M■ → M★ → C★" },
   ];
   const correctSentenceOrder = stations.map((s) => s.id);
   const persist = () => savePuzzleState("road", state);
@@ -1537,11 +1545,11 @@ function renderTestimonyPuzzle() {
       flow.innerHTML = `<section class="sentence-lock"><h3>순례자의 여정 지도 매트 복원</h3><p>중앙 테이블의 여정 지도 매트에 4개 문장 조각을 자연스러운 신앙의 여정이 되도록 순서대로 배치하십시오.</p><div class="sentence-slots">${[0, 1, 2, 3].map((i) => { const id = state.slots[i]; const st = stations.find((s) => s.id === id); return `<button type="button" data-slot="${i}" class="${st ? "filled" : ""}">${st ? st.fragmentText : i + 1}</button>`; }).join("")}</div><div class="sentence-pool">${pool.map((id) => `<button type="button" data-fragment="${id}">${stations.find((s) => s.id === id).fragmentText}</button>`).join("")}</div><button class="primary-button" id="checkSentence" type="button">문장 확인</button></section>`;
     }
     if (state.phase === "reveal") {
-      flow.innerHTML = `<section class="sentence-lock"><h3>서사 반전: 지나온 선택의 기록</h3><p>"그들이 나온 바 본향을 생각하였더라면 돌아갈 기회가 있었으려니와... 표식은 목적지가 아니라 지나온 선택의 기록이다." (히 11:15-16)</p><p>완성한 문장 순서(A→B→C→D)대로 4장의 카드를 여정 지도 매트의 격자선에 연결하십시오. 각 카드의 1·2차 방향 궤적이 이어져 <strong>총 8자리 순례의 길</strong>이 완성됩니다.</p><button class="primary-button" id="toDirection" type="button">8자리 방향 자물쇠로 이동</button></section>`;
+      flow.innerHTML = `<section class="sentence-lock"><h3>서사 반전: 지나온 선택의 기록</h3><p>"그들이 나온 바 본향을 생각하였더라면 돌아갈 기회가 있었으려니와... 표식은 목적지가 아니라 지나온 선택의 기록이다." (히 11:15-16)</p><p>완성한 문장 순서(A→B→C→D)대로 4장의 카드에 적힌 좌표를 여정 지도 매트의 격자에 차례로 찍으십시오. 앞 카드의 끝점이 다음 카드의 시작점이 되어 하나의 경로로 이어지고, 그 경로가 움직인 방향이 <strong>총 8구간의 순례의 길</strong>입니다.</p><button class="primary-button" id="toDirection" type="button">8자리 방향 자물쇠로 이동</button></section>`;
     }
     if (state.phase === "direction") {
       const remaining = Math.max(0, Math.ceil((state.directionLockedUntil - Date.now()) / 1000));
-      flow.innerHTML = `<section class="direction-lock"><p class="eyebrow">8-Step Direction Lock</p><h3>8자리 방향 자물쇠</h3><p>여정 지도 매트에서 연결된 4장의 1·2차 방향 궤적을 순서대로 눌러 자물쇠를 여십시오. (총 8회 입력)</p>${
+      flow.innerHTML = `<section class="direction-lock"><p class="eyebrow">8-Step Direction Lock</p><h3>8자리 방향 자물쇠</h3><p>매트에 그린 경로가 움직인 방향을 출발점부터 차례로 눌러 자물쇠를 여십시오. (총 8회 입력)</p>${
         remaining > 0
           ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
           : `<div class="direction-dial"><div class="direction-dial-center"><div class="direction-dial-slots">${[0, 1, 2, 3, 4, 5, 6, 7].map((i) => `<span class="direction-dial-slot ${state.directionInput[i] ? "filled" : ""}"></span>`).join("")}</div></div><button type="button" class="direction-dial-btn dial-up" data-direction="위" ${state.directionInput.length >= 8 ? "disabled" : ""}>↑</button><button type="button" class="direction-dial-btn dial-left" data-direction="왼쪽" ${state.directionInput.length >= 8 ? "disabled" : ""}>←</button><button type="button" class="direction-dial-btn dial-right" data-direction="오른쪽" ${state.directionInput.length >= 8 ? "disabled" : ""}>→</button><button type="button" class="direction-dial-btn dial-down" data-direction="아래" ${state.directionInput.length >= 8 ? "disabled" : ""}>↓</button></div><button class="secondary-button" id="resetDirection" type="button">다시 입력</button>`
@@ -1612,7 +1620,7 @@ function renderTestimonyPuzzle() {
         }
         persist();
         draw();
-        triggerFeedbackShake(feedback, "그 방향으로는 자물쇠가 열리지 않습니다. 여정 지도 매트의 8구간 궤적을 다시 대조하십시오.");
+        triggerFeedbackShake(feedback, "그 방향으로는 자물쇠가 열리지 않습니다. 매트에 찍은 좌표가 출발점 K●에서 시작해 끊기지 않고 이어지는지 다시 확인하십시오.");
         window.setTimeout(() => { state.directionInput = []; persist(); draw(); }, 900);
         return;
       }
@@ -1635,7 +1643,15 @@ function renderHomePuzzle() {
     { id: "road", label: "04 길 키워드", answer: "더 나은 본향" },
   ];
   const surface = getSurface();
-  const state = loadPuzzleState("home", { phase: "assemble", teamName: "", solved: false });
+  const state = loadPuzzleState("home", { phase: "assemble", teamName: "", slots: [null, null, null, null, null], picked: "", assembleWrongStreak: 0, solved: false });
+  // 선언문은 빈칸 다섯 개짜리 문장이고, 팀이 모은 낱말을 끼워 넣어야 완성된다.
+  // 빈칸 순서(장막→나그네→약속→청지기→더 나은 본향)는 여정 순서(나그네→장막→…)와
+  // 다르므로, 얻은 순서대로 밀어 넣으면 맞지 않는다 — 문장을 읽어야 한다.
+  const declarationParts = ["은 ", "을 집으로 착각했던 ", "였지만, ", "을 붙들고 ", "로 살아, ", "을 향해 걷는 사람입니다."];
+  const declarationSlots = ["장막", "나그네", "약속", "청지기", "더 나은 본향"];
+  // 칩은 문장 순서도 여정 순서도 아닌 고정 배열로 제시한다(다시 그릴 때마다 섞이면
+  // 조작이 불편하므로 무작위를 쓰지 않는다).
+  const chipOrder = ["청지기", "더 나은 본향", "장막", "약속", "나그네"];
 
   // 활동 페이지에 저장된 팀 이름 가져오기
   try {
@@ -1660,8 +1676,9 @@ function renderHomePuzzle() {
           <div class="declaration-preview-box" style="margin: 16px 0; padding: 18px; border: 2px solid var(--gold); border-radius: 8px; background: rgba(185,138,53,0.1); color: var(--forest); font-weight: 900; font-size: 18px; line-height: 1.6;">
             ✨ ${declarationText(state.teamName || "우리 팀")}
           </div>
-          <p>웹에서 완성한 귀향 선언문과 5개 키워드 카드를 최종 상자 앞에 나란히 놓고, 상자의 실제 4자리 자물쇠(1116)를 열어 상자를 개방하십시오.</p>
-          <p class="physical-lock-note">상자를 열었다면 내부의 종결 카드에 적힌 <strong>완료 코드</strong>를 아래에 입력하십시오.</p>
+          <p class="story-beat">여러분이 완성한 이 문장은 여러분이 지어낸 말이 아닙니다. 오래전에 이미 적혀 있던 말입니다.</p>
+          <p>예배당 <strong>말씀판</strong>에서 이 선언문이 온 구절을 찾으십시오 — 여러분이 향해 걷는 그곳의 이름이 적힌 구절입니다. 그 구절의 <strong>장과 절을 이어 붙인 네 자리</strong>가 최종 상자의 자물쇠를 엽니다.</p>
+          <p class="physical-lock-note">자물쇠 번호는 웹에 입력하지 않습니다. 상자를 열었다면 내부의 종결 카드에 적힌 <strong>완료 코드</strong>를 아래에 입력하십시오.</p>
           <form id="homeCodeForm" class="code-entry"><input id="homeCodeInput" autocomplete="off" placeholder="상자 안 완료 코드" /><button class="primary-button" type="submit">코드 확인</button></form>
         </section>
         <p class="feedback" id="feedback">최종 상자를 열고 안의 완료 코드를 확인해 입력하십시오.</p>
@@ -1699,77 +1716,86 @@ function renderHomePuzzle() {
       return;
     }
 
-    // 회수된 키워드 확인
-    const savedKeywords = {};
-    answers.forEach((item) => {
-      savedKeywords[item.id] = localStorage.getItem(`homeward-keyword-${item.id}`) || "";
-    });
+    const collected = answers.filter((item) => localStorage.getItem(`homeward-keyword-${item.id}`)).length;
+    const slots = state.slots || [null, null, null, null, null];
+    const pool = chipOrder.filter((word) => !slots.includes(word));
+    const sentenceHtml = declarationParts.reduce((html, part, i) => {
+      const before = i === 0 ? `<span class="decl-team">${state.teamName || "[팀 이름]"}</span>` : "";
+      const slotIdx = i;
+      const slotHtml =
+        slotIdx < declarationSlots.length
+          ? `<button type="button" class="decl-slot ${slots[slotIdx] ? "filled" : ""}" data-decl-slot="${slotIdx}">${slots[slotIdx] || "○○○"}</button>`
+          : "";
+      return html + before + part + slotHtml;
+    }, "");
 
     surface.innerHTML = `
-      <p class="instruction">수첩에 모은 5개 디지털 키워드를 순서대로 확인하고 조합하여 마지막 귀향 선언문을 완성하십시오.</p>
+      <p class="instruction">다섯 장소에서 얻은 낱말은 흩어진 단서가 아니라 한 문장이었습니다. 낱말을 제자리에 놓아 귀향 선언문을 완성하십시오.</p>
       ${adminPreview ? `<button class="secondary-button admin-reset" id="resetHome" type="button">관리자: 이 스테이지 초기화</button>` : ""}
-      <div class="keyword-auto-fill-strip" style="margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
-        <span style="font-weight: 900; color: var(--forest); font-size: 14px;">보관된 키워드 뱃지:</span>
-        ${answers
-          .map((item) => {
-            const kw = savedKeywords[item.id];
-            return kw
-              ? `<button type="button" class="secondary-button autofill-btn" data-target="${item.id}" data-val="${kw}" style="padding: 4px 10px; font-size: 13px;">${item.label.split(" ")[0]}: ${kw}</button>`
-              : `<span style="font-size: 12px; color: var(--muted); padding: 4px 8px; border: 1px dashed var(--line); border-radius: 6px;">${item.label.split(" ")[0]}: 미회수</span>`;
-          })
-          .join("")}
+      <p class="story-beat">여기까지 오는 동안 여러분은 머문 자리를 집이라 불러 보았고, 빌린 이름을 내려놓았고, 맡겨진 것을 지켜 보았습니다. 그 다섯 마디가 이제 한 문장으로 모입니다.</p>
+      <p class="phone-caption">사건 수첩에 회수된 키워드 <strong>${collected} / 5</strong></p>
+
+      <div class="decl-board">
+        <div class="decl-pool">${
+          pool.length
+            ? pool.map((word) => `<button type="button" class="decl-chip ${state.picked === word ? "picked" : ""}" data-decl-pick="${word}">${word}</button>`).join("")
+            : `<span class="decl-pool-empty">다섯 낱말을 모두 놓았습니다.</span>`
+        }</div>
+        <p class="decl-sentence">${sentenceHtml}</p>
       </div>
 
-      <div class="final-board">
-        ${answers
-          .map(
-            (item) => `
-              <label>
-                <span>${item.label}</span>
-                <input id="input-${item.id}" data-answer="${item.answer}" autocomplete="off" placeholder="예: ${item.answer}" value="${savedKeywords[item.id] || ""}" />
-              </label>
-            `,
-          )
-          .join("")}
-        <label>
-          <span>조사팀 이름</span>
-          <input id="teamDeclarationName" autocomplete="off" placeholder="예: 3조 순례자들" value="${state.teamName || ""}" />
-        </label>
-      </div>
-
-      <div class="declaration" id="declaration" style="margin-top: 16px; padding: 18px; border: 1px dashed var(--gold); border-radius: 8px; background: rgba(185,138,53,0.08); color: var(--forest); font-weight: 900; text-align: center;">
-        "[팀 이름]은 장막을 집으로 착각했던 나그네였지만, 약속을 붙들고 청지기로 살아, 더 나은 본향을 향해 걷는 사람입니다."
-      </div>
+      <label class="decl-name"><span>조사팀 이름</span><input id="teamDeclarationName" autocomplete="off" placeholder="예: 3조 순례자들" value="${state.teamName || ""}" /></label>
 
       <div class="check-line" style="margin-top: 18px;">
-        <button class="primary-button" type="button" id="checkFinal">귀향 선언문 조합 검증</button>
+        <button class="primary-button" type="button" id="checkFinal">귀향 선언문 완성</button>
       </div>
-      <p class="feedback" id="feedback">5개 단어와 순서가 모두 일치해야 클라이맥스 검증 단계로 넘어갑니다.</p>
+      <p class="feedback" id="feedback">낱말을 눌러 고른 뒤, 들어갈 자리를 누르십시오. 놓인 낱말을 다시 누르면 되돌아옵니다.</p>
     `;
 
-    // autofill 버튼 이벤트
-    surface.querySelectorAll(".autofill-btn").forEach((btn) => {
+    surface.querySelectorAll("[data-decl-pick]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const targetId = btn.dataset.target;
-        const val = btn.dataset.val;
-        const input = surface.querySelector(`#input-${targetId}`);
-        if (input) input.value = val;
+        state.picked = state.picked === btn.dataset.declPick ? "" : btn.dataset.declPick;
+        persist();
+        draw();
       });
+    });
+    surface.querySelectorAll("[data-decl-slot]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.dataset.declSlot);
+        const next = [...(state.slots || [])];
+        if (next[idx]) {
+          next[idx] = null;
+        } else if (state.picked) {
+          next[idx] = state.picked;
+          state.picked = "";
+        } else {
+          triggerFeedbackShake(document.querySelector("#feedback"), "먼저 위에서 넣을 낱말을 하나 고르십시오.");
+          return;
+        }
+        state.slots = next;
+        persist();
+        draw();
+      });
+    });
+
+    document.querySelector("#teamDeclarationName").addEventListener("input", (e) => {
+      state.teamName = e.target.value.trim();
     });
 
     document.querySelector("#checkFinal").addEventListener("click", () => {
-      const inputs = [...surface.querySelectorAll("[data-answer]")];
-      const correct = inputs.every((input) => normalize(input.value) === normalize(input.dataset.answer));
-      inputs.forEach((input) => {
-        input.dataset.status = normalize(input.value) === normalize(input.dataset.answer) ? "correct" : "miss";
-      });
-
-      if (!correct) {
-        triggerFeedbackShake(document.querySelector("#feedback"), "키워드 단어나 순서가 올바르지 않습니다. 수집 보드의 단서들을 다시 확인하십시오.");
-        triggerShake(surface.querySelector(".final-board"));
+      const filled = (state.slots || []).filter(Boolean).length;
+      if (filled < declarationSlots.length) {
+        triggerFeedbackShake(document.querySelector("#feedback"), "다섯 자리를 모두 채운 뒤 완성하십시오.");
         return;
       }
-
+      const correct = declarationSlots.every((word, i) => state.slots[i] === word);
+      if (!correct) {
+        state.assembleWrongStreak = (state.assembleWrongStreak || 0) + 1;
+        triggerFeedbackShake(document.querySelector("#feedback"), "아직 문장이 되지 않습니다. 얻은 순서가 아니라 문장이 흐르는 순서대로 읽어 보십시오.");
+        triggerShake(surface.querySelector(".decl-board"));
+        persist();
+        return;
+      }
       state.teamName = document.querySelector("#teamDeclarationName").value.trim() || state.teamName || "우리 팀";
       state.phase = "physical";
       persist();
