@@ -689,6 +689,7 @@ function renderCasePuzzle() {
                         <input data-passcode-input="${r.id}" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="0000" />
                         <button type="submit" class="secondary-button">복원</button>
                       </div>
+                      <div class="card-inline-feedback" data-card-feedback="${r.id}"></div>
                     </form>
                   `;
                 }
@@ -715,6 +716,7 @@ function renderCasePuzzle() {
                   <label for="identityInput">아직 목적지에 이르지 않은 조사팀의 정체성</label>
                   <input id="identityInput" autocomplete="off" placeholder="정체성 한 단어" />
                   <button class="primary-button" type="submit">정체성 확인</button>
+                  <div class="card-inline-feedback" id="identityInlineFeedback"></div>
                 </form>
               `
               : ""
@@ -743,10 +745,25 @@ function renderCasePuzzle() {
     const feedback = document.querySelector("#feedback");
 
     document.querySelectorAll("[data-passcode-form]").forEach((form) => {
+      const id = form.dataset.passcodeForm;
+      const input = form.querySelector(`[data-passcode-input="${id}"]`);
+      const inlineFeedback = form.querySelector(`[data-card-feedback="${id}"]`);
+
+      function showCardFeedback(message, isWarning) {
+        triggerShake(form);
+        if (inlineFeedback) {
+          inlineFeedback.textContent = message;
+          inlineFeedback.className = `card-inline-feedback active ${isWarning ? "warn" : "error"}`;
+        }
+        triggerFeedbackShake(feedback, message);
+      }
+
+      input?.addEventListener("input", () => {
+        if (inlineFeedback) inlineFeedback.classList.remove("active");
+      });
+
       form.addEventListener("submit", (event) => {
         event.preventDefault();
-        const id = form.dataset.passcodeForm;
-        const input = form.querySelector(`[data-passcode-input="${id}"]`);
         const value = input.value.trim();
 
         // 첫 암호를 입력하는 순간 그 팀의 슬롯(1~5)이 고정된다. 이후 기록은
@@ -760,7 +777,7 @@ function renderCasePuzzle() {
             draw();
             return;
           }
-          triggerFeedbackShake(feedback, "그 암호로는 이 기록이 열리지 않습니다. 카드의 알파벳과 기록 이름이 맞는지 다시 확인하십시오.");
+          showCardFeedback("⚠️ 암호가 맞지 않습니다. 카드의 알파벳(A~E)과 일치하는지 확인하세요.", false);
           input.value = "";
           return;
         }
@@ -773,12 +790,11 @@ function renderCasePuzzle() {
         }
 
         const belongsToOtherTeam = passcodes[id].includes(value);
-        triggerFeedbackShake(
-          feedback,
-          belongsToOtherTeam
-            ? "그 암호는 다른 팀의 카드입니다. 우리 팀 카드가 맞는지 다시 확인하십시오."
-            : "그 암호로는 이 기록이 열리지 않습니다. 카드의 알파벳과 기록 이름이 맞는지 다시 확인하십시오.",
-        );
+        if (belongsToOtherTeam) {
+          showCardFeedback("⚠️ 다른 팀의 암호입니다! 우리 팀 카드(동일한 팀 번호)인지 확인하십시오.", true);
+        } else {
+          showCardFeedback("⚠️ 암호가 맞지 않습니다. 카드의 알파벳(A~E)과 일치하는지 확인하세요.", false);
+        }
         input.value = "";
       });
     });
@@ -812,15 +828,28 @@ function renderCasePuzzle() {
       draw();
     });
 
-    document.querySelector("#identityForm")?.addEventListener("submit", (event) => {
+    const identityForm = document.querySelector("#identityForm");
+    const identityInput = document.querySelector("#identityInput");
+    const identityInlineFeedback = document.querySelector("#identityInlineFeedback");
+
+    identityInput?.addEventListener("input", () => {
+      if (identityInlineFeedback) identityInlineFeedback.classList.remove("active");
+    });
+
+    identityForm?.addEventListener("submit", (event) => {
       event.preventDefault();
-      const keyword = normalize(document.querySelector("#identityInput").value);
+      const keyword = normalize(identityInput.value);
       if (keyword === "나그네") {
         state.solved = true;
         persist();
         draw();
         unlock();
         return;
+      }
+      triggerShake(identityForm);
+      if (identityInlineFeedback) {
+        identityInlineFeedback.textContent = "⚠️ 정체성이 맞지 않습니다. 길 위에 있는 사람을 떠올려 보십시오.";
+        identityInlineFeedback.className = "card-inline-feedback active warn";
       }
       triggerFeedbackShake(feedback, "아직 정체성이 맞지 않습니다. 도착하지 않았고, 목적지도 미기록인 채 길 위에 있는 사람을 떠올려 보십시오.");
     });
