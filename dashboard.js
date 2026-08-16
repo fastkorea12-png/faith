@@ -112,18 +112,23 @@ teamForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const name = teamName.value.trim();
   if (!name) return;
-  state.teams.push({
+  // 서버에도 만들어 두지 않으면 5초 뒤 폴링이 목록을 덮어쓰면서 방금 추가한 팀이 사라진다.
+  const created = {
     id: createId(),
     name,
     completed: {},
     hints: 0,
     current: "case",
     note: "",
+    notes: {},
+    password: "",
     updatedAt: new Date().toISOString(),
-  });
+  };
+  state.teams.push(created);
   teamName.value = "";
   saveState();
   render();
+  pushTeamToServer(created);
 });
 
 startTimer.addEventListener("click", () => {
@@ -349,7 +354,19 @@ function renderTeams() {
       state.teams = state.teams.filter((item) => item.id !== team.id);
       saveState();
       render();
-      opsMessage.textContent = `${team.name} 팀 기록을 삭제했습니다. 해당 기기는 다음 동기화 때 초기화됩니다.`;
+
+      // send()는 no-cors라 서버 응답을 읽을 수 없다. 그래서 잠시 뒤 목록을 다시
+      // 받아 실제로 지워졌는지 확인한다 — 서버가 아직 deleteTeam을 모르는(재배포
+      // 전) 상태면 팀이 그대로 돌아오는데, 그걸 조용히 넘기면 진행자는 지워진 줄
+      // 안다.
+      opsMessage.textContent = `${team.name} 팀 삭제를 요청했습니다. 서버 반영을 확인하는 중입니다.`;
+      window.setTimeout(async () => {
+        await loadRemoteDashboard();
+        const stillThere = state.teams.some((item) => item.name === team.name);
+        opsMessage.textContent = stillThere
+          ? `${team.name} 팀이 서버에서 지워지지 않았습니다. Apps Script에 deleteTeam이 반영됐는지(재배포 여부) 확인하십시오.`
+          : `${team.name} 팀 기록을 삭제했습니다. 해당 기기는 다음 동기화 때 초기화됩니다.`;
+      }, 2000);
     });
   });
 }
@@ -374,6 +391,9 @@ async function loadRemoteDashboard() {
       hints: Number(team.hints || 0),
       current: team.activeStageId || nextRemoteStage(team.completedStages || []),
       note: team.note || "",
+      // 스테이지별 메모 전체를 들고 있어야, 진행자가 한 스테이지 메모를 고쳐
+      // 서버에 되돌려 보낼 때 나머지 스테이지 메모를 지우지 않는다.
+      notes: team.notes || {},
       updatedAt: team.updatedAt || "",
       lastProgressAt: team.lastProgressAt || team.updatedAt || "",
       password: team.teamPassword || "",
@@ -448,10 +468,42 @@ function nextRemoteStage(completedStages) {
   return next ? next.id : "home";
 }
 
+// 진행자가 체크박스·힌트·현재 스테이지·메모를 고쳐도 예전에는 localStorage에만
+// 저장했다. 5초마다 도는 loadRemoteDashboard가 서버 데이터로 state.teams를 통째로
+// 덮어쓰기 때문에, 수정한 내용이 5초 만에 원래대로 돌아가 "전혀 안 먹는" 것처럼
+// 보였다. 이제 같은 내용을 서버(saveProgress)에도 보내 폴링이 덮어써도 유지된다.
 function touch(team) {
   team.updatedAt = new Date().toISOString();
   saveState();
   render();
+  pushTeamToServer(team);
+}
+
+async function pushTeamToServer(team) {
+  if (!window.HomewardSync || !team?.name) return;
+  const completedStages = stages.filter((stage) => team.completed[stage.id]).map((stage) => stage.id);
+  const current = stages.find((stage) => stage.id === team.current) || stages[0];
+  const notes = { ...(team.notes || {}) };
+  notes[team.current] = team.note || "";
+  team.notes = notes;
+  try {
+    const result = await window.HomewardSync.send("saveProgress", {
+      eventType: "host_edit",
+      teamName: team.name,
+      teamPassword: team.password || "",
+      activeStageId: team.current,
+      activeStageTitle: current.title,
+      completedStages,
+      completedCount: completedStages.length,
+      totalStages: stages.length,
+      hintsCount: Number(team.hints || 0),
+      notes,
+      updatedAt: team.updatedAt,
+    });
+    if (result?.offline) opsMessage.textContent = "로컬 대시보드 모드입니다. 수정 내용은 이 기기에만 저장됩니다.";
+  } catch {
+    opsMessage.textContent = "수정 내용을 서버에 반영하지 못했습니다. 네트워크를 확인하십시오.";
+  }
 }
 
 function loadState() {
