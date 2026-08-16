@@ -2315,6 +2315,15 @@ input {
 .record-grid button { display: grid; gap: 6px; padding: 12px; text-align: left; }
 .record-grid button span, .record-grid button small { color: var(--muted); }
 .record-grid button.selected { outline: 3px solid var(--clay); background: rgba(155,86,61,.1); }
+/* 05 마지막 반전 화면. 팀이 상자 바닥의 엎어진 카드를 뒤집는 순간에 맞춰,
+   자물쇠를 열 때 쓴 구절의 뒷부분을 처음으로 보여준다. */
+.final-reveal { display: grid; gap: 14px; margin-top: 18px; padding: 18px; border: 1px solid var(--line); border-radius: 10px; background: rgba(185, 138, 53, 0.07); }
+.verse-full { display: grid; gap: 8px; margin: 0; padding: 16px 18px; border-left: 4px solid var(--gold); background: #fffdf6; color: var(--ink); font-size: 16px; line-height: 1.95; }
+.verse-full cite { color: var(--muted); font-size: 13px; font-style: normal; font-weight: 800; }
+.final-keyword { display: grid; gap: 6px; justify-items: center; padding: 20px; border: 2px solid var(--gold); border-radius: 10px; background: #16261f; text-align: center; }
+.final-keyword span { color: rgba(255, 253, 246, 0.72); font-size: 13px; font-weight: 800; letter-spacing: 1px; }
+.final-keyword strong { color: #fffdf6; font-size: 30px; font-weight: 900; letter-spacing: 2px; }
+
 /* 05 예배당 귀향 선언문 조립. 실물 키워드 카드를 나눠주지 않기로 해서, 팀이 모은
    다섯 낱말을 문장의 빈칸에 직접 끼워 넣는 방식으로 만들었다. 03 선반 미니게임과
    같은 탭-투-플레이스이며(390px에서 드래그 회피), 빈칸 순서가 여정 순서와 달라
