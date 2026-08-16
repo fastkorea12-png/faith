@@ -201,11 +201,19 @@ teamNote.addEventListener("input", () => {
   teamNote.syncTimer = window.setTimeout(() => syncProgress("note_updated"), 500);
 });
 
+// 참가자 기기의 진행 기록을 전부 지운다. 예전에는 지울 키를 일일이 나열했는데,
+// 정작 각 퍼즐의 내부 상태(homeward-game-*)와 온보딩·프롤로그 키가 빠져 있어서
+// "처음부터 다시 시작"을 눌러도 스테이지를 열면 완료 화면이 그대로 떴다. 게다가
+// 키워드는 keywordCards(00~04)만 돌아 05(home)가 남았다. 그래서 나열 대신
+// homeward- 접두사를 전부 훑고, 진행 기록이 아닌 진행자용 키만 남긴다 —
+// 새 키가 추가돼도 초기화에서 다시 누락되지 않는다.
+const HOST_ONLY_KEYS = new Set(["homeward-dashboard-unlocked", "homeward-admin-preview", "homeward-host-dashboard"]);
+
 resetButton.addEventListener("click", () => {
   if (confirm("정말로 사건기록 및 수집된 디지털 키워드를 초기화하시겠습니까?")) {
-    localStorage.removeItem(storageKey);
-    stages.forEach((s) => localStorage.removeItem(`homeward-solved-${s.id}`));
-    keywordCards.forEach((k) => localStorage.removeItem(`homeward-keyword-${k.id}`));
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith("homeward-") && !HOST_ONLY_KEYS.has(key))
+      .forEach((key) => localStorage.removeItem(key));
     window.location.href = "activity.html";
   }
 });

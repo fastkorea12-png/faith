@@ -517,16 +517,15 @@ function renderCasePrologue(teamKey) {
   });
 }
 
+// 다른 팀으로 새로 등록할 때 이전 팀의 흔적을 전부 지운다. 예전에는 지울 키를
+// 나열했는데 프롤로그 열람 기록(homeward-prologue-seen-*)이 빠져 있었다. 나열
+// 대신 homeward- 접두사를 훑고 진행자용 키만 남긴다(activity.js와 동일한 방식).
+const HOST_ONLY_KEYS = new Set(["homeward-dashboard-unlocked", "homeward-admin-preview", "homeward-host-dashboard"]);
+
 function clearLocalTeamProgress() {
-  localStorage.removeItem("homeward-case-progress");
-  localStorage.removeItem("homeward-hint-starts");
-  localStorage.removeItem("homeward-team-hints");
-  localStorage.removeItem("homeward-onboarded-team");
-  Object.keys(puzzles).forEach((id) => {
-    localStorage.removeItem(`homeward-game-${id}`);
-    localStorage.removeItem(`homeward-solved-${id}`);
-    localStorage.removeItem(`homeward-keyword-${id}`);
-  });
+  Object.keys(localStorage)
+    .filter((key) => key.startsWith("homeward-") && !HOST_ONLY_KEYS.has(key))
+    .forEach((key) => localStorage.removeItem(key));
 }
 
 function teamSessionKey(name, password) {
@@ -1155,7 +1154,8 @@ function renderInventoryPuzzleV2() {
     step: "briefing",
     cardsWrongStreak: 0,
     cardsLockedUntil: 0,
-    suspects: [],
+    auditWrongStreak: 0,
+    auditLockedUntil: 0,
     culprit: "",
     solved: false,
   });
@@ -1173,6 +1173,10 @@ function renderInventoryPuzzleV2() {
     { id: "water", mark: "+", item: "물", found: "선반 6", shelf: 6, text: "확인 뒤 인계 — 원래 자리 유지", author: "열쇠 담당", altered: false, code: "3" },
   ];
   const collectionCode = items.map((x) => x.code).join("");
+  // 조작된 세 기록에만 공통으로 박혀 있는 변명 문구. 3단계(기록 감식)의 정답이며,
+  // 이 문구는 화면의 기록 여섯 건 안에 그대로 들어 있다 — 읽으면 알 수 있지만
+  // 읽지 않고는 알 수 없다(찍어서 맞출 수 있는 선택지가 없다).
+  const alteredExcuse = "먼저 처리";
   // 2단계는 정답을 알려주지 않는 제약 조건 퍼즐이다. 아래 여섯 조건을 모두
   // 만족하는 배치는 (위→아래) 건과일·밀·기름·소금·콩·물 하나뿐이고, 여섯 조건은
   // 전부 필요하다(하나라도 빼면 해가 2~6개로 늘어난다 — 브루트포스로 검증함).
@@ -1234,7 +1238,13 @@ function renderInventoryPuzzleV2() {
       flow.innerHTML = `${progress}<h3>봉인 전 원본 보관 지침</h3><section class="lock-result"><p>"봉인 전 여섯 자리는 지침대로 채워져 있었다. 지침서는 창고에 그대로 남아 있으니, 그것을 읽고 자리를 되돌려라."</p><p>회수한 재고 카드 여섯 장을 <strong>복원 선반 매트</strong> 위에 올리십시오. 매트 아래쪽에 <strong>봉인 전 보관 지침 여섯 조건</strong>이 인쇄되어 있습니다. 여섯 조건을 모두 만족하는 배치는 단 하나뿐입니다.</p></section><p class="phone-caption">지침은 이 화면에 없습니다 — 매트에 인쇄된 여섯 조건을 읽고 채우십시오. 웹은 배치를 확인해 주지 않으며, 여러분이 복원한 매트가 뒤에서 자물쇠 번호의 근거가 됩니다.</p><button class="primary-button" id="next" type="button">현장 매트 복원 완료</button>`;
     }
     if (state.step === "audit") {
-      flow.innerHTML = `${progress}<h3>변경 기록 6건 감식 (웹 화면 B)</h3><p>원래 선반, 원본 문장 ‘확인 뒤 인계’, 담당 권한이 모두 어긋난 <strong>세 건의 조작 기록</strong>을 고르십시오.</p><p class="phone-caption">담당별 권한(누가 무엇을 바꿀 수 있는지)은 이 화면에 없습니다 — 실물 ‘담당별 권한표’ 인쇄물을 확인하십시오.</p><div class="record-grid">${items.map((x) => `<button type="button" data-suspect="${x.id}" class="${state.suspects.includes(x.id) ? "selected" : ""}"><b>${x.mark} ${x.item}</b><span>발견 장소: ${x.found}</span><span>기록 문장: ${x.text}</span><small>기록자: ${x.author}</small></button>`).join("")}</div><button class="primary-button" id="audit" type="button">의심 기록 3건 확정 (${state.suspects.length}/3)</button>`;
+      const remaining = Math.max(0, Math.ceil((state.auditLockedUntil - Date.now()) / 1000));
+      flow.innerHTML = `${progress}<h3>변경 기록 6건 감식</h3><p>여섯 건 중 세 건은 물자를 원래 자리에서 치우고 인계 문장까지 고쳐 쓴 기록입니다. 고쳐 쓴 사람은 세 번 모두 <strong>똑같은 변명</strong>을 적어 두었습니다.</p><div class="record-grid record-grid-readonly">${items.map((x) => `<div class="record-entry"><b>${x.mark} ${x.item}</b><span>발견 장소: ${x.found}</span><span>기록 문장: ${x.text}</span></div>`).join("")}</div><p class="phone-caption">세 기록에 공통으로 반복되는 그 변명 문구를 찾아, 아래에 그대로 옮겨 적으십시오.</p>${
+        remaining > 0
+          ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
+          : `<form id="auditForm" class="phone-answer-form"><label>반복된 변명 문구</label><input id="auditInput" autocomplete="off" placeholder="기록에 적힌 그대로" /><button type="submit" class="primary-button">확정</button></form>`
+      }`;
+      if (remaining > 0) lockTimer = setTimeout(draw, 1000);
     }
     if (state.step === "accuse") {
       flow.innerHTML = `${progress}<h3>사건 결론 (웹 화면 C)</h3><p>맡겨진 위치와 인계 원칙을 자기 판단으로 바꾼 담당자는 누구인가? 실물 ‘담당별 권한표’에서 위반한 담당자를 찾아, 그 옆에 인쇄된 확인 코드를 입력하십시오.</p><p class="eyebrow">네 역할 중 하나</p><div class="role-grid">${authorityList.map((a) => `<span>${a.role}</span>`).join("")}</div><form id="accuseForm" class="phone-answer-form"><label>위반한 담당자의 확인 코드 입력</label><input id="accuseInput" inputmode="numeric" autocomplete="off" placeholder="숫자" /><button type="submit" class="primary-button">지목 확정</button></form>`;
@@ -1272,29 +1282,29 @@ function renderInventoryPuzzleV2() {
     document.querySelector("#next")?.addEventListener("click", () => {
       advance({ restore: "audit" }[state.step]);
     });
-    flow.querySelectorAll("[data-suspect]").forEach((b) =>
-      b.addEventListener("click", () => {
-        state.suspects = state.suspects.includes(b.dataset.suspect)
-          ? state.suspects.filter((x) => x !== b.dataset.suspect)
-          : state.suspects.length < 3
-          ? [...state.suspects, b.dataset.suspect]
-          : state.suspects;
-        persist();
-        draw();
-      })
-    );
-    document.querySelector("#audit")?.addEventListener("click", () => {
-      const correct = items.filter((x) => x.altered).every((x) => state.suspects.includes(x.id)) && state.suspects.length === 3;
-      if (!correct) {
-        triggerFeedbackShake(
-          feedback,
-          state.suspects.length !== 3
-            ? "사라진 것은 세 건입니다. 같은 표현이 반복된 기록부터 찾으십시오."
-            : "발견 장소만으로 판단하지 마십시오. 원래 선반, 문장, 권한이 모두 어긋나는지 확인하십시오."
-        );
+    // 예전엔 6개 기록 중 3개를 클릭해 고르는 방식이었는데, 경우의 수가 20가지뿐이라
+    // 내용을 전혀 몰라도 눌러보다 보면 뚫렸다. 이제는 세 조작 기록에 공통으로 박혀
+    // 있는 변명 문구를 직접 타이핑해야 한다 — 입력 공간이 무한이라 찍기가 불가능하고,
+    // 여섯 기록을 실제로 읽어야만 무엇이 반복되는지 알 수 있다.
+    document.querySelector("#auditForm")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = document.querySelector("#auditInput");
+      if (normalize(input.value).includes(normalize(alteredExcuse))) {
+        state.auditWrongStreak = 0;
+        advance("accuse");
         return;
       }
-      advance("accuse");
+      state.auditWrongStreak = (state.auditWrongStreak || 0) + 1;
+      if (state.auditWrongStreak >= 3) {
+        state.auditLockedUntil = Date.now() + 10000;
+        state.auditWrongStreak = 0;
+        persist();
+        draw();
+        return;
+      }
+      triggerFeedbackShake(feedback, "그 문구가 아닙니다. 여섯 기록을 나란히 놓고, 세 번 똑같이 반복되는 표현이 무엇인지 다시 찾으십시오.");
+      input.value = "";
+      persist();
     });
     document.querySelector("#accuseForm")?.addEventListener("submit", (e) => {
       e.preventDefault();
