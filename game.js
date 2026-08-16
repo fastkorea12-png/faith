@@ -50,16 +50,16 @@ const puzzles = {
   ledger: {
     step: "03 / 창고 및 물자 보관소(청지기실)",
     title: "맡겨진 것을 바꾼 사람",
-    intro: "원래 선반과 변경 기록, 담당 권한을 대조해 조작한 사람을 찾으십시오.",
+    intro: "인계를 하루 앞두고 창고 봉인이 뜯겨 있었다. 여섯 품목 중 셋이 제자리를 떠났고, 장부에는 고쳐 쓴 자국이 남아 있다.",
     code: "STEWARD-03",
     keyword: "청지기",
     message: "네 번째 키워드 '청지기'를 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
     evidence: ["재고 카드 6장", "보관 지침 6조건", "변경 기록", "권한표", "3자리 자물쇠"],
-    objective: "카드의 원래 위치를 복원하고 기록과 권한을 감식해 물리 자물쇠의 순서를 찾습니다.",
+    objective: "이 창고를 함께 맡은 네 사람은 아무도 거짓을 말하지 않습니다. 다만 물자를 옮기는 일과 장부에 적는 일을 한 손에 쥔 사람은 하나뿐이었습니다. 급한 마음이 맡겨진 규칙을 앞질렀을 때 무엇이 무너지는지 밝히십시오.",
     hints: {
-      focus: "물품 수량을 세거나 계산하려 하지 말고, 물품 배치 변경 기록과 담당 권한표에 시선을 맞추십시오.",
-      contrast: "보관 지침은 '밀·기름·소금이 잇닿은 세 칸'에서 출발하십시오 — 그 덩어리가 들어갈 자리는 많지 않습니다. 복원한 선반 위치와 변경 기록, '먼저 처리' 지침의 권한 위반자를 서로 대조하여 조작자를 가려내십시오.",
-      action: "권한을 남용하여 기록을 바꾼 조작자의 순서에 맞춰 3자리 자물쇠 번호 '432'를 맞추십시오.",
+      focus: "물품 수량을 세려 하지 마십시오. 무엇이 제자리를 떠났는지, 그리고 그 기록이 어떻게 고쳐졌는지에 시선을 맞추십시오.",
+      contrast: "매트에 인쇄된 보관 지침은 '밀·기름·소금이 잇닿은 세 칸'에서 출발하십시오 — 그 덩어리가 들어갈 자리는 많지 않습니다. 그리고 조작된 세 건은 '자리를 옮긴 것'과 '장부를 고친 것'이 함께 일어났습니다. 실물 권한표에서 그 두 가지를 모두 할 수 있었던 사람을 찾으십시오.",
+      action: "권한표에서 물자 이동과 장부 기재가 모두 '가능'인 사람은 배급 담당뿐입니다. 그 확인 코드를 입력한 뒤, 복원한 매트에서 소금·기름·밀의 선반 번호를 표식 순서대로 읽어 3자리 자물쇠 '432'를 맞추십시오.",
     },
     render: renderInventoryPuzzleV2,
   },
@@ -1223,7 +1223,7 @@ function renderInventoryPuzzleV2() {
 
     if (state.step === "briefing") {
       const remaining = Math.max(0, Math.ceil((state.cardsLockedUntil - Date.now()) / 1000));
-      flow.innerHTML = `${progress}<h3>청지기실 긴급 지시서</h3><section class="lock-result"><p>"구호 물자 인계를 앞두고 여섯 품목의 기록에 이상이 발견되었다. 흩어진 재고 카드 여섯 장을 모두 회수해 본래 자리를 증명하라. 맡겨진 것을 끝까지 지키는 자만이 다음 문을 연다."</p><p>수색은 나누고, 기록 대조는 함께 하십시오. 여섯 장을 모두 손에 넣었다면, 각 카드에 적힌 숫자를 표식 순서(○ → △ → □ → ◇ → ☆ → +)대로 이어 붙여 아래에 입력하십시오.</p></section>${
+      flow.innerHTML = `${progress}<h3>청지기실 긴급 지시서</h3><section class="lock-result"><p class="story-beat">"내일 아침이면 이 물자는 길 위의 순례자들에게 나뉘어야 한다. 그런데 봉인을 열어 보니 재고 카드가 제자리에 없다. 누군가 물자를 옮기면서 카드까지 흩어 놓았다. 흩어진 여섯 장을 모두 찾아, 이 창고에 무엇이 맡겨져 있었는지부터 증명하라."</p><p>수색은 나누고, 기록 대조는 함께 하십시오. 여섯 장을 모두 손에 넣었다면, 각 카드에 적힌 숫자를 표식 순서(○ → △ → □ → ◇ → ☆ → +)대로 이어 붙여 아래에 입력하십시오.</p></section>${
         remaining > 0
           ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
           : `<form id="cardsForm" class="phone-answer-form"><label>여섯 자리 조합 코드</label><input id="cardsInput" inputmode="numeric" autocomplete="off" placeholder="숫자 6자리" /><button type="submit" class="primary-button">확인</button></form>`
@@ -1231,11 +1231,11 @@ function renderInventoryPuzzleV2() {
       if (remaining > 0) lockTimer = setTimeout(draw, 1000);
     }
     if (state.step === "restore") {
-      flow.innerHTML = `${progress}<h3>봉인 전 원본 보관 지침</h3><section class="lock-result"><p>"봉인 전 여섯 자리는 지침대로 채워져 있었다. 지침서는 창고에 그대로 남아 있으니, 그것을 읽고 자리를 되돌려라."</p><p>회수한 재고 카드 여섯 장을 <strong>복원 선반 매트</strong> 위에 올리십시오. 매트 아래쪽에 <strong>봉인 전 보관 지침 여섯 조건</strong>이 인쇄되어 있습니다. 여섯 조건을 모두 만족하는 배치는 단 하나뿐입니다.</p></section><p class="phone-caption">지침은 이 화면에 없습니다 — 매트에 인쇄된 여섯 조건을 읽고 채우십시오. 웹은 배치를 확인해 주지 않으며, 여러분이 복원한 매트가 뒤에서 자물쇠 번호의 근거가 됩니다.</p><button class="primary-button" id="next" type="button">현장 매트 복원 완료</button>`;
+      flow.innerHTML = `${progress}<h3>봉인 전 원본 보관 지침</h3><section class="lock-result"><p class="story-beat">"이 자리들은 아무렇게나 정해진 것이 아니다. 물이 새어도 마른 것이 상하지 않도록, 함께 나가는 것은 함께 두도록 — 맡긴 이가 손수 정해 둔 순서다. 지침서는 창고에 그대로 남아 있으니, 그것을 읽고 자리를 되돌려라."</p><p>회수한 재고 카드 여섯 장을 <strong>복원 선반 매트</strong> 위에 올리십시오. 매트 아래쪽에 <strong>봉인 전 보관 지침 여섯 조건</strong>이 인쇄되어 있습니다. 여섯 조건을 모두 만족하는 배치는 단 하나뿐입니다.</p></section><p class="phone-caption">지침은 이 화면에 없습니다 — 매트에 인쇄된 여섯 조건을 읽고 채우십시오. 웹은 배치를 확인해 주지 않으며, 여러분이 복원한 매트가 뒤에서 자물쇠 번호의 근거가 됩니다.</p><button class="primary-button" id="next" type="button">현장 매트 복원 완료</button>`;
     }
     if (state.step === "audit") {
       const remaining = Math.max(0, Math.ceil((state.auditLockedUntil - Date.now()) / 1000));
-      flow.innerHTML = `${progress}<h3>변경 기록 6건 감식</h3><p>여섯 건 중 세 건은 <strong>물자가 원래 자리에서 옮겨졌고</strong>, 거기에 더해 <strong>장부 문장까지 고쳐 쓰였습니다</strong>. 한 사람이 이 두 가지를 모두 저질렀습니다.</p><div class="record-grid record-grid-readonly">${items.map((x) => `<div class="record-entry"><b>${x.mark} ${x.item}</b><span>발견 장소: ${x.found}</span><span>기록 문장: ${x.text}</span></div>`).join("")}</div><p class="phone-caption">누가 물자를 옮길 수 있고 누가 장부를 쓸 수 있는지는 이 화면에 없습니다. 실물 <strong>담당별 권한표</strong>를 펼쳐, <strong>두 가지를 모두 할 수 있었던 단 한 사람</strong>을 가려낸 뒤 그 옆에 인쇄된 확인 코드를 입력하십시오.</p>${
+      flow.innerHTML = `${progress}<h3>변경 기록 6건 감식</h3><p class="story-beat">이 창고는 네 사람이 함께 맡았습니다. 넷 다 자기 몫을 성실히 말합니다 — <strong>아무도 거짓을 말하지 않습니다.</strong></p><p>그런데 기록 여섯 건 중 세 건은 <strong>물자가 원래 자리를 떠났을 뿐 아니라</strong>, <strong>장부 문장까지 고쳐 쓰여 있습니다</strong>. 옮긴 손과 적은 손이 같은 사람이라는 뜻입니다.</p><div class="record-grid record-grid-readonly">${items.map((x) => `<div class="record-entry"><b>${x.mark} ${x.item}</b><span>발견 장소: ${x.found}</span><span>기록 문장: ${x.text}</span></div>`).join("")}</div><p class="phone-caption">누가 물자를 옮길 수 있고 누가 장부를 쓸 수 있는지는 이 화면에 없습니다. 실물 <strong>담당별 권한표</strong>를 펼쳐, <strong>두 가지를 모두 할 수 있었던 단 한 사람</strong>을 가려낸 뒤 그 옆에 인쇄된 확인 코드를 입력하십시오.</p>${
         remaining > 0
           ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
           : `<form id="auditForm" class="phone-answer-form"><label>범인의 확인 코드</label><input id="auditInput" inputmode="numeric" autocomplete="off" placeholder="권한표에 인쇄된 숫자" /><button type="submit" class="primary-button">지목 확정</button></form>`
@@ -1243,10 +1243,10 @@ function renderInventoryPuzzleV2() {
       if (remaining > 0) lockTimer = setTimeout(draw, 1000);
     }
     if (state.step === "unlock") {
-      flow.innerHTML = `${progress}<h3>실제 자물쇠 개방 지시</h3><div class="lock-sequence-box"><div class="lock-sequence-item"><span class="mark">□</span><span class="item-name">소금</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">△</span><span class="item-name">기름</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">○</span><span class="item-name">밀</span></div></div><p>여러분이 복원한 <strong>매트에서 이 세 품목의 선반 번호</strong>를 인계 표식 순서(<strong>□ → △ → ○</strong>)대로 읽어 실제 3자리 자물쇠를 여십시오.</p><div class="physical-lock-note">자물쇠 번호는 웹에 입력하지 않습니다. 상자를 열었으면 안의 결과 카드에 적힌 <strong>완료 코드</strong>를 아래에 입력하십시오.</div><form id="ledgerCodeForm" class="code-entry"><input id="ledgerCodeInput" autocomplete="off" placeholder="상자 안 완료 코드" /><button class="primary-button" type="submit">코드 확인</button></form>`;
+      flow.innerHTML = `${progress}<h3>실제 자물쇠 개방 지시</h3><p class="story-beat">흩어졌던 자리가 제자리로 돌아왔습니다. 이제 맡긴 이가 남겨 둔 순서대로 상자를 열 차례입니다.</p><div class="lock-sequence-box"><div class="lock-sequence-item"><span class="mark">□</span><span class="item-name">소금</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">△</span><span class="item-name">기름</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">○</span><span class="item-name">밀</span></div></div><p>여러분이 복원한 <strong>매트에서 이 세 품목의 선반 번호</strong>를 인계 표식 순서(<strong>□ → △ → ○</strong>)대로 읽어 실제 3자리 자물쇠를 여십시오.</p><div class="physical-lock-note">자물쇠 번호는 웹에 입력하지 않습니다. 상자를 열었으면 안의 결과 카드에 적힌 <strong>완료 코드</strong>를 아래에 입력하십시오.</div><form id="ledgerCodeForm" class="code-entry"><input id="ledgerCodeInput" autocomplete="off" placeholder="상자 안 완료 코드" /><button class="primary-button" type="submit">코드 확인</button></form>`;
     }
     if (state.step === "complete") {
-      flow.innerHTML = `${progress}<h3>결과 카드 확인</h3><p>배급 담당은 빠르게 나누려는 자기 판단으로 맡겨진 위치와 인계 원칙을 바꾸었습니다. 여러분은 수량을 맞춘 것이 아니라, 원래 뜻대로 자리를 복원하고 변경의 책임을 밝혔습니다. 맡은 것을 주인의 뜻대로 지키고 설명하는 사람이 청지기입니다.</p><div class="evidence-strip"><span>결과 키워드: 청지기</span><span>완료 코드: STEWARD-03</span></div><a class="primary-button" href="activity.html?stage=ledger">활동 페이지로 이동</a>`;
+      flow.innerHTML = `${progress}<h3>결과 카드 확인</h3><p class="story-beat">배급 담당은 도둑이 아니었습니다. 그는 급한 물자를 먼저 내주는 편이 낫다고 판단했고, 그 판단대로 자리를 옮기고 장부를 고쳤습니다. 훔친 것도, 숨긴 것도 없었습니다.</p><p>다만 맡은 사람이 맡긴 이의 자리에 서는 순간, 선한 뜻도 질서를 무너뜨립니다. 여러분은 수량을 맞춘 것이 아니라 원래의 뜻을 되돌리고 그 책임을 밝혔습니다. 맡은 것을 주인의 뜻대로 지키고 설명하는 사람이 청지기입니다.</p><div class="evidence-strip"><span>결과 키워드: 청지기</span><span>완료 코드: STEWARD-03</span></div><a class="primary-button" href="activity.html?stage=ledger">활동 페이지로 이동</a>`;
     }
     bind();
   }

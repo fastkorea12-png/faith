@@ -2286,6 +2286,17 @@ input {
 .record-grid button { display: grid; gap: 6px; padding: 12px; text-align: left; }
 .record-grid button span, .record-grid button small { color: var(--muted); }
 .record-grid button.selected { outline: 3px solid var(--clay); background: rgba(155,86,61,.1); }
+/* 03 창고 서사 문단: 절차 안내와 목소리를 구분한다. 사건 기록·현장 지시서의
+   말투로 읽히도록 왼쪽에 표식을 두고 행간을 넉넉히 준다. */
+.story-beat {
+  margin: 0 0 12px;
+  padding-left: 14px;
+  border-left: 3px solid var(--gold);
+  color: var(--ink);
+  line-height: 1.85;
+}
+.story-beat strong { color: var(--clay); }
+
 /* 03 창고 기록 감식: 고르는 게 아니라 읽는 증거라서 버튼이 아닌 읽기 전용 카드로 렌더링한다. */
 .record-grid-readonly .record-entry { display: grid; gap: 6px; min-height: 44px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); font-weight: 800; text-align: left; }
 .record-grid-readonly .record-entry span { color: var(--muted); font-weight: 700; }
