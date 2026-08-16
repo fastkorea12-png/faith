@@ -82,16 +82,16 @@ const puzzles = {
   home: {
     step: "05 / 예배당",
     title: "예비된 성",
-    intro: "다섯 장소를 지나온 팀이 마지막으로 예배당 앞에 섰다. 손에 남은 것은 지나온 증거물들과, 단상 위에 4자리 자물쇠로 잠긴 실물 최종 상자뿐이다.",
+    intro: "다섯 장소를 지나온 팀이 마지막으로 예배당 앞에 섰다. 그러나 지나온 네 장소에는 아직 읽지 않은 마지막 흔적이 남아 있다.",
     code: "HOMEWARD-05",
     keyword: "예비된 성",
     message: "최종 사건파일이 열렸습니다. 활동 페이지에 마지막 코드를 입력하십시오.",
-    evidence: ["01~04 증거물", "귀향 선언문", "팀 이름", "예배당 말씀판", "4자리 자물쇠"],
-    objective: "다섯 낱말로 귀향 선언문을 완성하고, 지나온 네 장소(01~04) 증거물 뒷면의 숨겨진 숫자를 조합하여 실물 최종 상자의 4자리 자물쇠를 해제하십시오.",
+    evidence: ["01~04 마지막 흔적", "귀향 선언문", "팀 이름", "말씀 카드", "4자리 자물쇠"],
+    objective: "다섯 낱말로 귀향 선언문을 완성한 뒤, 지나온 네 장소(01~04)를 다시 방문해 마지막 흔적의 숫자를 찾고 실물 최종 상자를 여십시오.",
     hints: {
-      focus: "1단계로 선언문을 완성한 뒤, 화면의 4대 은폐 지령을 읽고 01~04 실물 증거물의 뒷면에 적힌 숫자를 찾으십시오.",
-      contrast: "증거물 이면에서 찾은 숫자 1116은 히브리서 11장 16절을 가리킵니다. 예배당 말씀판에서 해당 구절을 찾아 하나님이 예비하신 목적지 이름(한글 5글자)을 웹에 입력하십시오.",
-      action: "목적지 이름은 '예비된 성'입니다. 말씀판 확증 후 자물쇠 암호 1116으로 단상 위 실물 최종 상자를 열어 말씀 카드 코드를 확인하고, 진행자에게 선언문을 수령하십시오.",
+      focus: "선언문을 완성한 뒤에는 지나온 01~04 장소를 다시 방문해야 합니다. 화면의 네 지령이 각 장소에서 어떤 기록을 가리키는지 떠올리십시오.",
+      contrast: "네 지령은 각각 01 야외의 키워드 카드, 02 숙소의 퇴실 안내문, 03 창고의 복원 지시, 04 길의 여정 지도 매트를 가리킵니다. 각 자료의 보이지 않던 면을 확인하십시오.",
+      action: "각 장소에서 발견할 숫자는 01=1, 02=1, 03=1, 04=6입니다. 장소 순서대로 조합한 1116으로 최종 상자를 열고, 안의 말씀 카드에 적힌 완료 코드를 입력하십시오.",
     },
     render: renderHomePuzzle,
   },
@@ -1683,37 +1683,33 @@ function renderHomePuzzle() {
 
           <p class="story-beat">
             단상 위의 <strong>실물 최종 상자</strong>는 <strong>4자리 번호 자물쇠</strong>로 잠겨 있습니다.<br/>
-            순례자는 지나온 자리에 흔적을 남겼습니다. 여러분이 손에 쥐고 온 <strong>네 개 증거물(01~04)의 뒷면</strong>을 확인하십시오.
+            지나온 네 장소에는 아직 읽지 않은 마지막 기록이 남아 있습니다. <strong>01부터 04까지 다시 찾아가</strong>, 아래 지령이 가리키는 흔적을 확인하십시오.
           </p>
 
           <div style="background: #182820; border: 1.5px solid var(--gold); border-radius: 10px; padding: 16px; margin: 16px 0; color: #fff;">
             <div style="text-align: center; font-size: 12px; color: var(--gold); font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">
-              [ 4자리 물리 자물쇠 단서 ]
+              [ 지나온 네 장소의 마지막 지령 ]
             </div>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center;">
-              <div style="background: rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 2px;">
-                <div style="font-size: 11px; color: #94a3b8;">1번째 자리</div>
-                <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-top: 2px;">01 야외</div>
-                <div style="font-size: 10px; color: #cbd5e1;">키워드 뒷면</div>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+              <div style="background: rgba(255,255,255,0.08); border-radius: 7px; padding: 11px 12px;">
+                <div style="font-size: 11px; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">첫 번째 흔적</div>
+                <div style="font-size: 12px; color: #f8fafc; line-height: 1.55;">오래 머물 곳이 아니었던 자리에서, 길을 계속 가게 만든 낱말의 보이지 않던 면을 확인하십시오.</div>
               </div>
-              <div style="background: rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 2px;">
-                <div style="font-size: 11px; color: #94a3b8;">2번째 자리</div>
-                <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-top: 2px;">02 숙소</div>
-                <div style="font-size: 10px; color: #cbd5e1;">안내문 뒷면</div>
+              <div style="background: rgba(255,255,255,0.08); border-radius: 7px; padding: 11px 12px;">
+                <div style="font-size: 11px; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">두 번째 흔적</div>
+                <div style="font-size: 12px; color: #f8fafc; line-height: 1.55;">빌려 입은 이름들을 내려놓았던 곳에서, 머무름의 끝을 알리던 기록을 다시 살피십시오.</div>
               </div>
-              <div style="background: rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 2px;">
-                <div style="font-size: 11px; color: #94a3b8;">3번째 자리</div>
-                <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-top: 2px;">03 창고</div>
-                <div style="font-size: 10px; color: #cbd5e1;">복원지침 뒷면</div>
+              <div style="background: rgba(255,255,255,0.08); border-radius: 7px; padding: 11px 12px;">
+                <div style="font-size: 11px; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">세 번째 흔적</div>
+                <div style="font-size: 12px; color: #f8fafc; line-height: 1.55;">맡겨진 물건을 원래 자리로 되돌렸던 곳에서, 복원을 명령했던 기록의 이면을 확인하십시오.</div>
               </div>
-              <div style="background: rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 2px;">
-                <div style="font-size: 11px; color: #94a3b8;">4번째 자리</div>
-                <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-top: 2px;">04 길</div>
-                <div style="font-size: 10px; color: #cbd5e1;">여정매트 뒷면</div>
+              <div style="background: rgba(255,255,255,0.08); border-radius: 7px; padding: 11px 12px;">
+                <div style="font-size: 11px; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">네 번째 흔적</div>
+                <div style="font-size: 12px; color: #f8fafc; line-height: 1.55;">돌아갈 수 있었지만 계속 걸었던 곳에서, 지나온 길을 그렸던 지도의 반대편을 확인하십시오.</div>
               </div>
             </div>
             <p style="margin: 12px 0 0; font-size: 12px; color: #cbd5e1; text-align: center; line-height: 1.5;">
-              네 숫자를 차례로 조합한 번호로 단상 위 <strong>실물 최종 상자</strong>를 여십시오.<br/>(예배당 <strong>말씀판</strong>의 히브리서 11장 16절이 그 답을 증언합니다)
+              발견한 네 숫자를 <strong>지나온 장소의 순서</strong>대로 기록하십시오.<br/>그 네 자리가 단상 위 <strong>실물 최종 상자</strong>를 엽니다.
             </p>
           </div>
 
@@ -1722,7 +1718,7 @@ function renderHomePuzzle() {
           </p>
           <form id="homeCodeForm" class="code-entry"><input id="homeCodeInput" autocomplete="off" placeholder="상자 안 말씀 카드 완료 코드" /><button class="primary-button" type="submit">코드 확인</button></form>
         </section>
-        <p class="feedback" id="feedback">소품 뒷면의 4자리 숫자로 실물 최종 상자를 열고, 말씀 카드의 완료 코드를 입력하십시오.</p>
+        <p class="feedback" id="feedback">네 장소의 마지막 흔적을 찾은 뒤 예배당으로 돌아와 상자를 여십시오.</p>
         ${adminPreview ? `<button class="secondary-button admin-reset" id="resetHome" type="button">관리자: 이 스테이지 초기화</button>` : ""}
       `;
       document.querySelector("#homeCodeForm").addEventListener("submit", (event) => {
