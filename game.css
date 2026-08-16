@@ -2286,6 +2286,19 @@ input {
 .record-grid button { display: grid; gap: 6px; padding: 12px; text-align: left; }
 .record-grid button span, .record-grid button small { color: var(--muted); }
 .record-grid button.selected { outline: 3px solid var(--clay); background: rgba(155,86,61,.1); }
+/* 03 창고는 밝은 수첩 지면 위에 렌더링되는데, .phone-answer-form / .phone-caption /
+   .phone-answer-locked 계열은 02의 어두운 폰 화면을 전제로 글자와 배경이 모두 흰
+   계열이다. 그대로 두면 입력칸 레이블("옮긴 사람 / 적은 사람")과 잠금 카운트다운
+   숫자가 지면에 묻혀 아예 보이지 않는다. 구조는 건드리지 않고 대비만 되돌린다. */
+#ledgerFlow .phone-answer-form,
+#ledgerFlow .phone-answer-locked {
+  border: 1px solid var(--line);
+  background: rgba(111, 138, 93, 0.08);
+}
+#ledgerFlow .phone-answer-form label { color: var(--ink); }
+#ledgerFlow .phone-caption { background: transparent; color: var(--muted); }
+#ledgerFlow .lock-countdown { color: var(--clay) !important; }
+
 /* 03 창고 2단계 배치 미니게임. 아래 목록에서 품목을 하나 고르고 선반 칸을 눌러
    올린다. 좁은 폭(390px)에서 드래그는 오작동이 잦아 탭-투-플레이스로 구현했고,
    모든 터치 대상은 44px 이상을 유지한다. */

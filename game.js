@@ -55,11 +55,11 @@ const puzzles = {
     keyword: "청지기",
     message: "네 번째 키워드 '청지기'를 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
     evidence: ["재고 카드 6장", "보관 지침 6조건", "변경 기록", "권한표", "3자리 자물쇠"],
-    objective: "이 창고를 함께 맡은 네 사람은 아무도 거짓을 말하지 않습니다. 다만 물자를 옮기는 일과 장부에 적는 일을 한 손에 쥔 사람은 하나뿐이었습니다. 급한 마음이 맡겨진 규칙을 앞질렀을 때 무엇이 무너지는지 밝히십시오.",
+    objective: "이 창고를 함께 맡은 네 사람은 아무도 거짓을 말하지 않습니다. 그리고 혼자서는 아무도 이 일을 할 수 없었습니다. 누가 누구에게 자기 권한을 빌려주었는지 밝히십시오.",
     hints: {
       focus: "물품 수량을 세려 하지 마십시오. 무엇이 제자리를 떠났는지, 그리고 그 기록이 어떻게 고쳐졌는지에 시선을 맞추십시오.",
-      contrast: "매트에 인쇄된 보관 지침은 '밀·기름·소금이 잇닿은 세 칸'에서 출발하십시오 — 그 덩어리가 들어갈 자리는 많지 않습니다. 그리고 조작된 세 건은 '자리를 옮긴 것'과 '장부를 고친 것'이 함께 일어났습니다. 실물 권한표에서 그 두 가지를 모두 할 수 있었던 사람을 찾으십시오.",
-      action: "권한표에서 물자 이동과 장부 기재가 모두 '가능'인 사람은 배급 담당뿐입니다. 그 확인 코드를 입력한 뒤, 복원한 매트에서 소금·기름·밀의 선반 번호를 표식 순서대로 읽어 3자리 자물쇠 '432'를 맞추십시오.",
+      contrast: "매트에 인쇄된 보관 지침은 '밀·기름·소금이 잇닿은 세 칸'에서 출발하십시오 — 그 덩어리가 들어갈 자리는 많지 않습니다. 그리고 조작된 세 건은 '봉인 뒤에 물자를 옮긴 것'과 '장부를 고쳐 쓴 것'이 함께 일어났습니다. 권한표를 보면 두 가지를 혼자 할 수 있는 사람이 없습니다 — 두 사람을 찾아야 합니다.",
+      action: "권한표에서 봉인 뒤 물자를 반출할 수 있는 사람은 배급 담당(58), 장부에 문장을 쓸 수 있는 사람은 장부 담당(37)뿐입니다. 두 코드를 각 칸에 넣은 뒤, 복원한 매트에서 소금·기름·밀의 선반 번호를 표식 순서대로 읽어 3자리 자물쇠 '432'를 맞추십시오.",
     },
     render: renderInventoryPuzzleV2,
   },
@@ -1205,11 +1205,16 @@ function renderInventoryPuzzleV2() {
   // 그 인쇄물에 역할마다 함께 인쇄되는 확인 코드로, 범인의 코드를 맞혀야만
   // 지목이 통과된다. 웹 화면에 4개 역할 이름은 나오지만 코드는 어디에도
   // 나열되지 않으므로, 실물 인쇄물을 보지 않고는 어떤 코드도 알 수 없다.
+  // 조작은 (1) 봉인 뒤 물자를 옮기고 (2) 장부 문장을 고쳐 쓰는, 두 가지가 함께
+  // 일어나야 가능했다. 그런데 네 사람 중 두 가지를 혼자 할 수 있는 사람은 없다 —
+  // 봉인 뒤 반출은 배급 담당만, 장부 기재는 장부 담당만 가능하다. 즉 서로 권한을
+  // 빌려준 두 사람의 공모다. 팀은 "옮긴 사람"과 "적은 사람"을 각각 지목해야 하므로,
+  // 코드 두 개를 찾는 것으로 끝나지 않고 누가 무엇을 했는지까지 갈라야 한다.
   const authorityList = [
-    { role: "보관 담당", perm: "봉인 전 선반 배치", forbid: "장부 문장 수정", quote: "“원본 안내도대로 여섯 자리를 채웠다.”", code: "24" },
-    { role: "장부 담당", perm: "인계 완료 뒤 문장 확정", forbid: "혼자 위치 변경", quote: "“`확인 뒤 인계`가 원래 문장이다.”", code: "37" },
-    { role: "열쇠 담당", perm: "두 사람 입회 때 창고 개방", forbid: "카드·장부 단독 변경", quote: "“봉인 뒤에는 혼자 문을 연 적이 없다.”", code: "45" },
-    { role: "배급 담당", perm: "확정된 장부대로 전달", forbid: "위치·조건 임의 변경", quote: "“급한 품목은 먼저 처리해도 된다고 판단했다.”", code: "58" },
+    { role: "보관 담당", perm: "봉인 전 선반 배치", forbid: "봉인 뒤 반출·장부 기재", quote: "“봉인 전에 여섯 자리를 지침대로 채웠다. 봉인 뒤로는 선반에 손대지 않았다.”", code: "24", canMove: false, canWrite: false },
+    { role: "장부 담당", perm: "인계 문장 확정", forbid: "물자 반출", quote: "“문장은 내가 쓴다. 물자에는 손대지 않는다.”", code: "37", canMove: false, canWrite: true },
+    { role: "열쇠 담당", perm: "창고 문 개폐", forbid: "물자·장부 취급", quote: "“나는 문을 여닫을 뿐, 물자도 장부도 만지지 않는다.”", code: "45", canMove: false, canWrite: false },
+    { role: "배급 담당", perm: "배급 때 물자 반출", forbid: "장부 기재", quote: "“급한 물자는 내가 직접 꺼내 나른다. 다만 장부는 내 손으로 쓸 수 없다.”", code: "58", canMove: true, canWrite: false },
   ];
 
   surface.innerHTML = `<p class="instruction">지시서를 읽고 흩어진 재고 카드를 회수하십시오. 원본 위치·변경 문장·권한을 대조해 실제 상자의 번호를 복원합니다.</p>${adminPreview ? `<button class="secondary-button admin-reset" id="resetLedger" type="button">관리자: 이 스테이지 초기화</button>` : ""}<section class="case-flow" id="ledgerFlow"></section><p class="feedback" id="feedback" aria-live="polite"></p>`;
@@ -1259,10 +1264,10 @@ function renderInventoryPuzzleV2() {
     }
     if (state.step === "audit") {
       const remaining = Math.max(0, Math.ceil((state.auditLockedUntil - Date.now()) / 1000));
-      flow.innerHTML = `${progress}<h3>변경 기록 6건 감식</h3><p class="story-beat">이 창고는 네 사람이 함께 맡았습니다. 넷 다 자기 몫을 성실히 말합니다 — <strong>아무도 거짓을 말하지 않습니다.</strong></p><p>그런데 기록 여섯 건 중 세 건은 <strong>물자가 원래 자리를 떠났을 뿐 아니라</strong>, <strong>장부 문장까지 고쳐 쓰여 있습니다</strong>. 옮긴 손과 적은 손이 같은 사람이라는 뜻입니다.</p><div class="record-grid record-grid-readonly">${items.map((x) => `<div class="record-entry"><b>${x.mark} ${x.item}</b><span>발견 장소: ${x.found}</span><span>기록 문장: ${x.text}</span></div>`).join("")}</div><p class="phone-caption">누가 물자를 옮길 수 있고 누가 장부를 쓸 수 있는지는 이 화면에 없습니다. 실물 <strong>담당별 권한표</strong>를 펼쳐, <strong>두 가지를 모두 할 수 있었던 단 한 사람</strong>을 가려낸 뒤 그 옆에 인쇄된 확인 코드를 입력하십시오.</p>${
+      flow.innerHTML = `${progress}<h3>변경 기록 6건 감식</h3><p class="story-beat">이 창고는 네 사람이 함께 맡았습니다. 넷 다 자기 몫을 성실히 말합니다 — <strong>아무도 거짓을 말하지 않습니다.</strong></p><p>그런데 기록 여섯 건 중 세 건은 <strong>봉인 뒤에 물자가 자리를 떠났고</strong>, 거기에 더해 <strong>장부 문장까지 고쳐 쓰여 있습니다</strong>.</p><div class="record-grid record-grid-readonly">${items.map((x) => `<div class="record-entry"><b>${x.mark} ${x.item}</b><span>발견 장소: ${x.found}</span><span>기록 문장: ${x.text}</span></div>`).join("")}</div><p class="phone-caption">실물 <strong>담당별 권한표</strong>를 펼쳐 보십시오. 이 두 가지를 <strong>혼자 할 수 있는 사람은 없습니다</strong> — 두 사람이 서로에게 권한을 빌려준 것입니다. 물자를 옮긴 사람과 장부를 고쳐 쓴 사람을 각각 가려내, 그 옆에 인쇄된 확인 코드를 넣으십시오.</p>${
         remaining > 0
           ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
-          : `<form id="auditForm" class="phone-answer-form"><label>범인의 확인 코드</label><input id="auditInput" inputmode="numeric" autocomplete="off" placeholder="권한표에 인쇄된 숫자" /><button type="submit" class="primary-button">지목 확정</button></form>`
+          : `<form id="auditForm" class="phone-answer-form"><label for="moverInput">봉인 뒤 물자를 옮긴 사람의 확인 코드</label><input id="moverInput" inputmode="numeric" autocomplete="off" placeholder="권한표에 인쇄된 숫자" /><label for="writerInput">장부 문장을 고쳐 쓴 사람의 확인 코드</label><input id="writerInput" inputmode="numeric" autocomplete="off" placeholder="권한표에 인쇄된 숫자" /><button type="submit" class="primary-button">공모 확정</button></form>`
       }`;
       if (remaining > 0) lockTimer = setTimeout(draw, 1000);
     }
@@ -1270,7 +1275,7 @@ function renderInventoryPuzzleV2() {
       flow.innerHTML = `${progress}<h3>실제 자물쇠 개방 지시</h3><p class="story-beat">흩어졌던 자리가 제자리로 돌아왔습니다. 이제 맡긴 이가 남겨 둔 순서대로 상자를 열 차례입니다.</p><div class="lock-sequence-box"><div class="lock-sequence-item"><span class="mark">□</span><span class="item-name">소금</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">△</span><span class="item-name">기름</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">○</span><span class="item-name">밀</span></div></div><p>여러분이 복원한 <strong>매트에서 이 세 품목의 선반 번호</strong>를 인계 표식 순서(<strong>□ → △ → ○</strong>)대로 읽어 실제 3자리 자물쇠를 여십시오.</p><div class="physical-lock-note">자물쇠 번호는 웹에 입력하지 않습니다. 상자를 열었으면 안의 결과 카드에 적힌 <strong>완료 코드</strong>를 아래에 입력하십시오.</div><form id="ledgerCodeForm" class="code-entry"><input id="ledgerCodeInput" autocomplete="off" placeholder="상자 안 완료 코드" /><button class="primary-button" type="submit">코드 확인</button></form>`;
     }
     if (state.step === "complete") {
-      flow.innerHTML = `${progress}<h3>결과 카드 확인</h3><p class="story-beat">배급 담당은 도둑이 아니었습니다. 그는 급한 물자를 먼저 내주는 편이 낫다고 판단했고, 그 판단대로 자리를 옮기고 장부를 고쳤습니다. 훔친 것도, 숨긴 것도 없었습니다.</p><p>다만 맡은 사람이 맡긴 이의 자리에 서는 순간, 선한 뜻도 질서를 무너뜨립니다. 여러분은 수량을 맞춘 것이 아니라 원래의 뜻을 되돌리고 그 책임을 밝혔습니다. 맡은 것을 주인의 뜻대로 지키고 설명하는 사람이 청지기입니다.</p><div class="evidence-strip"><span>결과 키워드: 청지기</span><span>완료 코드: STEWARD-03</span></div><a class="primary-button" href="activity.html?stage=ledger">활동 페이지로 이동</a>`;
+      flow.innerHTML = `${progress}<h3>결과 카드 확인</h3><p class="story-beat">배급 담당은 도둑이 아니었습니다. 급한 물자를 먼저 내주는 편이 낫다고 판단했을 뿐입니다. 장부 담당도 도둑이 아니었습니다. 그 판단이 옳아 보여, 빈자리를 설명해 줄 문장을 대신 적어 주었을 뿐입니다.</p><p>둘 다 훔치지 않았고, 둘 다 서로를 도왔다고 여겼습니다. 그러나 맡은 사람들이 서로에게 권한을 빌려주는 순간, 맡긴 이가 세운 질서는 아무도 훔치지 않은 채로 사라집니다. 여러분은 수량을 맞춘 것이 아니라 원래의 뜻을 되돌리고 그 책임을 밝혔습니다. 맡은 것을 주인의 뜻대로 지키고 설명하는 사람이 청지기입니다.</p><div class="evidence-strip"><span>결과 키워드: 청지기</span><span>완료 코드: STEWARD-03</span></div><a class="primary-button" href="activity.html?stage=ledger">활동 페이지로 이동</a>`;
     }
     bind();
   }
@@ -1357,10 +1362,12 @@ function renderInventoryPuzzleV2() {
     // 할 수 있었는가"는 실물 권한표에만 있다. 둘을 합쳐야만 답이 나온다.
     document.querySelector("#auditForm")?.addEventListener("submit", (e) => {
       e.preventDefault();
-      const input = document.querySelector("#auditInput");
-      const matched = authorityList.find((a) => normalize(input.value) === normalize(a.code));
-      if (matched && matched.role === "배급 담당") {
-        state.culprit = matched.role;
+      const moverInput = document.querySelector("#moverInput");
+      const writerInput = document.querySelector("#writerInput");
+      const mover = authorityList.find((a) => normalize(moverInput.value) === normalize(a.code));
+      const writer = authorityList.find((a) => normalize(writerInput.value) === normalize(a.code));
+      if (mover && writer && mover.canMove && writer.canWrite) {
+        state.culprit = `${mover.role} + ${writer.role}`;
         state.auditWrongStreak = 0;
         advance("unlock");
         return;
@@ -1373,8 +1380,18 @@ function renderInventoryPuzzleV2() {
         draw();
         return;
       }
-      triggerFeedbackShake(feedback, matched ? "그 담당자는 둘 중 하나밖에 할 수 없었습니다. 물자를 옮기는 것과 장부를 고쳐 쓰는 것, 두 가지를 모두 할 수 있었던 사람을 다시 찾으십시오." : "권한표에 없는 번호입니다. 네 담당자 옆에 인쇄된 확인 코드를 다시 확인하십시오.");
-      input.value = "";
+      // 어느 칸이 틀렸는지는 알려주되 정답은 알려주지 않는다. 두 칸에 같은 사람을
+      // 넣은 경우는 "혼자서는 못 한다"는 이 단계의 핵심을 놓친 것이라 따로 짚어 준다.
+      const message = !mover || !writer
+        ? "권한표에 없는 번호가 있습니다. 네 담당자 옆에 인쇄된 확인 코드를 다시 확인하십시오."
+        : mover.role === writer.role
+        ? "한 사람이 두 가지를 다 할 수는 없었습니다. 권한표를 다시 보고 서로 다른 두 사람을 찾으십시오."
+        : !mover.canMove && !writer.canWrite
+        ? "두 칸 모두 맞지 않습니다. 봉인 뒤에 물자를 꺼낼 수 있었던 사람과, 장부에 문장을 쓸 수 있었던 사람을 각각 찾으십시오."
+        : !mover.canMove
+        ? "장부 쪽은 맞습니다. 다만 그 사람은 봉인 뒤에 물자를 옮길 수 없었습니다."
+        : "물자를 옮긴 쪽은 맞습니다. 다만 그 사람은 장부에 문장을 쓸 수 없었습니다.";
+      triggerFeedbackShake(feedback, message);
       persist();
     });
     document.querySelector("#ledgerCodeForm")?.addEventListener("submit", (event) => {
