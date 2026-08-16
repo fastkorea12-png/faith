@@ -1173,10 +1173,6 @@ function renderInventoryPuzzleV2() {
     { id: "water", mark: "+", item: "물", found: "선반 6", shelf: 6, text: "확인 뒤 인계 — 원래 자리 유지", author: "열쇠 담당", altered: false, code: "3" },
   ];
   const collectionCode = items.map((x) => x.code).join("");
-  // 조작된 세 기록에만 공통으로 박혀 있는 변명 문구. 3단계(기록 감식)의 정답이며,
-  // 이 문구는 화면의 기록 여섯 건 안에 그대로 들어 있다 — 읽으면 알 수 있지만
-  // 읽지 않고는 알 수 없다(찍어서 맞출 수 있는 선택지가 없다).
-  const alteredExcuse = "먼저 처리";
   // 2단계는 정답을 알려주지 않는 제약 조건 퍼즐이다. 아래 여섯 조건을 모두
   // 만족하는 배치는 (위→아래) 건과일·밀·기름·소금·콩·물 하나뿐이고, 여섯 조건은
   // 전부 필요하다(하나라도 빼면 해가 2~6개로 늘어난다 — 브루트포스로 검증함).
@@ -1223,7 +1219,7 @@ function renderInventoryPuzzleV2() {
 
   function draw() {
     clearTimeout(lockTimer);
-    const progress = `<div class="flow-progress">1. 지시 · 2. 복원 · 3. 기록 감식 · 4. 용의자 · 5. 자물쇠 · 6. 완료</div>`;
+    const progress = `<div class="flow-progress">1. 지시 · 2. 복원 · 3. 기록 감식 · 4. 자물쇠 · 5. 완료</div>`;
 
     if (state.step === "briefing") {
       const remaining = Math.max(0, Math.ceil((state.cardsLockedUntil - Date.now()) / 1000));
@@ -1239,15 +1235,12 @@ function renderInventoryPuzzleV2() {
     }
     if (state.step === "audit") {
       const remaining = Math.max(0, Math.ceil((state.auditLockedUntil - Date.now()) / 1000));
-      flow.innerHTML = `${progress}<h3>변경 기록 6건 감식</h3><p>여섯 건 중 세 건은 물자를 원래 자리에서 치우고 인계 문장까지 고쳐 쓴 기록입니다. 고쳐 쓴 사람은 세 번 모두 <strong>똑같은 변명</strong>을 적어 두었습니다.</p><div class="record-grid record-grid-readonly">${items.map((x) => `<div class="record-entry"><b>${x.mark} ${x.item}</b><span>발견 장소: ${x.found}</span><span>기록 문장: ${x.text}</span></div>`).join("")}</div><p class="phone-caption">세 기록에 공통으로 반복되는 그 변명 문구를 찾아, 아래에 그대로 옮겨 적으십시오.</p>${
+      flow.innerHTML = `${progress}<h3>변경 기록 6건 감식</h3><p>여섯 건 중 세 건은 <strong>물자가 원래 자리에서 옮겨졌고</strong>, 거기에 더해 <strong>장부 문장까지 고쳐 쓰였습니다</strong>. 한 사람이 이 두 가지를 모두 저질렀습니다.</p><div class="record-grid record-grid-readonly">${items.map((x) => `<div class="record-entry"><b>${x.mark} ${x.item}</b><span>발견 장소: ${x.found}</span><span>기록 문장: ${x.text}</span></div>`).join("")}</div><p class="phone-caption">누가 물자를 옮길 수 있고 누가 장부를 쓸 수 있는지는 이 화면에 없습니다. 실물 <strong>담당별 권한표</strong>를 펼쳐, <strong>두 가지를 모두 할 수 있었던 단 한 사람</strong>을 가려낸 뒤 그 옆에 인쇄된 확인 코드를 입력하십시오.</p>${
         remaining > 0
           ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
-          : `<form id="auditForm" class="phone-answer-form"><label>반복된 변명 문구</label><input id="auditInput" autocomplete="off" placeholder="기록에 적힌 그대로" /><button type="submit" class="primary-button">확정</button></form>`
+          : `<form id="auditForm" class="phone-answer-form"><label>범인의 확인 코드</label><input id="auditInput" inputmode="numeric" autocomplete="off" placeholder="권한표에 인쇄된 숫자" /><button type="submit" class="primary-button">지목 확정</button></form>`
       }`;
       if (remaining > 0) lockTimer = setTimeout(draw, 1000);
-    }
-    if (state.step === "accuse") {
-      flow.innerHTML = `${progress}<h3>사건 결론 (웹 화면 C)</h3><p>맡겨진 위치와 인계 원칙을 자기 판단으로 바꾼 담당자는 누구인가? 실물 ‘담당별 권한표’에서 위반한 담당자를 찾아, 그 옆에 인쇄된 확인 코드를 입력하십시오.</p><p class="eyebrow">네 역할 중 하나</p><div class="role-grid">${authorityList.map((a) => `<span>${a.role}</span>`).join("")}</div><form id="accuseForm" class="phone-answer-form"><label>위반한 담당자의 확인 코드 입력</label><input id="accuseInput" inputmode="numeric" autocomplete="off" placeholder="숫자" /><button type="submit" class="primary-button">지목 확정</button></form>`;
     }
     if (state.step === "unlock") {
       flow.innerHTML = `${progress}<h3>실제 자물쇠 개방 지시</h3><div class="lock-sequence-box"><div class="lock-sequence-item"><span class="mark">□</span><span class="item-name">소금</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">△</span><span class="item-name">기름</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">○</span><span class="item-name">밀</span></div></div><p>여러분이 복원한 <strong>매트에서 이 세 품목의 선반 번호</strong>를 인계 표식 순서(<strong>□ → △ → ○</strong>)대로 읽어 실제 3자리 자물쇠를 여십시오.</p><div class="physical-lock-note">자물쇠 번호는 웹에 입력하지 않습니다. 상자를 열었으면 안의 결과 카드에 적힌 <strong>완료 코드</strong>를 아래에 입력하십시오.</div><form id="ledgerCodeForm" class="code-entry"><input id="ledgerCodeInput" autocomplete="off" placeholder="상자 안 완료 코드" /><button class="primary-button" type="submit">코드 확인</button></form>`;
@@ -1282,16 +1275,20 @@ function renderInventoryPuzzleV2() {
     document.querySelector("#next")?.addEventListener("click", () => {
       advance({ restore: "audit" }[state.step]);
     });
-    // 예전엔 6개 기록 중 3개를 클릭해 고르는 방식이었는데, 경우의 수가 20가지뿐이라
-    // 내용을 전혀 몰라도 눌러보다 보면 뚫렸다. 이제는 세 조작 기록에 공통으로 박혀
-    // 있는 변명 문구를 직접 타이핑해야 한다 — 입력 공간이 무한이라 찍기가 불가능하고,
-    // 여섯 기록을 실제로 읽어야만 무엇이 반복되는지 알 수 있다.
+    // 기록 감식과 범인 지목을 한 단계로 합쳤다. 예전엔 (1) 6건 중 3건을 클릭해
+    // 고르고 (2) 범인 코드를 넣는 두 단계였는데, (1)은 경우의 수가 20가지뿐이라
+    // 찍으면 뚫렸고, 뒤이어 반복 문구를 타이핑하게 바꾼 뒤에도 화면에 그대로
+    // 적힌 말을 옮겨 쓰는 수준이라 추리가 없었다. 이제 웹은 "무슨 일이
+    // 벌어졌는가"(물자 이동 + 장부 수정)만 보여주고, "누가 그 두 가지를 모두
+    // 할 수 있었는가"는 실물 권한표에만 있다. 둘을 합쳐야만 답이 나온다.
     document.querySelector("#auditForm")?.addEventListener("submit", (e) => {
       e.preventDefault();
       const input = document.querySelector("#auditInput");
-      if (normalize(input.value).includes(normalize(alteredExcuse))) {
+      const matched = authorityList.find((a) => normalize(input.value) === normalize(a.code));
+      if (matched && matched.role === "배급 담당") {
+        state.culprit = matched.role;
         state.auditWrongStreak = 0;
-        advance("accuse");
+        advance("unlock");
         return;
       }
       state.auditWrongStreak = (state.auditWrongStreak || 0) + 1;
@@ -1302,21 +1299,9 @@ function renderInventoryPuzzleV2() {
         draw();
         return;
       }
-      triggerFeedbackShake(feedback, "그 문구가 아닙니다. 여섯 기록을 나란히 놓고, 세 번 똑같이 반복되는 표현이 무엇인지 다시 찾으십시오.");
+      triggerFeedbackShake(feedback, matched ? "그 담당자는 둘 중 하나밖에 할 수 없었습니다. 물자를 옮기는 것과 장부를 고쳐 쓰는 것, 두 가지를 모두 할 수 있었던 사람을 다시 찾으십시오." : "권한표에 없는 번호입니다. 네 담당자 옆에 인쇄된 확인 코드를 다시 확인하십시오.");
       input.value = "";
       persist();
-    });
-    document.querySelector("#accuseForm")?.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const input = document.querySelector("#accuseInput");
-      const matched = authorityList.find((a) => normalize(input.value) === normalize(a.code));
-      if (!matched || matched.role !== "배급 담당") {
-        triggerFeedbackShake(feedback, "그 코드로는 결론이 확정되지 않습니다. 실물 권한표에서 위치·조건을 임의로 바꿀 수 없는 담당자를 다시 찾으십시오.");
-        input.value = "";
-        return;
-      }
-      state.culprit = matched.role;
-      advance("unlock");
     });
     document.querySelector("#ledgerCodeForm")?.addEventListener("submit", (event) => {
       event.preventDefault();
