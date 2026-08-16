@@ -1548,6 +1548,88 @@ input {
   grid-column: 2;
 }
 
+.direction-dial {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 20px auto 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #2c3a30, #101a14 72%);
+  border: 6px solid rgba(255, 253, 246, 0.14);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35), inset 0 2px 6px rgba(255, 255, 255, 0.06);
+}
+
+.direction-dial-center {
+  position: absolute;
+  inset: 30%;
+  border-radius: 50%;
+  background: #0d1610;
+  border: 2px solid rgba(255, 253, 246, 0.14);
+  display: grid;
+  place-items: center;
+  gap: 2px;
+}
+
+.direction-dial-slots {
+  display: flex;
+  gap: 4px;
+}
+
+.direction-dial-slot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 253, 246, 0.2);
+}
+
+.direction-dial-slot.filled {
+  background: var(--gold);
+}
+
+.direction-dial-btn {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 253, 246, 0.25);
+  background: rgba(255, 253, 246, 0.12);
+  color: #fffdf6;
+  font-size: 22px;
+  font-weight: 900;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.direction-dial-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.direction-dial-btn.dial-up {
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.direction-dial-btn.dial-down {
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.direction-dial-btn.dial-left {
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.direction-dial-btn.dial-right {
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .final-board label {
   display: grid;
   gap: 8px;

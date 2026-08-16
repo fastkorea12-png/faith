@@ -70,12 +70,12 @@ const puzzles = {
     code: "BETTER-04",
     keyword: "더 나은 본향",
     message: "다섯 번째 키워드 '더 나은 본향'을 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
-    evidence: ["표식 담당 A~D", "증언 대조", "문장 조각", "방향 홈", "웹 방향 자물쇠"],
-    objective: "분담해 관찰한 표식 증언을 서로 정확히 전달해 웹에서 대조하고, 회수한 문장 조각을 스스로 이치에 맞게 배치한 뒤 방향 기록의 의미를 읽어 웹 방향 자물쇠를 해제합니다.",
+    evidence: ["표식 담당 A~D", "증언 대조", "문장 조각", "방향 홈", "방향 자물쇠"],
+    objective: "분담해 관찰한 표식 증언을 서로 정확히 전달해 웹에서 대조하고, 회수한 문장 조각을 스스로 이치에 맞게 배치한 뒤 방향 기록의 의미를 읽어 방향 자물쇠를 엽니다.",
     hints: {
       focus: "표식 담당 A~D가 각자 20초 동안 본 문구를 서로에게 정확한 표현 그대로 전달하십시오. 다른 표식의 증언을 고르면 통과되지 않습니다.",
       contrast: "네 문장 조각이 자연스러운 하나의 문장이 되는 순서를 스스로 판단하십시오. 확인된 순서대로 다시 표식 카드를 살펴보십시오.",
-      action: "완성 문장은 '돌아갈 수 있었지만 / 그 길을 떠나 / 더 나은 본향을 / 사모하였다'입니다. 이 순서대로 각 표식 카드 가장자리의 방향 홈을 읽어 화면의 방향 자물쇠를 누르십시오(오른쪽 → 위 → 왼쪽 → 위).",
+      action: "완성 문장은 '돌아갈 수 있었지만 / 그 길을 떠나 / 더 나은 본향을 / 사모하였다'입니다. 이 순서대로 각 표식 카드 가장자리의 방향 홈을 읽어 다이얼의 방향을 누르십시오(오른쪽 → 위 → 왼쪽 → 위).",
     },
     render: renderTestimonyPuzzle,
   },
@@ -1153,29 +1153,26 @@ function renderInventoryPuzzleV2() {
   const surface = getSurface();
   const state = loadPuzzleState("ledger", {
     step: "briefing",
-    roles: [],
-    found: [],
+    cardsWrongStreak: 0,
+    cardsLockedUntil: 0,
     suspects: [],
     culprit: "",
-    checks: [],
     solved: false,
   });
+  // 재고 카드 6장에는 품목/표식/방향 정보 외에 작은 숫자 하나씩(code)이 인쇄된다.
+  // 웹은 "발견 장소"를 절대 알려주지 않는다 — 현장에서 실제로 6장을 다 찾아야만
+  // 표식 순서(○ △ □ ◇ ☆ +)대로 숫자를 이어 붙인 조합 코드를 만들 수 있고,
+  // 그 코드를 입력해야만 다음 단계(선반 복원)로 넘어간다. items 배열이 이미
+  // 마크 순서대로 정렬돼 있으므로 collectionCode는 code를 그대로 이어붙인 값이다.
   const items = [
-    { id: "wheat", mark: "○", item: "밀", found: "보관소 입구", shelf: 2, text: "먼저 처리 — 보관소 입구로 이동", author: "배급 담당", altered: true },
-    { id: "oil", mark: "△", item: "기름", found: "출입구", shelf: 3, text: "먼저 처리 — 출입구로 이동", author: "배급 담당", altered: true },
-    { id: "salt", mark: "□", item: "소금", found: "보관소 입구", shelf: 4, text: "먼저 처리 — 보관소 입구로 이동", author: "배급 담당", altered: true },
-    { id: "bean", mark: "◇", item: "콩", found: "선반 5", shelf: 5, text: "확인 뒤 인계 — 원래 자리 유지", author: "장부 담당", altered: false },
-    { id: "fruit", mark: "☆", item: "건과일", found: "선반 1", shelf: 1, text: "확인 뒤 인계 — 원래 자리 유지", author: "보관 담당", altered: false },
-    { id: "water", mark: "+", item: "물", found: "선반 6", shelf: 6, text: "확인 뒤 인계 — 원래 자리 유지", author: "열쇠 담당", altered: false },
+    { id: "wheat", mark: "○", item: "밀", found: "보관소 입구", shelf: 2, text: "먼저 처리 — 보관소 입구로 이동", author: "배급 담당", altered: true, code: "4" },
+    { id: "oil", mark: "△", item: "기름", found: "출입구", shelf: 3, text: "먼저 처리 — 출입구로 이동", author: "배급 담당", altered: true, code: "1" },
+    { id: "salt", mark: "□", item: "소금", found: "보관소 입구", shelf: 4, text: "먼저 처리 — 보관소 입구로 이동", author: "배급 담당", altered: true, code: "6" },
+    { id: "bean", mark: "◇", item: "콩", found: "선반 5", shelf: 5, text: "확인 뒤 인계 — 원래 자리 유지", author: "장부 담당", altered: false, code: "2" },
+    { id: "fruit", mark: "☆", item: "건과일", found: "선반 1", shelf: 1, text: "확인 뒤 인계 — 원래 자리 유지", author: "보관 담당", altered: false, code: "5" },
+    { id: "water", mark: "+", item: "물", found: "선반 6", shelf: 6, text: "확인 뒤 인계 — 원래 자리 유지", author: "열쇠 담당", altered: false, code: "3" },
   ];
-  const roleList = [
-    { name: "수색 담당 A", task: "보관소 입구와 홀수 선반의 재고 카드 3장 회수" },
-    { name: "수색 담당 B", task: "출입구와 짝수 선반의 재고 카드 3장 회수" },
-    { name: "보관 복원 담당", task: "원본 선반 안내도 지침으로 카드 6장 위치 복원" },
-    { name: "기록 감식 담당", task: "웹 변경 기록 6건 감식 및 반복 문구 포착" },
-    { name: "권한 확인 담당", task: "네 담당자 권한표 대조해 직권 오남용 판단" },
-    { name: "반증·발표 담당", task: "사실·추론·결론 정리 및 최종 지목" },
-  ];
+  const collectionCode = items.map((x) => x.code).join("");
   // authorityList의 perm/forbid/quote는 이제 웹에 절대 표시하지 않는다 — 실물
   // "담당별 권한표" 인쇄물에만 있다(stage-packets/stage-03.md 참고). code는
   // 그 인쇄물에 역할마다 함께 인쇄되는 확인 코드로, 범인의 코드를 맞혀야만
@@ -1188,7 +1185,7 @@ function renderInventoryPuzzleV2() {
     { role: "배급 담당", perm: "확정된 장부대로 전달", forbid: "위치·조건 임의 변경", quote: "“급한 품목은 먼저 처리해도 된다고 판단했다.”", code: "58" },
   ];
 
-  surface.innerHTML = `<p class="instruction">역할을 나누고 원본 위치·변경 문장·권한을 대조해 실제 상자의 번호를 복원하십시오.</p>${adminPreview ? `<button class="secondary-button admin-reset" id="resetLedger" type="button">관리자: 이 스테이지 초기화</button>` : ""}<section class="case-flow" id="ledgerFlow"></section><p class="feedback" id="feedback" aria-live="polite"></p>`;
+  surface.innerHTML = `<p class="instruction">지시서를 읽고 흩어진 재고 카드를 회수하십시오. 원본 위치·변경 문장·권한을 대조해 실제 상자의 번호를 복원합니다.</p>${adminPreview ? `<button class="secondary-button admin-reset" id="resetLedger" type="button">관리자: 이 스테이지 초기화</button>` : ""}<section class="case-flow" id="ledgerFlow"></section><p class="feedback" id="feedback" aria-live="polite"></p>`;
   const flow = document.querySelector("#ledgerFlow");
   const feedback = document.querySelector("#feedback");
   const persist = () => savePuzzleState("ledger", state);
@@ -1197,15 +1194,20 @@ function renderInventoryPuzzleV2() {
     persist();
     draw();
   };
+  let lockTimer = null;
 
   function draw() {
-    const progress = `<div class="flow-progress">1. 브리핑 · 2. 수색 · 3. 복원 · 4. 기록 감식 · 5. 용의자 · 6. 자물쇠 · 7. 완료</div>`;
+    clearTimeout(lockTimer);
+    const progress = `<div class="flow-progress">1. 지시 · 2. 복원 · 3. 기록 감식 · 4. 용의자 · 5. 자물쇠 · 6. 완료</div>`;
 
     if (state.step === "briefing") {
-      flow.innerHTML = `${progress}<h3>03 식량 장부 사건 브리핑</h3><p>수색 A/B, 보관 복원, 기록 감식, 권한 확인, 반증·발표 역할을 나누십시오. 최소 세 역할이 결론 전에 근거를 확인해야 합니다.</p><div class="role-grid">${roleList.map((r) => `<button type="button" data-role="${r.name}" class="role-card ${state.roles.includes(r.name) ? "selected" : ""}"><strong>${r.name}</strong><small>${r.task}</small></button>`).join("")}</div><button class="primary-button" id="next" type="button">역할 배정 완료 (${state.roles.length}/6)</button>`;
-    }
-    if (state.step === "search") {
-      flow.innerHTML = `${progress}<h3>재고 카드 6장 회수</h3><p>보관소 입구, 출입구, 선반 주변에서 찾은 흑백 재고 카드를 체크하십시오. 발견 위치는 원래 자리가 아닐 수 있습니다.</p><div class="check-grid">${items.map((x) => `<button type="button" data-found="${x.id}" class="${state.found.includes(x.id) ? "selected" : ""}"><b>${x.mark} ${x.item}</b><small>발견 장소: ${x.found}</small></button>`).join("")}</div><button class="primary-button" id="next" ${state.found.length === 6 ? "" : "disabled"}>6장 인계 (${state.found.length}/6)</button>`;
+      const remaining = Math.max(0, Math.ceil((state.cardsLockedUntil - Date.now()) / 1000));
+      flow.innerHTML = `${progress}<h3>청지기실 긴급 지시서</h3><section class="lock-result"><p>"구호 물자 인계를 앞두고 여섯 품목의 기록에 이상이 발견되었다. 흩어진 재고 카드 여섯 장을 모두 회수해 본래 자리를 증명하라. 맡겨진 것을 끝까지 지키는 자만이 다음 문을 연다."</p><p>수색은 나누고, 기록 대조는 함께 하십시오. 여섯 장을 모두 손에 넣었다면, 각 카드에 적힌 숫자를 표식 순서(○ → △ → □ → ◇ → ☆ → +)대로 이어 붙여 아래에 입력하십시오.</p></section>${
+        remaining > 0
+          ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
+          : `<form id="cardsForm" class="phone-answer-form"><label>여섯 자리 조합 코드</label><input id="cardsInput" inputmode="numeric" autocomplete="off" placeholder="숫자 6자리" /><button type="submit" class="primary-button">확인</button></form>`
+      }`;
+      if (remaining > 0) lockTimer = setTimeout(draw, 1000);
     }
     if (state.step === "restore") {
       flow.innerHTML = `${progress}<h3>봉인 전 원본 선반 안내도 (웹 화면 A)</h3><p class="eyebrow">보관 복원 담당 지침</p><ol class="shelf-clues"><li>물은 가장 아래 선반에 둔다 (선반 6).</li><li>콩은 물 바로 위에 둔다 (선반 5).</li><li>소금은 콩 바로 위에 둔다 (선반 4).</li><li>기름은 소금 바로 위에 둔다 (선반 3).</li><li>밀은 기름 바로 위에 둔다 (선반 2).</li><li>건과일은 가장 위 선반에 둔다 (선반 1).</li></ol><div class="shelf-stack"><strong>복원된 원래 선반 위치 (현장 매트 대조용)</strong>${[1, 2, 3, 4, 5, 6].map((n) => { const item = items.find((x) => x.shelf === n); return `<div><b>선반 ${n}</b><span>${item.mark} ${item.item}</span></div>`; }).join("")}</div><p class="phone-caption">보관 복원 담당자는 현장 매트의 선반 1~6에 카드를 올바르게 배치했는지 확인하십시오.</p><button class="primary-button" id="next" type="button">현장 매트 복원 완료</button>`;
@@ -1226,28 +1228,29 @@ function renderInventoryPuzzleV2() {
   }
 
   function bind() {
-    flow.querySelectorAll("[data-role]").forEach((b) =>
-      b.addEventListener("click", () => {
-        const role = b.dataset.role;
-        state.roles = state.roles.includes(role) ? state.roles.filter((r) => r !== role) : [...state.roles, role];
-        persist();
-        draw();
-      })
-    );
-    document.querySelector("#next")?.addEventListener("click", () => {
-      if (state.step === "search" && state.found.length < 6) {
-        triggerFeedbackShake(feedback, "현장에서 6장의 재고 카드를 모두 발견한 뒤 다음으로 진행하십시오.");
+    document.querySelector("#cardsForm")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = document.querySelector("#cardsInput");
+      if (normalize(input.value) === normalize(collectionCode)) {
+        state.cardsWrongStreak = 0;
+        advance("restore");
         return;
       }
-      advance({ briefing: "search", search: "restore", restore: "audit" }[state.step]);
-    });
-    flow.querySelectorAll("[data-found]").forEach((b) =>
-      b.addEventListener("click", () => {
-        state.found = state.found.includes(b.dataset.found) ? state.found.filter((x) => x !== b.dataset.found) : [...state.found, b.dataset.found];
+      state.cardsWrongStreak = (state.cardsWrongStreak || 0) + 1;
+      if (state.cardsWrongStreak >= 3) {
+        state.cardsLockedUntil = Date.now() + 10000;
+        state.cardsWrongStreak = 0;
         persist();
         draw();
-      })
-    );
+        return;
+      }
+      triggerFeedbackShake(feedback, "그 조합은 맞지 않습니다. 여섯 장의 카드를 표식 순서(○ △ □ ◇ ☆ +)대로 다시 확인하십시오.");
+      input.value = "";
+      persist();
+    });
+    document.querySelector("#next")?.addEventListener("click", () => {
+      advance({ restore: "audit" }[state.step]);
+    });
     flow.querySelectorAll("[data-suspect]").forEach((b) =>
       b.addEventListener("click", () => {
         state.suspects = state.suspects.includes(b.dataset.suspect)
@@ -1309,16 +1312,20 @@ function renderTestimonyPuzzle() {
     matchLockedUntil: 0,
     slots: [],
     directionInput: [],
+    directionWrongStreak: 0,
+    directionLockedUntil: 0,
     solved: false,
   });
-  // 방향 자물쇠는 실물 하드웨어(방향 자물쇠 봉투) 없이 웹에서 직접 입력한다.
-  // 04는 이미 증언 대조·문장 조합·현장 카드 대조로 물리 활동이 충분해서,
-  // 마지막 방향 입력만 웹으로 옮겨도 스테이지의 물리성이 사라지지 않는다(02와 동일한 예외).
-  //
   // 표식 카드에는 마크 + 증언 문구 + 방향 홈만 인쇄한다(문장 조각은 인쇄하지 않는다).
   // 문장 조각은 웹에서 증언을 정확히 맞혀야만 보상으로 드러나므로, 카드를 안 읽고
   // 다른 팀원 말만 듣고 웹에서 아무 선택지나 눌러서는 통과할 수 없다 — 오답 선택지도
   // 전부 실제 다른 표식의 증언(허구의 유인책이 아니다)이라 정확한 전달이 필요하다.
+  //
+  // 방향 자물쇠는 물리 하드웨어 없이 웹 화면 안에서 완결된다(02 가상 휴대폰과 동일한
+  // 예외) — 이미 증언 대조·문장 조합·현장 카드 재대조로 물리 활동이 충분하다. 다이얼
+  // UI는 실제 방향형 콤비네이션 자물쇠(원형 다이얼 + 상하좌우 화살표)를 본떠 만들어
+  // 방향을 "누른다"는 조작감을 살렸다. 3회 연속 오답 시 10초 잠금을 둬서 카드를 안
+  // 읽고 화면만으로 시행착오를 반복하는 것을 어렵게 만든다.
   const correctDirection = ["오른쪽", "위", "왼쪽", "위"];
   const stations = [
     { id: "gate", mark: "A · 문", quote: "열려 있다는 것과 들어가야 한다는 것은 다르다.", fragmentText: "돌아갈 수 있었지만" },
@@ -1364,13 +1371,13 @@ function renderTestimonyPuzzle() {
       flow.innerHTML = `<section class="sentence-lock"><h3>마지막 표식의 뜻</h3><p>"표식은 목적지를 가리키지 않는다. 지나온 선택을 기록한다."</p><p>화살표는 앞으로 갈 길이 아니라 이미 지나온 선택의 기록입니다. 완성한 문장 순서대로 표식 카드 가장자리의 방향 홈을 다시 확인하십시오.</p><button class="primary-button" id="toDirection" type="button">방향 자물쇠로 이동</button></section>`;
     }
     if (state.phase === "direction") {
-      const dirLabels = [
-        ["오른쪽", "→"],
-        ["위", "↑"],
-        ["왼쪽", "←"],
-        ["아래", "↓"],
-      ];
-      flow.innerHTML = `<section class="direction-lock"><p class="eyebrow">Direction Lock</p><h3>방향 자물쇠</h3><p>완성한 문장 순서대로 각 표식 카드 가장자리의 방향 홈을 읽고, 같은 순서로 아래 방향을 눌러 자물쇠를 여십시오.</p><div class="direction-slots">${[0, 1, 2, 3].map((i) => `<span class="direction-slot ${state.directionInput[i] ? "filled" : ""}">${state.directionInput[i] || i + 1}</span>`).join("")}</div><div class="direction-pad">${dirLabels.map(([label, arrow]) => `<button type="button" data-direction="${label}" ${state.directionInput.length >= 4 ? "disabled" : ""}>${arrow}<small>${label}</small></button>`).join("")}</div><button class="secondary-button" id="resetDirection" type="button">다시 입력</button></section>`;
+      const remaining = Math.max(0, Math.ceil((state.directionLockedUntil - Date.now()) / 1000));
+      flow.innerHTML = `<section class="direction-lock"><p class="eyebrow">Direction Lock</p><h3>방향 자물쇠</h3><p>완성한 문장 순서대로 각 표식 카드 가장자리의 방향 홈을 읽고, 다이얼의 방향을 같은 순서로 눌러 자물쇠를 여십시오.</p>${
+        remaining > 0
+          ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
+          : `<div class="direction-dial"><div class="direction-dial-center"><div class="direction-dial-slots">${[0, 1, 2, 3].map((i) => `<span class="direction-dial-slot ${state.directionInput[i] ? "filled" : ""}"></span>`).join("")}</div></div><button type="button" class="direction-dial-btn dial-up" data-direction="위" ${state.directionInput.length >= 4 ? "disabled" : ""}>↑</button><button type="button" class="direction-dial-btn dial-left" data-direction="왼쪽" ${state.directionInput.length >= 4 ? "disabled" : ""}>←</button><button type="button" class="direction-dial-btn dial-right" data-direction="오른쪽" ${state.directionInput.length >= 4 ? "disabled" : ""}>→</button><button type="button" class="direction-dial-btn dial-down" data-direction="아래" ${state.directionInput.length >= 4 ? "disabled" : ""}>↓</button></div><button class="secondary-button" id="resetDirection" type="button">다시 입력</button>`
+      }</section>`;
+      if (remaining > 0) lockTimer = setTimeout(draw, 1000);
     }
     if (state.phase === "complete") flow.innerHTML = `<section class="sentence-lock"><h3>방향 자물쇠 해제 완료</h3><p>완료 코드 <strong>BETTER-04</strong>를 확인했습니다. 활동 페이지에 입력하십시오.</p><a class="primary-button" href="activity.html?stage=road">활동 페이지로 이동</a></section>`;
     bind();
@@ -1423,6 +1430,15 @@ function renderTestimonyPuzzle() {
           persist();
           draw();
           unlock();
+          return;
+        }
+        state.directionWrongStreak = (state.directionWrongStreak || 0) + 1;
+        if (state.directionWrongStreak >= 3) {
+          state.directionLockedUntil = Date.now() + 10000;
+          state.directionWrongStreak = 0;
+          state.directionInput = [];
+          persist();
+          draw();
           return;
         }
         persist();
