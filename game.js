@@ -473,6 +473,8 @@ async function registerTeamFromOnboarding(event) {
     nextProgress.notes = remote.notes || {};
   }
 
+  const nowIso = new Date().toISOString();
+  localStorage.setItem(RESET_SEEN_KEY, nowIso);
   localStorage.setItem("homeward-case-progress", JSON.stringify(nextProgress));
   const nextTeamKey = teamSessionKey(name, password);
   localStorage.setItem("homeward-onboarded-team", nextTeamKey);
@@ -517,14 +519,14 @@ function renderCasePrologue(teamKey) {
   });
 }
 
-// 다른 팀으로 새로 등록할 때 이전 팀의 흔적을 전부 지운다. 예전에는 지울 키를
-// 나열했는데 프롤로그 열람 기록(homeward-prologue-seen-*)이 빠져 있었다. 나열
-// 대신 homeward- 접두사를 훑고 진행자용 키만 남긴다(activity.js와 동일한 방식).
+// 다른 팀으로 새로 등록할 때 이전 팀의 흔적을 전부 지운다.
+// 단, 진행자용 키와 reset-seen 키는 보존하여 무한 초기화 루프를 방지한다.
 const HOST_ONLY_KEYS = new Set(["homeward-dashboard-unlocked", "homeward-admin-preview", "homeward-host-dashboard"]);
+const RESET_SEEN_KEY = "homeward-reset-seen";
 
 function clearLocalTeamProgress() {
   Object.keys(localStorage)
-    .filter((key) => key.startsWith("homeward-") && !HOST_ONLY_KEYS.has(key))
+    .filter((key) => key.startsWith("homeward-") && key !== RESET_SEEN_KEY && !HOST_ONLY_KEYS.has(key))
     .forEach((key) => localStorage.removeItem(key));
 }
 
@@ -563,6 +565,24 @@ function unlock() {
     if (!progress.codes) progress.codes = {};
     progress.codes[stageId] = puzzle.code;
     localStorage.setItem("homeward-case-progress", JSON.stringify(progress));
+
+    // 클라우드 대시보드에도 완료 상태 즉시 동기화
+    if (progress.teamName && progress.teamPassword && window.HomewardSync?.send) {
+      const completedList = Object.keys(progress.completed || {});
+      window.HomewardSync.send("saveProgress", {
+        eventType: "stage_completed",
+        teamName: progress.teamName,
+        teamPassword: progress.teamPassword,
+        activeStageId: stageId,
+        activeStageTitle: puzzle.title,
+        completedStages: completedList,
+        completedCount: completedList.length,
+        totalStages: Object.keys(puzzles).length,
+        notes: progress.notes || {},
+        hintsCount: Number(progress.hintsCount || 0),
+        updatedAt: new Date().toISOString(),
+      });
+    }
   } catch (e) {
     console.error("Auto record progress error:", e);
   }

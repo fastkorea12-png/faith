@@ -150,6 +150,9 @@ teamForm.addEventListener("submit", (event) => {
   event.preventDefault();
   state.teamName = teamName.value.trim();
   state.teamPassword = teamPassword.value.trim();
+  if (!localStorage.getItem(RESET_SEEN_KEY)) {
+    localStorage.setItem(RESET_SEEN_KEY, new Date().toISOString());
+  }
   saveState();
   if (!state.teamName || !state.teamPassword) {
     saveStatus.textContent = "팀 이름과 팀 비밀번호를 모두 입력하십시오.";
@@ -365,9 +368,15 @@ function loadState() {
   const fallback = { teamName: "", teamPassword: "", activeStageId: "case", completed: {}, notes: {} };
   try {
     const loaded = { ...fallback, ...JSON.parse(localStorage.getItem(storageKey)) };
+    if (!loaded.completed) loaded.completed = {};
     stages.forEach((stage) => {
-      if (localStorage.getItem(`homeward-solved-${stage.id}`) === "true") {
+      if (localStorage.getItem(`homeward-solved-${stage.id}`) === "true" || loaded.completed[stage.id]) {
         loaded.completed[stage.id] = true;
+        localStorage.setItem(`homeward-solved-${stage.id}`, "true");
+        const cardMeta = keywordCards.find((k) => k.id === stage.id);
+        if (cardMeta && !localStorage.getItem(`homeward-keyword-${stage.id}`)) {
+          localStorage.setItem(`homeward-keyword-${stage.id}`, cardMeta.name);
+        }
       }
     });
     return loaded;
@@ -443,11 +452,12 @@ async function pullTeamProgress() {
     }
 
     // 진행자가 대시보드에서 기록을 지우면 서버가 그 시각(resetAt)을 돌려준다.
-    // 이 기기가 마지막으로 본 시각보다 나중이면, 폰에 남은 진행을 비우고 새
-    // 시각을 기억한다. 이걸 안 하면 폰이 다음 saveProgress를 보내는 순간 지운
-    // 팀이 시트에 그대로 되살아난다. 서버가 아무 신호도 안 주면(구버전 배포·
-    // 오프라인) 아무것도 지우지 않으므로 기존 동작 그대로다.
-    if (result.resetAt && result.resetAt > (localStorage.getItem(RESET_SEEN_KEY) || "")) {
+    // 이 기기가 이미 인지한 시각보다 새로운 resetAt일 때만 초기화를 수행한다.
+    // 첫 연결이거나 새 팀인 경우 reset-seen을 현재 시각으로 초기화하여 과거 초기화로 인한 오동작을 방지한다.
+    const seenReset = localStorage.getItem(RESET_SEEN_KEY);
+    if (!seenReset) {
+      localStorage.setItem(RESET_SEEN_KEY, result.resetAt || new Date().toISOString());
+    } else if (result.resetAt && result.resetAt > seenReset) {
       localStorage.setItem(RESET_SEEN_KEY, result.resetAt);
       clearParticipantProgress();
       saveStatus.textContent = "진행자가 기록을 초기화했습니다. 이 기기의 진행 상황도 함께 비웠습니다.";
