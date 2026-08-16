@@ -3,7 +3,7 @@ const adminStages = [
   { id: "bag", step: "01", place: "야외 시설", title: "너무 오래 머문 자리", code: "TENT-01" },
   { id: "name", step: "02", place: "숙소", title: "잠긴 휴대폰", code: "PROMISE-02" },
   { id: "ledger", step: "03", place: "창고 및 물자 보관소(청지기실)", title: "맡겨진 것을 바꾼 사람", code: "STEWARD-03" },
-  { id: "road", step: "04", place: "비아 돌로로사", title: "되돌아가는 길", code: "BETTER-04" },
+  { id: "road", step: "04", place: "비아 돌로로사 / 길", title: "돌아갈 수 있었던 길", code: "BETTER-04" },
   { id: "home", step: "05", place: "예배당", title: "예비된 성", code: "HOMEWARD-05" },
 ];
 

@@ -54,11 +54,11 @@ const puzzles = {
     code: "STEWARD-03",
     keyword: "청지기",
     message: "네 번째 키워드 '청지기'를 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
-    evidence: ["역할 분담", "재고 카드 6장", "변경 기록", "권한표", "3자리 자물쇠"],
+    evidence: ["재고 카드 6장", "보관 지침 6조건", "변경 기록", "권한표", "3자리 자물쇠"],
     objective: "카드의 원래 위치를 복원하고 기록과 권한을 감식해 물리 자물쇠의 순서를 찾습니다.",
     hints: {
       focus: "물품 수량을 세거나 계산하려 하지 말고, 물품 배치 변경 기록과 담당 권한표에 시선을 맞추십시오.",
-      contrast: "선반의 원래 위치와 위치 변경 기록, '먼저 처리' 지침의 권한 위반자를 서로 대조하여 조작자를 가려내십시오.",
+      contrast: "보관 지침은 '밀·기름·소금이 잇닿은 세 칸'에서 출발하십시오 — 그 덩어리가 들어갈 자리는 많지 않습니다. 복원한 선반 위치와 변경 기록, '먼저 처리' 지침의 권한 위반자를 서로 대조하여 조작자를 가려내십시오.",
       action: "권한을 남용하여 기록을 바꾼 조작자의 순서에 맞춰 3자리 자물쇠 번호 '432'를 맞추십시오.",
     },
     render: renderInventoryPuzzleV2,
@@ -70,12 +70,12 @@ const puzzles = {
     code: "BETTER-04",
     keyword: "더 나은 본향",
     message: "다섯 번째 키워드 '더 나은 본향'을 확보했습니다. 활동 페이지에 완료 코드를 입력하십시오.",
-    evidence: ["표식 담당 A~D", "증언 대조", "문장 조각", "방향 홈", "방향 자물쇠"],
-    objective: "분담해 관찰한 표식 증언을 서로 정확히 전달해 웹에서 대조하고, 회수한 문장 조각을 스스로 이치에 맞게 배치한 뒤 방향 기록의 의미를 읽어 방향 자물쇠를 엽니다.",
+    evidence: ["순례자 갈림길 일지 A~D", "증언 대조", "여정 지도 매트", "문장 조각", "8자리 방향 자물쇠"],
+    objective: "방 안 4개 지점의 순례자 일지를 탐색해 참된 결단을 대조하고, 여정 지도 매트에 문장 조각과 4장의 카드를 배치하여 8자리 방향 궤적을 해독합니다.",
     hints: {
-      focus: "표식 담당 A~D가 각자 20초 동안 본 문구를 서로에게 정확한 표현 그대로 전달하십시오. 다른 표식의 증언을 고르면 통과되지 않습니다.",
-      contrast: "네 문장 조각이 자연스러운 하나의 문장이 되는 순서를 스스로 판단하십시오. 확인된 순서대로 다시 표식 카드를 살펴보십시오.",
-      action: "완성 문장은 '돌아갈 수 있었지만 / 그 길을 떠나 / 더 나은 본향을 / 사모하였다'입니다. 이 순서대로 각 표식 카드 가장자리의 방향 홈을 읽어 다이얼의 방향을 누르십시오(오른쪽 → 위 → 왼쪽 → 위).",
+      focus: "방 안 4개 구역(문, 창가, 바닥, 선반)의 일지를 탐색하여 순례자가 본향을 향해 내린 참된 결단 증언을 웹에서 대조하십시오.",
+      contrast: "확보한 4개 문장 조각을 여정 지도 매트에 순서대로 배치하여 '돌아갈 수 있었지만 그 길을 떠나 더 나은 본향을 사모하였다'를 완성하십시오.",
+      action: "완성 문장(A→B→C→D) 순서대로 4개 카드의 1·2차 방향 궤적을 지도 격자에 연결하면 총 8자리 암호가 도출됩니다 (오른쪽 → 위 → 왼쪽 → 위 → 오른쪽 → 위 → 왼쪽 → 위).",
     },
     render: renderTestimonyPuzzle,
   },
@@ -1173,6 +1173,20 @@ function renderInventoryPuzzleV2() {
     { id: "water", mark: "+", item: "물", found: "선반 6", shelf: 6, text: "확인 뒤 인계 — 원래 자리 유지", author: "열쇠 담당", altered: false, code: "3" },
   ];
   const collectionCode = items.map((x) => x.code).join("");
+  // 2단계는 정답을 알려주지 않는 제약 조건 퍼즐이다. 아래 여섯 조건을 모두
+  // 만족하는 배치는 (위→아래) 건과일·밀·기름·소금·콩·물 하나뿐이고, 여섯 조건은
+  // 전부 필요하다(하나라도 빼면 해가 2~6개로 늘어난다 — 브루트포스로 검증함).
+  // 웹은 팀이 만든 배치를 검증하지 않는다. 매트가 틀리면 5단계에서 자물쇠 번호가
+  // 어긋나 실물 자물쇠가 대신 검증하므로, 화면에는 정답을 어떤 형태로도 남기지
+  // 않는다(예전엔 힌트 괄호·정답표·5단계 선반 번호까지 3중으로 노출돼 있었다).
+  const shelfClues = [
+    "밀과 기름과 소금은 매일 함께 배급되므로, 서로 잇닿은 세 칸에 나란히 둔다.",
+    "그 세 칸의 가운데 칸은 기름의 자리다.",
+    "소금은 기름보다 아래 칸에 둔다.",
+    "콩 바로 아래 칸은 물의 자리다.",
+    "건과일은 밀과 맞닿은 칸에 둔다.",
+    "물이 새어도 마른 것이 상하지 않도록, 물은 건과일보다 아래 칸에 둔다.",
+  ];
   // authorityList의 perm/forbid/quote는 이제 웹에 절대 표시하지 않는다 — 실물
   // "담당별 권한표" 인쇄물에만 있다(stage-packets/stage-03.md 참고). code는
   // 그 인쇄물에 역할마다 함께 인쇄되는 확인 코드로, 범인의 코드를 맞혀야만
@@ -1210,7 +1224,7 @@ function renderInventoryPuzzleV2() {
       if (remaining > 0) lockTimer = setTimeout(draw, 1000);
     }
     if (state.step === "restore") {
-      flow.innerHTML = `${progress}<h3>봉인 전 원본 선반 안내도 (웹 화면 A)</h3><p class="eyebrow">보관 복원 담당 지침</p><ol class="shelf-clues"><li>물은 가장 아래 선반에 둔다 (선반 6).</li><li>콩은 물 바로 위에 둔다 (선반 5).</li><li>소금은 콩 바로 위에 둔다 (선반 4).</li><li>기름은 소금 바로 위에 둔다 (선반 3).</li><li>밀은 기름 바로 위에 둔다 (선반 2).</li><li>건과일은 가장 위 선반에 둔다 (선반 1).</li></ol><div class="shelf-stack"><strong>복원된 원래 선반 위치 (현장 매트 대조용)</strong>${[1, 2, 3, 4, 5, 6].map((n) => { const item = items.find((x) => x.shelf === n); return `<div><b>선반 ${n}</b><span>${item.mark} ${item.item}</span></div>`; }).join("")}</div><p class="phone-caption">보관 복원 담당자는 현장 매트의 선반 1~6에 카드를 올바르게 배치했는지 확인하십시오.</p><button class="primary-button" id="next" type="button">현장 매트 복원 완료</button>`;
+      flow.innerHTML = `${progress}<h3>봉인 전 원본 보관 지침 (웹 화면 A)</h3><p class="eyebrow">보관 복원 담당 지침</p><p>선반 <strong>1이 가장 위</strong>, <strong>6이 가장 아래</strong>입니다. 아래 여섯 조건을 모두 만족하는 배치는 단 하나뿐입니다. 조건을 맞춰 현장 매트의 여섯 칸을 채우십시오.</p><ol class="shelf-clues">${shelfClues.map((c) => `<li>${c}</li>`).join("")}</ol><p class="phone-caption">웹은 배치를 확인해 주지 않습니다. 여러분이 복원한 매트가 뒤에서 자물쇠 번호의 근거가 됩니다.</p><button class="primary-button" id="next" type="button">현장 매트 복원 완료</button>`;
     }
     if (state.step === "audit") {
       flow.innerHTML = `${progress}<h3>변경 기록 6건 감식 (웹 화면 B)</h3><p>원래 선반, 원본 문장 ‘확인 뒤 인계’, 담당 권한이 모두 어긋난 <strong>세 건의 조작 기록</strong>을 고르십시오.</p><p class="phone-caption">담당별 권한(누가 무엇을 바꿀 수 있는지)은 이 화면에 없습니다 — 실물 ‘담당별 권한표’ 인쇄물을 확인하십시오.</p><div class="record-grid">${items.map((x) => `<button type="button" data-suspect="${x.id}" class="${state.suspects.includes(x.id) ? "selected" : ""}"><b>${x.mark} ${x.item}</b><span>발견 장소: ${x.found}</span><span>기록 문장: ${x.text}</span><small>기록자: ${x.author}</small></button>`).join("")}</div><button class="primary-button" id="audit" type="button">의심 기록 3건 확정 (${state.suspects.length}/3)</button>`;
@@ -1219,7 +1233,7 @@ function renderInventoryPuzzleV2() {
       flow.innerHTML = `${progress}<h3>사건 결론 (웹 화면 C)</h3><p>맡겨진 위치와 인계 원칙을 자기 판단으로 바꾼 담당자는 누구인가? 실물 ‘담당별 권한표’에서 위반한 담당자를 찾아, 그 옆에 인쇄된 확인 코드를 입력하십시오.</p><p class="eyebrow">네 역할 중 하나</p><div class="role-grid">${authorityList.map((a) => `<span>${a.role}</span>`).join("")}</div><form id="accuseForm" class="phone-answer-form"><label>위반한 담당자의 확인 코드 입력</label><input id="accuseInput" inputmode="numeric" autocomplete="off" placeholder="숫자" /><button type="submit" class="primary-button">지목 확정</button></form>`;
     }
     if (state.step === "unlock") {
-      flow.innerHTML = `${progress}<h3>실제 자물쇠 개방 지시</h3><div class="lock-sequence-box"><div class="lock-sequence-item"><span class="mark">□</span><span class="item-name">소금</span><span class="shelf-num">선반 4</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">△</span><span class="item-name">기름</span><span class="shelf-num">선반 3</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">○</span><span class="item-name">밀</span><span class="shelf-num">선반 2</span></div></div><p>복원 매트의 <strong>원래 선반 번호</strong>를 인계 표식 순서(<strong>□ → △ → ○</strong>)대로 읽어 실제 3자리 자물쇠를 여십시오.</p><div class="physical-lock-note">웹에는 번호를 입력하지 않습니다. 상자를 열었으면 안의 결과 카드를 꺼내십시오.</div><button class="primary-button" id="opened" type="button">실제 상자를 열었다</button>`;
+      flow.innerHTML = `${progress}<h3>실제 자물쇠 개방 지시</h3><div class="lock-sequence-box"><div class="lock-sequence-item"><span class="mark">□</span><span class="item-name">소금</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">△</span><span class="item-name">기름</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">○</span><span class="item-name">밀</span></div></div><p>여러분이 복원한 <strong>매트에서 이 세 품목의 선반 번호</strong>를 인계 표식 순서(<strong>□ → △ → ○</strong>)대로 읽어 실제 3자리 자물쇠를 여십시오.</p><div class="physical-lock-note">웹에는 번호를 입력하지 않습니다. 상자를 열었으면 안의 결과 카드를 꺼내십시오.</div><button class="primary-button" id="opened" type="button">실제 상자를 열었다</button>`;
     }
     if (state.step === "complete") {
       flow.innerHTML = `${progress}<h3>결과 카드 확인</h3><p>배급 담당은 빠르게 나누려는 자기 판단으로 맡겨진 위치와 인계 원칙을 바꾸었습니다. 여러분은 수량을 맞춘 것이 아니라, 원래 뜻대로 자리를 복원하고 변경의 책임을 밝혔습니다. 맡은 것을 주인의 뜻대로 지키고 설명하는 사람이 청지기입니다.</p><div class="evidence-strip"><span>결과 키워드: 청지기</span><span>완료 코드: STEWARD-03</span></div><a class="primary-button" href="activity.html?stage=ledger">활동 페이지로 이동</a>`;
@@ -1316,22 +1330,15 @@ function renderTestimonyPuzzle() {
     directionLockedUntil: 0,
     solved: false,
   });
-  // 표식 카드에는 마크 + 증언 문구 + 방향 홈만 인쇄한다(문장 조각은 인쇄하지 않는다).
-  // 문장 조각은 웹에서 증언을 정확히 맞혀야만 보상으로 드러나므로, 카드를 안 읽고
-  // 다른 팀원 말만 듣고 웹에서 아무 선택지나 눌러서는 통과할 수 없다 — 오답 선택지도
-  // 전부 실제 다른 표식의 증언(허구의 유인책이 아니다)이라 정확한 전달이 필요하다.
-  //
-  // 방향 자물쇠는 물리 하드웨어 없이 웹 화면 안에서 완결된다(02 가상 휴대폰과 동일한
-  // 예외) — 이미 증언 대조·문장 조합·현장 카드 재대조로 물리 활동이 충분하다. 다이얼
-  // UI는 실제 방향형 콤비네이션 자물쇠(원형 다이얼 + 상하좌우 화살표)를 본떠 만들어
-  // 방향을 "누른다"는 조작감을 살렸다. 3회 연속 오답 시 10초 잠금을 둬서 카드를 안
-  // 읽고 화면만으로 시행착오를 반복하는 것을 어렵게 만든다.
-  const correctDirection = ["오른쪽", "위", "왼쪽", "위"];
+  // 4개 표식 카드가 각각 2개씩의 1·2차 방향 궤적을 가지고 있어,
+  // 여정 지도 매트에서 완성 문장(A→B→C→D) 순서대로 연결하면 총 8자리 방향 자물쇠가 완성된다.
+  // A(문): 오른쪽→위 / B(눈): 왼쪽→위 / C(발자국): 오른쪽→위 / D(별): 왼쪽→위
+  const correctDirection = ["오른쪽", "위", "왼쪽", "위", "오른쪽", "위", "왼쪽", "위"];
   const stations = [
-    { id: "gate", mark: "A · 문", quote: "열려 있다는 것과 들어가야 한다는 것은 다르다.", fragmentText: "돌아갈 수 있었지만" },
-    { id: "snow", mark: "B · 눈", quote: "본 것은 답이 아니다. 사라진 뒤 말할 수 있어야 한다.", fragmentText: "그 길을 떠나" },
-    { id: "footprint", mark: "C · 발자국", quote: "사람 수가 아니라 하나뿐인 발자국을 따른다.", fragmentText: "더 나은 본향을" },
-    { id: "star", mark: "D · 별", quote: "돌아갈 수 있다는 말은 돌아가야 한다는 뜻이 아니다.", fragmentText: "사모하였다" },
+    { id: "gate", mark: "A · 문", quote: "열려 있다는 것과 들어가야 한다는 것은 다르다.", fragmentText: "돌아갈 수 있었지만", path: "오른쪽(→) → 위(↑)" },
+    { id: "snow", mark: "B · 눈", quote: "본 것은 답이 아니다. 사라진 뒤 말할 수 있어야 한다.", fragmentText: "그 길을 떠나", path: "왼쪽(←) → 위(↑)" },
+    { id: "footprint", mark: "C · 발자국", quote: "사람 수가 아니라 하나뿐인 발자국을 따른다.", fragmentText: "더 나은 본향을", path: "오른쪽(→) → 위(↑)" },
+    { id: "star", mark: "D · 별", quote: "돌아갈 수 있다는 말은 돌아가야 한다는 뜻이 아니다.", fragmentText: "사모하였다", path: "왼쪽(←) → 위(↑)" },
   ];
   const correctSentenceOrder = stations.map((s) => s.id);
   const persist = () => savePuzzleState("road", state);
@@ -1339,47 +1346,54 @@ function renderTestimonyPuzzle() {
     state.quoteOrder = shuffle(stations.map((s) => s.id));
     persist();
   }
-  surface.innerHTML = `<p class="instruction">네 표식을 나눠 맡아 증언을 정확히 전달하고, 흩어진 문장을 스스로 완성한 뒤 방향 자물쇠를 여십시오.</p>${adminPreview ? `<button class="secondary-button admin-reset" id="resetRoad" type="button">관리자: 이 스테이지 초기화</button>` : ""}<section class="case-flow" id="roadFlow"></section><p class="feedback" id="feedback" aria-live="polite"></p>`;
+  // 오답 상태로 새로고침되어 8자리 입력이 남아있는 경우 안전하게 리셋
+  if (!state.solved && state.directionInput && state.directionInput.length >= 8) {
+    state.directionInput = [];
+    persist();
+  }
+  surface.innerHTML = `<p class="instruction">방 안 4개 지점의 순례자 일지를 탐색해 결단을 대조하고, 여정 지도 매트에 문장과 카드를 배치해 8자리 방향 자물쇠를 여십시오.</p>${adminPreview ? `<button class="secondary-button admin-reset" id="resetRoad" type="button">관리자: 이 스테이지 초기화</button>` : ""}<section class="case-flow" id="roadFlow"></section><p class="feedback" id="feedback" aria-live="polite"></p>`;
   const flow = document.querySelector("#roadFlow");
   const feedback = document.querySelector("#feedback");
   let lockTimer = null;
 
+  document.querySelector("#resetRoad")?.addEventListener("click", () => resetStageProgress("road"));
+
   function draw() {
     clearTimeout(lockTimer);
     if (state.phase === "briefing") {
-      flow.innerHTML = `<h3>표식 담당 브리핑</h3><p>A 문 · B 눈 · C 발자국 · D 별 담당을 나누십시오. 각자 20초 동안 촬영·필기 없이 자기 표식의 문구만 관찰하고, 다른 표식은 보지 마십시오. 합류한 뒤 서로 문구를 정확히 전달받아, 웹에서 어느 표식의 증언인지 지목합니다.</p><div class="role-grid">${stations.map((s) => `<span>${s.mark}</span>`).join("")}</div><button class="primary-button" id="startMatch" type="button">네 담당 준비 완료</button>`;
+      flow.innerHTML = `<h3>순례자 갈림길 일지 탐색 (4구역)</h3><p>A 문(출입문) · B 눈(창가) · C 발자국(바닥) · D 별(선반) 구역을 나눠 조사하십시오. 각 지점에 남겨진 순례자의 갈림길 일지를 탐색하고, 편안한 과거로 돌아가는 선택이 아닌 '본향을 향한 참된 결단 증언'을 확인하여 웹에 대조합니다.</p><div class="role-grid">${stations.map((s) => `<span>${s.mark}</span>`).join("")}</div><button class="primary-button" id="startMatch" type="button">네 담당 탐색 시작</button>`;
     }
     if (state.phase === "match") {
       const remaining = Math.max(0, Math.ceil((state.matchLockedUntil - Date.now()) / 1000));
       const unmatched = stations.filter((s) => !state.matched.includes(s.id));
       flow.innerHTML = `
-        <h3>표식 증언 대조 (${state.matched.length}/4)</h3>
-        <p>담당자에게 정확히 전달받은 문구가 어느 표식의 것인지 고르십시오. 다른 표식의 증언을 고르면 통과되지 않습니다.</p>
-        ${state.matched.length ? `<div class="lock-result"><strong>확인된 표식</strong><p>${stations.filter((s) => state.matched.includes(s.id)).map((s) => `${s.mark}: "${s.fragmentText}"`).join(" · ")}</p></div>` : ""}
+        <h3>순례자 결단 증언 대조 (${state.matched.length}/4)</h3>
+        <p>각 지점의 갈림길 일지에서 확인한 순례자의 참된 결단 증언을 지목하십시오. 다른 표식의 증언을 고르면 통과되지 않습니다.</p>
+        ${state.matched.length ? `<div class="lock-result"><strong>확인된 순례자 결단</strong><p>${stations.filter((s) => state.matched.includes(s.id)).map((s) => `${s.mark}: "${s.fragmentText}"`).join(" · ")}</p></div>` : ""}
         ${remaining > 0
           ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
-          : unmatched.map((s) => `<section class="sentence-lock"><h3>${s.mark}</h3><p>이 표식이 실제로 들은 증언을 고르십시오.</p><div class="choice-grid">${state.quoteOrder.map((ownerId) => `<button type="button" data-station="${s.id}" data-owner="${ownerId}">${stations.find((st) => st.id === ownerId).quote}</button>`).join("")}</div></section>`).join("")
+          : unmatched.map((s) => `<section class="sentence-lock"><h3>${s.mark}</h3><p>이 지점의 순례자가 내린 참된 결단 증언을 고르십시오.</p><div class="choice-grid">${state.quoteOrder.map((ownerId) => `<button type="button" data-station="${s.id}" data-owner="${ownerId}">${stations.find((st) => st.id === ownerId).quote}</button>`).join("")}</div></section>`).join("")
         }
       `;
       if (remaining > 0) lockTimer = setTimeout(draw, 1000);
     }
     if (state.phase === "assemble") {
       const pool = state.matched.filter((id) => !state.slots.includes(id));
-      flow.innerHTML = `<section class="sentence-lock"><h3>흩어진 문장</h3><p>네 표식에서 확인한 문장 조각을 자연스러운 한 문장이 되도록 순서대로 배치하십시오.</p><div class="sentence-slots">${[0, 1, 2, 3].map((i) => { const id = state.slots[i]; const st = stations.find((s) => s.id === id); return `<button type="button" data-slot="${i}" class="${st ? "filled" : ""}">${st ? st.fragmentText : i + 1}</button>`; }).join("")}</div><div class="sentence-pool">${pool.map((id) => `<button type="button" data-fragment="${id}">${stations.find((s) => s.id === id).fragmentText}</button>`).join("")}</div><button class="primary-button" id="checkSentence" type="button">문장 확인</button></section>`;
+      flow.innerHTML = `<section class="sentence-lock"><h3>순례자의 여정 지도 매트 복원</h3><p>중앙 테이블의 여정 지도 매트에 4개 문장 조각을 자연스러운 신앙의 여정이 되도록 순서대로 배치하십시오.</p><div class="sentence-slots">${[0, 1, 2, 3].map((i) => { const id = state.slots[i]; const st = stations.find((s) => s.id === id); return `<button type="button" data-slot="${i}" class="${st ? "filled" : ""}">${st ? st.fragmentText : i + 1}</button>`; }).join("")}</div><div class="sentence-pool">${pool.map((id) => `<button type="button" data-fragment="${id}">${stations.find((s) => s.id === id).fragmentText}</button>`).join("")}</div><button class="primary-button" id="checkSentence" type="button">문장 확인</button></section>`;
     }
     if (state.phase === "reveal") {
-      flow.innerHTML = `<section class="sentence-lock"><h3>마지막 표식의 뜻</h3><p>"표식은 목적지를 가리키지 않는다. 지나온 선택을 기록한다."</p><p>화살표는 앞으로 갈 길이 아니라 이미 지나온 선택의 기록입니다. 완성한 문장 순서대로 표식 카드 가장자리의 방향 홈을 다시 확인하십시오.</p><button class="primary-button" id="toDirection" type="button">방향 자물쇠로 이동</button></section>`;
+      flow.innerHTML = `<section class="sentence-lock"><h3>서사 반전: 지나온 선택의 기록</h3><p>"그들이 나온 바 본향을 생각하였더라면 돌아갈 기회가 있었으려니와... 표식은 목적지가 아니라 지나온 선택의 기록이다." (히 11:15-16)</p><p>완성한 문장 순서(A→B→C→D)대로 4장의 카드를 여정 지도 매트의 격자선에 연결하십시오. 각 카드의 1·2차 방향 궤적이 이어져 <strong>총 8자리 순례의 길</strong>이 완성됩니다.</p><button class="primary-button" id="toDirection" type="button">8자리 방향 자물쇠로 이동</button></section>`;
     }
     if (state.phase === "direction") {
       const remaining = Math.max(0, Math.ceil((state.directionLockedUntil - Date.now()) / 1000));
-      flow.innerHTML = `<section class="direction-lock"><p class="eyebrow">Direction Lock</p><h3>방향 자물쇠</h3><p>완성한 문장 순서대로 각 표식 카드 가장자리의 방향 홈을 읽고, 다이얼의 방향을 같은 순서로 눌러 자물쇠를 여십시오.</p>${
+      flow.innerHTML = `<section class="direction-lock"><p class="eyebrow">8-Step Direction Lock</p><h3>8자리 방향 자물쇠</h3><p>여정 지도 매트에서 연결된 4장의 1·2차 방향 궤적을 순서대로 눌러 자물쇠를 여십시오. (총 8회 입력)</p>${
         remaining > 0
           ? `<div class="phone-answer-locked"><strong>입력이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
-          : `<div class="direction-dial"><div class="direction-dial-center"><div class="direction-dial-slots">${[0, 1, 2, 3].map((i) => `<span class="direction-dial-slot ${state.directionInput[i] ? "filled" : ""}"></span>`).join("")}</div></div><button type="button" class="direction-dial-btn dial-up" data-direction="위" ${state.directionInput.length >= 4 ? "disabled" : ""}>↑</button><button type="button" class="direction-dial-btn dial-left" data-direction="왼쪽" ${state.directionInput.length >= 4 ? "disabled" : ""}>←</button><button type="button" class="direction-dial-btn dial-right" data-direction="오른쪽" ${state.directionInput.length >= 4 ? "disabled" : ""}>→</button><button type="button" class="direction-dial-btn dial-down" data-direction="아래" ${state.directionInput.length >= 4 ? "disabled" : ""}>↓</button></div><button class="secondary-button" id="resetDirection" type="button">다시 입력</button>`
+          : `<div class="direction-dial"><div class="direction-dial-center"><div class="direction-dial-slots">${[0, 1, 2, 3, 4, 5, 6, 7].map((i) => `<span class="direction-dial-slot ${state.directionInput[i] ? "filled" : ""}"></span>`).join("")}</div></div><button type="button" class="direction-dial-btn dial-up" data-direction="위" ${state.directionInput.length >= 8 ? "disabled" : ""}>↑</button><button type="button" class="direction-dial-btn dial-left" data-direction="왼쪽" ${state.directionInput.length >= 8 ? "disabled" : ""}>←</button><button type="button" class="direction-dial-btn dial-right" data-direction="오른쪽" ${state.directionInput.length >= 8 ? "disabled" : ""}>→</button><button type="button" class="direction-dial-btn dial-down" data-direction="아래" ${state.directionInput.length >= 8 ? "disabled" : ""}>↓</button></div><button class="secondary-button" id="resetDirection" type="button">다시 입력</button>`
       }</section>`;
       if (remaining > 0) lockTimer = setTimeout(draw, 1000);
     }
-    if (state.phase === "complete") flow.innerHTML = `<section class="sentence-lock"><h3>방향 자물쇠 해제 완료</h3><p>완료 코드 <strong>BETTER-04</strong>를 확인했습니다. 활동 페이지에 입력하십시오.</p><a class="primary-button" href="activity.html?stage=road">활동 페이지로 이동</a></section>`;
+    if (state.phase === "complete") flow.innerHTML = `<section class="sentence-lock"><h3>8자리 방향 자물쇠 해제 완료</h3><p>완료 코드 <strong>BETTER-04</strong>를 확인했습니다. 활동 페이지에 입력하십시오.</p><a class="primary-button" href="activity.html?stage=road">활동 페이지로 이동</a></section>`;
     bind();
   }
 
@@ -1420,9 +1434,9 @@ function renderTestimonyPuzzle() {
     });
     document.querySelector("#toDirection")?.addEventListener("click", () => { state.phase = "direction"; persist(); draw(); });
     flow.querySelectorAll("[data-direction]").forEach((b) => b.addEventListener("click", () => {
-      if (state.directionInput.length >= 4) return;
+      if (state.directionInput.length >= 8) return;
       state.directionInput = [...state.directionInput, b.dataset.direction];
-      if (state.directionInput.length === 4) {
+      if (state.directionInput.length === 8) {
         const correct = correctDirection.every((d, i) => state.directionInput[i] === d);
         if (correct) {
           state.phase = "complete";
@@ -1443,7 +1457,7 @@ function renderTestimonyPuzzle() {
         }
         persist();
         draw();
-        triggerFeedbackShake(feedback, "그 방향으로는 자물쇠가 열리지 않습니다. 완성한 문장 순서를 다시 떠올려 보십시오.");
+        triggerFeedbackShake(feedback, "그 방향으로는 자물쇠가 열리지 않습니다. 여정 지도 매트의 8구간 궤적을 다시 대조하십시오.");
         window.setTimeout(() => { state.directionInput = []; persist(); draw(); }, 900);
         return;
       }
@@ -1451,7 +1465,6 @@ function renderTestimonyPuzzle() {
       draw();
     }));
     document.querySelector("#resetDirection")?.addEventListener("click", () => { state.directionInput = []; persist(); draw(); });
-    document.querySelector("#resetRoad")?.addEventListener("click", () => resetStageProgress("road"));
   }
 
   draw();

@@ -1572,18 +1572,22 @@ input {
 
 .direction-dial-slots {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 4px;
+  max-width: 72px;
 }
 
 .direction-dial-slot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: rgba(255, 253, 246, 0.2);
 }
 
 .direction-dial-slot.filled {
   background: var(--gold);
+  box-shadow: 0 0 6px var(--gold);
 }
 
 .direction-dial-btn {
