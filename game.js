@@ -1644,13 +1644,11 @@ function renderHomePuzzle() {
   ];
   const surface = getSurface();
   const state = loadPuzzleState("home", {
-    phase: "assemble", // assemble -> investigate -> bible_verify -> physical -> complete
+    phase: "assemble", // assemble -> physical -> complete
     teamName: "",
     slots: [null, null, null, null, null],
     picked: "",
     assembleWrongStreak: 0,
-    investigateInput: "",
-    bibleInput: "",
     solved: false,
   });
 
@@ -1673,144 +1671,58 @@ function renderHomePuzzle() {
     `${team}은 장막을 집으로 착각했던 나그네였지만, 약속을 붙들고 청지기로 살아, 더 나은 본향을 향해 걷는 사람입니다.`;
 
   function draw() {
-    // [Step 2: 4대 현장 은폐 지령문 & 소품 이면 추리]
-    if (state.phase === "investigate") {
-      surface.innerHTML = `
-        <section class="direction-lock">
-          <p class="eyebrow">Secret Directives Inspection</p>
-          <h3>지나온 네 장소의 은폐 수사 지령</h3>
-          <div class="declaration-preview-box" style="margin: 14px 0; padding: 14px; border: 1.5px solid var(--gold); border-radius: 8px; background: rgba(185,138,53,0.08); color: var(--forest); font-weight: bold; font-size: 15px; line-height: 1.5;">
-            ✨ ${declarationText(state.teamName || "우리 팀")}
-          </div>
-
-          <p class="story-beat">
-            순례자는 지나온 자리에 <strong>네 자리의 숨은 표식</strong>을 남겼습니다.<br/>
-            수사관의 4대 은폐 지령을 읽고, 테이블 위에 놓인 <strong>01~04 실물 증거물의 이면(裏面)</strong>을 대조하여 4자리 암호를 밝혀내십시오.
-          </p>
-
-          <!-- 4대 은폐 지령문 그리드 -->
-          <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin: 16px 0;">
-            <div style="background: #fff; border-left: 4px solid #0284c7; padding: 12px 14px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
-              <b style="color: #0284c7; font-size: 13px;">[1st 지령 · 장막의 이면]</b>
-              <p style="margin: 4px 0 0; font-size: 13px; line-height: 1.5; color: #334155;">"첫 번째 머물렀던 쉼터에서 손에 쥐었던 증거, 그 가장 은밀한 이면(裏面)에 남겨진 첫 번째 숫자를 확인하라."</p>
-            </div>
-            <div style="background: #fff; border-left: 4px solid #d97706; padding: 12px 14px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
-              <b style="color: #d97706; font-size: 13px;">[2nd 지령 · 안식처의 퇴실]</b>
-              <p style="margin: 4px 0 0; font-size: 13px; line-height: 1.5; color: #334155;">"가짜 명성과 이름표가 난무했던 숙소 문 앞, 퇴실을 알리던 공식 안내문 이면에 숨겨진 두 번째 숫자를 확인하라."</p>
-            </div>
-            <div style="background: #fff; border-left: 4px solid #16a34a; padding: 12px 14px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
-              <b style="color: #16a34a; font-size: 13px;">[3rd 지령 · 청지기의 질서]</b>
-              <p style="margin: 4px 0 0; font-size: 13px; line-height: 1.5; color: #334155;">"뒤바뀐 여섯 물자의 자리를 바로잡던 원본 보관 지침, 그 선반 매트 바닥면에 새겨진 세 번째 숫자를 확인하라."</p>
-            </div>
-            <div style="background: #fff; border-left: 4px solid #9333ea; padding: 12px 14px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
-              <b style="color: #9333ea; font-size: 13px;">[4th 지령 · 순례자의 여정]</b>
-              <p style="margin: 4px 0 0; font-size: 13px; line-height: 1.5; color: #334155;">"더 나은 본향을 향해 나아갔던 여정의 궤적, 순례자의 발걸음이 찍혔던 지도 뒷면의 마지막 숫자를 확인하라."</p>
-            </div>
-          </div>
-
-          <form id="investigateForm" class="code-entry" style="margin-top: 18px;">
-            <input id="investigateInput" autocomplete="off" placeholder="증거물 이면에서 찾은 4자리 숫자" maxlength="6" />
-            <button class="primary-button" type="submit">지령 번호 대조</button>
-          </form>
-        </section>
-        <p class="feedback" id="feedback">01~04 실물 증거물의 뒷면을 대조하여 4자리 숫자를 입력하십시오.</p>
-        ${adminPreview ? `<button class="secondary-button admin-reset" id="resetHome" type="button">관리자: 이 스테이지 초기화</button>` : ""}
-      `;
-      document.querySelector("#investigateForm").addEventListener("submit", (event) => {
-        event.preventDefault();
-        const input = document.querySelector("#investigateInput");
-        if (normalize(input.value) !== normalize("1116")) {
-          triggerFeedbackShake(document.querySelector("#feedback"), "일치하지 않습니다. 네 지령문이 가리키는 01~04 소품의 뒷면 숫자를 순서대로 다시 확인하십시오.");
-          input.value = "";
-          return;
-        }
-        state.phase = "bible_verify";
-        persist();
-        draw();
-      });
-      document.querySelector("#resetHome")?.addEventListener("click", () => resetStageProgress("home"));
-      return;
-    }
-
-    // [Step 3: 말씀판 교차 검증 & 목적지 성경 암호 해독]
-    if (state.phase === "bible_verify") {
-      surface.innerHTML = `
-        <section class="direction-lock">
-          <p class="eyebrow">Scripture Cross-Verification</p>
-          <h3>말씀판 교차 검증 (약속의 좌표)</h3>
-          
-          <div style="background: #1e293b; border-radius: 8px; padding: 14px; margin: 14px 0; color: #f8fafc; text-align: center;">
-            <span style="font-size: 12px; color: #94a3b8; letter-spacing: 1px;">증거물 이면에서 밝혀낸 약속의 좌표</span>
-            <div style="font-size: 32px; font-weight: 900; letter-spacing: 6px; color: #38bdf8; margin: 6px 0;">1 1 1 6</div>
-          </div>
-
-          <p class="story-beat">
-            네 증거물의 이면에서 찾아낸 <strong>1116</strong>은 단순한 번호가 아니라, 이 여정의 모든 기록이 시작된 <strong>약속의 성경 좌표(히브리서 11장 16절)</strong>입니다.
-          </p>
-
-          <div style="background: #fffdf6; border: 2px solid var(--gold); border-radius: 8px; padding: 16px; margin: 16px 0; font-size: 14px; line-height: 1.8; color: #182820;">
-            <p style="margin: 0 0 8px; font-weight: bold; font-size: 15px;">📜 예배당 벽면의 [말씀판]을 확인하십시오</p>
-            <p style="margin: 0;">
-              말씀판의 <strong>히브리서 11장 16절</strong> 구절 속에서, 하나님이 본향을 찾는 순례자들을 위해 친히 준비해 두신 <strong>[최종 목적지]의 이름(한글 5글자)</strong>을 찾아 아래에 입력하십시오.
-            </p>
-          </div>
-
-          <form id="bibleVerifyForm" class="code-entry">
-            <input id="bibleVerifyInput" autocomplete="off" placeholder="말씀판 11:16의 최종 목적지 이름 (한글 5글자)" />
-            <button class="primary-button" type="submit">말씀판 확증</button>
-          </form>
-        </section>
-        <p class="feedback" id="feedback">말씀판 히브리서 11:16에서 예비된 목적지의 이름을 찾아 입력하십시오.</p>
-        ${adminPreview ? `<button class="secondary-button admin-reset" id="resetHome" type="button">관리자: 이 스테이지 초기화</button>` : ""}
-      `;
-      document.querySelector("#bibleVerifyForm").addEventListener("submit", (event) => {
-        event.preventDefault();
-        const input = document.querySelector("#bibleVerifyInput");
-        const val = normalize(input.value);
-        if (val !== normalize("예비된 성") && val !== normalize("예비된성") && val !== normalize("한성을예비하셨느니라") && val !== normalize("한 성을 예비하셨느니라")) {
-          triggerFeedbackShake(document.querySelector("#feedback"), "정답이 아닙니다. 말씀판 히브리서 11장 16절의 끝 구절(그들을 위하여 '○○○ ○'을...)을 확인하십시오.");
-          input.value = "";
-          return;
-        }
-        state.phase = "physical";
-        persist();
-        draw();
-      });
-      document.querySelector("#resetHome")?.addEventListener("click", () => resetStageProgress("home"));
-      return;
-    }
-
-    // [Step 4: 실물 최종 상자 개방 & 말씀 카드 코드 확인]
     if (state.phase === "physical") {
       surface.innerHTML = `
         <section class="direction-lock physical-only">
           <p class="eyebrow">Physical Lock Verification</p>
-          <h3>🔐 실물 최종 상자 개방 (자물쇠: 1116)</h3>
+          <h3>🔐 실물 최종 상자 개방</h3>
           
-          <div class="declaration-preview-box" style="margin: 16px 0; padding: 16px; border: 2px solid var(--gold); border-radius: 8px; background: rgba(185,138,53,0.1); color: var(--forest); font-weight: 900; font-size: 16px; line-height: 1.6;">
+          <div class="declaration-preview-box" style="margin: 16px 0; padding: 16px; border: 2px solid var(--gold); border-radius: 8px; background: rgba(185,138,53,0.1); color: var(--forest); font-weight: 900; font-size: 16px; line-height: 1.6; text-align: center;">
             ✨ ${declarationText(state.teamName || "우리 팀")}
           </div>
 
           <p class="story-beat">
-            성경의 증언이 확증되었습니다! 이제 단상 위의 <strong>실물 최종 상자</strong>로 이동하십시오.
+            단상 위의 <strong>실물 최종 상자</strong>는 <strong>4자리 번호 자물쇠</strong>로 잠겨 있습니다.<br/>
+            순례자는 지나온 자리에 흔적을 남겼습니다. 여러분이 손에 쥐고 온 <strong>네 개 증거물(01~04)의 뒷면</strong>을 확인하십시오.
           </p>
 
-          <div style="background: #182820; border: 2px solid var(--gold); border-radius: 10px; padding: 18px; margin: 16px 0; color: #fff; text-align: center;">
-            <span style="font-size: 13px; color: var(--gold); font-weight: bold; letter-spacing: 1px;">실물 최종 상자 4자리 자물쇠 암호</span>
-            <div style="font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #38bdf8; margin: 8px 0;">1 1 1 6</div>
-            <div style="font-size: 12px; color: #cbd5e1; margin-top: 6px;">(01~04 증거물 이면의 수 & 히브리서 11:16 좌표)</div>
+          <div style="background: #182820; border: 1.5px solid var(--gold); border-radius: 10px; padding: 16px; margin: 16px 0; color: #fff;">
+            <div style="text-align: center; font-size: 12px; color: var(--gold); font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">
+              [ 4자리 물리 자물쇠 단서 ]
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center;">
+              <div style="background: rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 2px;">
+                <div style="font-size: 11px; color: #94a3b8;">1번째 자리</div>
+                <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-top: 2px;">01 야외</div>
+                <div style="font-size: 10px; color: #cbd5e1;">키워드 뒷면</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 2px;">
+                <div style="font-size: 11px; color: #94a3b8;">2번째 자리</div>
+                <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-top: 2px;">02 숙소</div>
+                <div style="font-size: 10px; color: #cbd5e1;">안내문 뒷면</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 2px;">
+                <div style="font-size: 11px; color: #94a3b8;">3번째 자리</div>
+                <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-top: 2px;">03 창고</div>
+                <div style="font-size: 10px; color: #cbd5e1;">복원지침 뒷면</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 2px;">
+                <div style="font-size: 11px; color: #94a3b8;">4번째 자리</div>
+                <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-top: 2px;">04 길</div>
+                <div style="font-size: 10px; color: #cbd5e1;">여정매트 뒷면</div>
+              </div>
+            </div>
+            <p style="margin: 12px 0 0; font-size: 12px; color: #cbd5e1; text-align: center; line-height: 1.5;">
+              네 숫자를 차례로 조합한 번호로 단상 위 <strong>실물 최종 상자</strong>를 여십시오.<br/>(예배당 <strong>말씀판</strong>의 히브리서 11장 16절이 그 답을 증언합니다)
+            </p>
           </div>
 
-          <div style="background: #fff; border: 1.5px solid #0284c7; border-radius: 8px; padding: 14px; margin: 16px 0; font-size: 13px; line-height: 1.7; color: #0f172a;">
-            <b>[최종 상자 개방 후 행동 수칙]</b><br/>
-            1. 4자리 암호 <b>1116</b>으로 단상 위 팀 상자를 여십시오.<br/>
-            2. 상자 안 <strong>말씀 카드</strong>에 적힌 <u>완료 코드</u>를 아래에 입력하십시오.<br/>
-            3. 카드 하단 안내에 따라 <strong>진행자에게 가서 실물 귀향 선언문 서식을 수령</strong>하십시오.
-          </div>
-
+          <p class="physical-lock-note" style="margin-top: 16px;">
+            상자를 열었다면 내부 <strong>말씀 카드</strong>에 적힌 완료 코드를 입력하고, <strong>진행자에게 귀향 선언문을 수령</strong>하십시오.
+          </p>
           <form id="homeCodeForm" class="code-entry"><input id="homeCodeInput" autocomplete="off" placeholder="상자 안 말씀 카드 완료 코드" /><button class="primary-button" type="submit">코드 확인</button></form>
         </section>
-        <p class="feedback" id="feedback">1116으로 최종 상자를 열고, 말씀 카드의 완료 코드를 입력하십시오.</p>
+        <p class="feedback" id="feedback">소품 뒷면의 4자리 숫자로 실물 최종 상자를 열고, 말씀 카드의 완료 코드를 입력하십시오.</p>
         ${adminPreview ? `<button class="secondary-button admin-reset" id="resetHome" type="button">관리자: 이 스테이지 초기화</button>` : ""}
       `;
       document.querySelector("#homeCodeForm").addEventListener("submit", (event) => {
@@ -1831,7 +1743,7 @@ function renderHomePuzzle() {
       return;
     }
 
-    // [Step 5: 감동의 피날레 & 공식 완주]
+    // [Step 3: 피날레 & 공식 완주]
     if (state.phase === "complete") {
       surface.innerHTML = `
         <div class="declaration" id="declaration" style="padding: 24px; border: 2px solid var(--gold); border-radius: 10px; background: #16261f; color: #fffdf6; font-size: 22px; font-weight: 900; line-height: 1.6; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
