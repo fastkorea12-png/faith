@@ -2286,6 +2286,21 @@ input {
 .record-grid button { display: grid; gap: 6px; padding: 12px; text-align: left; }
 .record-grid button span, .record-grid button small { color: var(--muted); }
 .record-grid button.selected { outline: 3px solid var(--clay); background: rgba(155,86,61,.1); }
+/* 03 창고 2단계 배치 미니게임. 아래 목록에서 품목을 하나 고르고 선반 칸을 눌러
+   올린다. 좁은 폭(390px)에서 드래그는 오작동이 잦아 탭-투-플레이스로 구현했고,
+   모든 터치 대상은 44px 이상을 유지한다. */
+.shelf-game { display: grid; gap: 12px; margin: 14px 0; }
+.shelf-pool { display: flex; flex-wrap: wrap; gap: 8px; min-height: 44px; padding: 10px; border: 1px dashed var(--line); border-radius: 8px; background: rgba(111, 138, 93, 0.06); }
+.shelf-chip { min-height: 44px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--ink); font-weight: 800; cursor: pointer; }
+.shelf-chip.picked { outline: 3px solid var(--gold); background: rgba(185, 138, 53, 0.18); }
+.shelf-pool-empty { align-self: center; color: var(--muted); font-weight: 700; }
+.shelf-slots { display: grid; gap: 6px; }
+.shelf-slot { display: grid; grid-template-columns: minmax(96px, auto) 1fr; align-items: center; gap: 10px; min-height: 48px; padding: 10px 12px; border: 2px dashed var(--line); border-radius: 8px; background: #fff; text-align: left; cursor: pointer; }
+.shelf-slot .shelf-no { color: var(--muted); font-size: 13px; font-weight: 800; }
+.shelf-slot .shelf-item { color: var(--muted); font-weight: 700; }
+.shelf-slot.filled { border-style: solid; border-color: var(--gold); background: rgba(185, 138, 53, 0.1); }
+.shelf-slot.filled .shelf-item { color: var(--ink); font-weight: 900; }
+
 /* 03 창고 서사 문단: 절차 안내와 목소리를 구분한다. 사건 기록·현장 지시서의
    말투로 읽히도록 왼쪽에 표식을 두고 행간을 넉넉히 준다. */
 .story-beat {

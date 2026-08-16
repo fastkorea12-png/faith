@@ -1154,6 +1154,12 @@ function renderInventoryPuzzleV2() {
     step: "briefing",
     cardsWrongStreak: 0,
     cardsLockedUntil: 0,
+    // 2단계 배치 미니게임: shelfAssign[0]이 선반 1이다. 실물 매트에 놓은 배치를
+    // 그대로 옮겨 담아 확인받는 용도라, 정답은 화면에 표시하지 않고 맞고 틀림만 알린다.
+    shelfAssign: [null, null, null, null, null, null],
+    pickedItem: "",
+    restoreWrongStreak: 0,
+    restoreLockedUntil: 0,
     auditWrongStreak: 0,
     auditLockedUntil: 0,
     culprit: "",
@@ -1231,7 +1237,25 @@ function renderInventoryPuzzleV2() {
       if (remaining > 0) lockTimer = setTimeout(draw, 1000);
     }
     if (state.step === "restore") {
-      flow.innerHTML = `${progress}<h3>봉인 전 원본 보관 지침</h3><section class="lock-result"><p class="story-beat">"이 자리들은 아무렇게나 정해진 것이 아니다. 물이 새어도 마른 것이 상하지 않도록, 함께 나가는 것은 함께 두도록 — 맡긴 이가 손수 정해 둔 순서다. 지침서는 창고에 그대로 남아 있으니, 그것을 읽고 자리를 되돌려라."</p><p>회수한 재고 카드 여섯 장을 <strong>복원 선반 매트</strong> 위에 올리십시오. 매트 아래쪽에 <strong>봉인 전 보관 지침 여섯 조건</strong>이 인쇄되어 있습니다. 여섯 조건을 모두 만족하는 배치는 단 하나뿐입니다.</p></section><p class="phone-caption">지침은 이 화면에 없습니다 — 매트에 인쇄된 여섯 조건을 읽고 채우십시오. 웹은 배치를 확인해 주지 않으며, 여러분이 복원한 매트가 뒤에서 자물쇠 번호의 근거가 됩니다.</p><button class="primary-button" id="next" type="button">현장 매트 복원 완료</button>`;
+      const remaining = Math.max(0, Math.ceil((state.restoreLockedUntil - Date.now()) / 1000));
+      const assign = state.shelfAssign || [null, null, null, null, null, null];
+      const pool = items.filter((x) => !assign.includes(x.id));
+      flow.innerHTML = `${progress}<h3>봉인 전 원본 보관 지침</h3><section class="lock-result"><p class="story-beat">"이 자리들은 아무렇게나 정해진 것이 아니다. 물이 새어도 마른 것이 상하지 않도록, 함께 나가는 것은 함께 두도록 — 맡긴 이가 손수 정해 둔 순서다. 지침서는 창고에 그대로 남아 있으니, 그것을 읽고 자리를 되돌려라."</p><p>회수한 재고 카드 여섯 장을 <strong>복원 선반 매트</strong> 위에 올리십시오. 매트 아래쪽에 <strong>봉인 전 보관 지침 여섯 조건</strong>이 인쇄되어 있습니다. 여섯 조건을 모두 만족하는 배치는 단 하나뿐입니다.</p></section><p class="phone-caption">지침은 이 화면에 없습니다 — 매트에 인쇄된 여섯 조건을 읽고 채우십시오. 실물 매트를 다 놓았다면, 아래에 <strong>같은 배치를 그대로 옮겨 담아</strong> 맞는지 확인하십시오.</p><div class="shelf-game"><div class="shelf-pool">${
+        pool.length
+          ? pool.map((x) => `<button type="button" class="shelf-chip ${state.pickedItem === x.id ? "picked" : ""}" data-pick="${x.id}">${x.mark} ${x.item}</button>`).join("")
+          : `<span class="shelf-pool-empty">여섯 장을 모두 올렸습니다. 배치를 확인하십시오.</span>`
+      }</div><div class="shelf-slots">${[1, 2, 3, 4, 5, 6]
+        .map((n) => {
+          const placed = assign[n - 1] ? items.find((x) => x.id === assign[n - 1]) : null;
+          const edge = n === 1 ? " (가장 위)" : n === 6 ? " (가장 아래)" : "";
+          return `<button type="button" class="shelf-slot ${placed ? "filled" : ""}" data-slot="${n}"><span class="shelf-no">선반 ${n}${edge}</span><span class="shelf-item">${placed ? `${placed.mark} ${placed.item}` : "비어 있음"}</span></button>`;
+        })
+        .join("")}</div></div>${
+        remaining > 0
+          ? `<div class="phone-answer-locked"><strong>확인이 잠겼습니다.</strong><p class="lock-countdown">${remaining}초 후 다시 시도하십시오.</p></div>`
+          : `<button class="primary-button" id="checkShelf" type="button">배치 확인</button>`
+      }`;
+      if (remaining > 0) lockTimer = setTimeout(draw, 1000);
     }
     if (state.step === "audit") {
       const remaining = Math.max(0, Math.ceil((state.auditLockedUntil - Date.now()) / 1000));
@@ -1272,8 +1296,58 @@ function renderInventoryPuzzleV2() {
       input.value = "";
       persist();
     });
-    document.querySelector("#next")?.addEventListener("click", () => {
-      advance({ restore: "audit" }[state.step]);
+    // 2단계 배치 미니게임. 예전엔 "복원 완료" 버튼만 있어서 팀이 자기 배치가 맞는지
+    // 알 수 없었고, 틀렸다는 사실을 마지막 자물쇠에 가서야 알게 됐다. 이제 실물 매트에
+    // 놓은 배치를 화면에 그대로 옮겨 담아 맞고 틀림을 즉시 확인한다. 정답 배치는
+    // 화면 어디에도 표시하지 않고(칩은 팀이 직접 옮긴 것만 보인다) 판정만 돌려준다.
+    flow.querySelectorAll("[data-pick]").forEach((b) =>
+      b.addEventListener("click", () => {
+        state.pickedItem = state.pickedItem === b.dataset.pick ? "" : b.dataset.pick;
+        persist();
+        draw();
+      })
+    );
+    flow.querySelectorAll("[data-slot]").forEach((b) =>
+      b.addEventListener("click", () => {
+        const idx = Number(b.dataset.slot) - 1;
+        const assign = [...(state.shelfAssign || [])];
+        if (assign[idx]) {
+          // 이미 놓인 칸을 누르면 그 카드를 다시 아래 목록으로 되돌린다.
+          assign[idx] = null;
+        } else if (state.pickedItem) {
+          assign[idx] = state.pickedItem;
+          state.pickedItem = "";
+        } else {
+          triggerFeedbackShake(feedback, "먼저 아래에서 올릴 품목을 하나 고르십시오.");
+          return;
+        }
+        state.shelfAssign = assign;
+        persist();
+        draw();
+      })
+    );
+    document.querySelector("#checkShelf")?.addEventListener("click", () => {
+      const assign = state.shelfAssign || [];
+      if (assign.filter(Boolean).length < 6) {
+        triggerFeedbackShake(feedback, "여섯 칸을 모두 채운 뒤 확인하십시오.");
+        return;
+      }
+      const correct = [1, 2, 3, 4, 5, 6].every((n) => assign[n - 1] === items.find((x) => x.shelf === n).id);
+      if (correct) {
+        state.restoreWrongStreak = 0;
+        advance("audit");
+        return;
+      }
+      state.restoreWrongStreak = (state.restoreWrongStreak || 0) + 1;
+      if (state.restoreWrongStreak >= 3) {
+        state.restoreLockedUntil = Date.now() + 10000;
+        state.restoreWrongStreak = 0;
+        persist();
+        draw();
+        return;
+      }
+      triggerFeedbackShake(feedback, "여섯 조건을 모두 만족하는 배치가 아닙니다. 매트에 인쇄된 지침을 한 줄씩 다시 대조하십시오.");
+      persist();
     });
     // 기록 감식과 범인 지목을 한 단계로 합쳤다. 예전엔 (1) 6건 중 3건을 클릭해
     // 고르고 (2) 범인 코드를 넣는 두 단계였는데, (1)은 경우의 수가 20가지뿐이라
