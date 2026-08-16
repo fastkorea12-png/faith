@@ -1240,7 +1240,7 @@ function renderInventoryPuzzleV2() {
       flow.innerHTML = `${progress}<h3>사건 결론 (웹 화면 C)</h3><p>맡겨진 위치와 인계 원칙을 자기 판단으로 바꾼 담당자는 누구인가? 실물 ‘담당별 권한표’에서 위반한 담당자를 찾아, 그 옆에 인쇄된 확인 코드를 입력하십시오.</p><p class="eyebrow">네 역할 중 하나</p><div class="role-grid">${authorityList.map((a) => `<span>${a.role}</span>`).join("")}</div><form id="accuseForm" class="phone-answer-form"><label>위반한 담당자의 확인 코드 입력</label><input id="accuseInput" inputmode="numeric" autocomplete="off" placeholder="숫자" /><button type="submit" class="primary-button">지목 확정</button></form>`;
     }
     if (state.step === "unlock") {
-      flow.innerHTML = `${progress}<h3>실제 자물쇠 개방 지시</h3><div class="lock-sequence-box"><div class="lock-sequence-item"><span class="mark">□</span><span class="item-name">소금</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">△</span><span class="item-name">기름</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">○</span><span class="item-name">밀</span></div></div><p>여러분이 복원한 <strong>매트에서 이 세 품목의 선반 번호</strong>를 인계 표식 순서(<strong>□ → △ → ○</strong>)대로 읽어 실제 3자리 자물쇠를 여십시오.</p><div class="physical-lock-note">웹에는 번호를 입력하지 않습니다. 상자를 열었으면 안의 결과 카드를 꺼내십시오.</div><button class="primary-button" id="opened" type="button">실제 상자를 열었다</button>`;
+      flow.innerHTML = `${progress}<h3>실제 자물쇠 개방 지시</h3><div class="lock-sequence-box"><div class="lock-sequence-item"><span class="mark">□</span><span class="item-name">소금</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">△</span><span class="item-name">기름</span></div><div>→</div><div class="lock-sequence-item"><span class="mark">○</span><span class="item-name">밀</span></div></div><p>여러분이 복원한 <strong>매트에서 이 세 품목의 선반 번호</strong>를 인계 표식 순서(<strong>□ → △ → ○</strong>)대로 읽어 실제 3자리 자물쇠를 여십시오.</p><div class="physical-lock-note">자물쇠 번호는 웹에 입력하지 않습니다. 상자를 열었으면 안의 결과 카드에 적힌 <strong>완료 코드</strong>를 아래에 입력하십시오.</div><form id="ledgerCodeForm" class="code-entry"><input id="ledgerCodeInput" autocomplete="off" placeholder="상자 안 완료 코드" /><button class="primary-button" type="submit">코드 확인</button></form>`;
     }
     if (state.step === "complete") {
       flow.innerHTML = `${progress}<h3>결과 카드 확인</h3><p>배급 담당은 빠르게 나누려는 자기 판단으로 맡겨진 위치와 인계 원칙을 바꾸었습니다. 여러분은 수량을 맞춘 것이 아니라, 원래 뜻대로 자리를 복원하고 변경의 책임을 밝혔습니다. 맡은 것을 주인의 뜻대로 지키고 설명하는 사람이 청지기입니다.</p><div class="evidence-strip"><span>결과 키워드: 청지기</span><span>완료 코드: STEWARD-03</span></div><a class="primary-button" href="activity.html?stage=ledger">활동 페이지로 이동</a>`;
@@ -1308,7 +1308,14 @@ function renderInventoryPuzzleV2() {
       state.culprit = matched.role;
       advance("unlock");
     });
-    document.querySelector("#opened")?.addEventListener("click", () => {
+    document.querySelector("#ledgerCodeForm")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = document.querySelector("#ledgerCodeInput");
+      if (normalize(input.value) !== normalize("STEWARD-03")) {
+        triggerFeedbackShake(feedback, "그 코드는 아직 아닙니다. 실제 자물쇠를 열어 상자 안 결과 카드의 완료 코드를 확인하십시오.");
+        input.value = "";
+        return;
+      }
       state.step = "complete";
       state.solved = true;
       persist();
@@ -1513,13 +1520,20 @@ function renderHomePuzzle() {
             ✨ ${declarationText(state.teamName || "우리 팀")}
           </div>
           <p>웹에서 완성한 귀향 선언문과 5개 키워드 카드를 최종 상자 앞에 나란히 놓고, 상자의 실제 4자리 자물쇠(1116)를 열어 상자를 개방하십시오.</p>
-          <p class="physical-lock-note">상자를 열었다면 내부에서 종결 완료 코드 <strong>HOMEWARD-05</strong>를 확인하십시오.</p>
-          <button class="primary-button" id="opened" type="button">실제 최종 상자를 열었다</button>
+          <p class="physical-lock-note">상자를 열었다면 내부의 종결 카드에 적힌 <strong>완료 코드</strong>를 아래에 입력하십시오.</p>
+          <form id="homeCodeForm" class="code-entry"><input id="homeCodeInput" autocomplete="off" placeholder="상자 안 완료 코드" /><button class="primary-button" type="submit">코드 확인</button></form>
         </section>
-        <p class="feedback" id="feedback">상자를 열고 안의 완료 코드를 활동 페이지 수첩에 입력하십시오.</p>
+        <p class="feedback" id="feedback">최종 상자를 열고 안의 완료 코드를 확인해 입력하십시오.</p>
         ${adminPreview ? `<button class="secondary-button admin-reset" id="resetHome" type="button">관리자: 이 스테이지 초기화</button>` : ""}
       `;
-      document.querySelector("#opened").addEventListener("click", () => {
+      document.querySelector("#homeCodeForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const input = document.querySelector("#homeCodeInput");
+        if (normalize(input.value) !== normalize("HOMEWARD-05")) {
+          triggerFeedbackShake(document.querySelector("#feedback"), "그 코드는 아직 아닙니다. 실제 최종 상자를 열어 안의 종결 카드를 확인하십시오.");
+          input.value = "";
+          return;
+        }
         state.phase = "complete";
         state.solved = true;
         persist();
